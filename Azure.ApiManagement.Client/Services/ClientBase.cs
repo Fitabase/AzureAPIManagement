@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using SmallStepsLabs.Azure.ApiManagement.Utilities;
 using System;
 using System.Diagnostics;
 using System.Net.Http;
@@ -12,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace SmallStepsLabs.Azure.ApiManagement
 {
-    public abstract class ApiManagementClientBase
+    public abstract class ClientBase
     {
         private string Host { get; set; }
 
@@ -40,28 +39,11 @@ namespace SmallStepsLabs.Azure.ApiManagement
             return Utility.CreateSharedAccessToken(id, key, expiry);
         }
 
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        protected HttpRequestMessage BuildRequest(object data = null)
-        {
-            StackTrace st = new StackTrace();
-            StackFrame currentFrame = st.GetFrame(1);
-            MethodBase method = currentFrame.GetMethod();
-            var restMetadata = method.GetCustomAttribute<RestCallAttribute>();
-
-            // Resolve
-            // TODO - check with reg ex
-            var url = restMetadata.UrlMapping;
-            if (url.Contains("{"))
-                url = this.ResolveRequestUrl(url, data);
-
-            return this.GetRequest(url, new HttpMethod(restMetadata.Method), data);
-        }
-
-        protected HttpRequestMessage GetRequest(string url, HttpMethod method, object data = null)
+        protected HttpRequestMessage GetRequest(string url, string method, object data = null)
         {
             var requestUri = this.BuildRequestUri(url);
 
-            var request = new HttpRequestMessage(method, url);
+            var request = new HttpRequestMessage(new HttpMethod(method), url);
 
             // Set the SharedAccessSignature header
             request.Headers.Authorization = new AuthenticationHeaderValue(Constants.ApiManagement.AccessToken, this.GetToken());
@@ -99,11 +81,6 @@ namespace SmallStepsLabs.Azure.ApiManagement
             }
         }
 
-        protected virtual string ResolveRequestUrl(string parameterizedUrl, object data)
-        {
-            // Default
-            return parameterizedUrl;
-        }
 
         #region Private Helpers
 

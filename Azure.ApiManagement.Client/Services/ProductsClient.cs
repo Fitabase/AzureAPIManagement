@@ -1,81 +1,76 @@
 ﻿using SmallStepsLabs.Azure.ApiManagement.Model;
-using SmallStepsLabs.Azure.ApiManagement.Utilities;
 using System;
 using System.Collections.Generic;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace SmallStepsLabs.Azure.ApiManagement
 {
-    //TODO:
-    //Add an API to a product
-    //Remove an API from a product
-    //Get policy configuration for a product
-    //Set policy configuration for a product
-
-    public class ProductsClient : ApiManagementClientBase
+    public class ProductsClient : ClientBase
     {
+        #region Products CRUD
+
         /// <summary>
         /// Get a list of all products
         /// https://msdn.microsoft.com/en-us/library/azure/dn776336.aspx#ListProducts
         /// </summary>
         /// <returns></returns>
-        [RestCall("/products", "GET")]
-
-        public Task<List<Product>> GetProducts()
+        public Task<IEnumerable<Product>> GetProductsAsync(int top, int skip, bool expandGroups = false)
         {
-            var request = base.BuildRequest();
-            return base.ExecuteRequestAsync<List<Product>>(request);
+            var request = base.GetRequest("/products", "GET");
+            return base.ExecuteRequestAsync<IEnumerable<Product>>(request);
         }
 
         /// <summary>
         /// Get a specific product
         /// https://msdn.microsoft.com/en-us/library/azure/dn776336.aspx#GetProduct
         /// </summary>
-        /// <param name="productId"></param>
+        /// <param name="productId">Product identifier.</param>
         /// <returns></returns>
-        [RestCall("/products/{pid}", "GET")]
-        public Task<Product> GetProduct(string productId)
+        public Task<Product> GetProductAsync(string productId)
         {
-            var request = base.BuildRequest(productId);
+            var uri = String.Format("/products/{0}", productId);
+            var request = base.GetRequest(uri, "GET");
+
             return base.ExecuteRequestAsync<Product>(request);
         }
 
         /// <summary>
         /// Create a new product
-        /// 
+        /// https://msdn.microsoft.com/en-us/library/azure/dn776336.aspx#CreateProduct
         /// </summary>
         /// <param name="product"></param>
         /// <returns></returns>
-        [RestCall("/products/{pid}", "PUT")]
-        public Task<bool> CreateProduct(Product product)
+        public Task<bool> CreateProductAsync(Product product)
         {
-            var request = base.BuildRequest(product);
+            var uri = String.Format("/products/{0}", product.Id);
+            var request = base.GetRequest(uri, "PUT");
+
             return base.ExecuteRequestAsync<bool>(request);
         }
 
         /// <summary>
         /// Update a product
+        /// https://msdn.microsoft.com/en-us/library/azure/dn776336.aspx#UpdateProduct
         /// </summary>
         /// <param name="product"></param>
         /// <returns></returns>
-        [RestCall("/products/{pid}", "PATCH")]
-        public Task<bool> UpdateProduct(Product product)
+        public Task<bool> UpdateProductAsync(Product product)
         {
             // Request header //If - Match
 
-            var request = base.BuildRequest(product);
+            var uri = String.Format("/products/{0}", product.Id);
+            var request = base.GetRequest(uri, "PATCH");
+
             return base.ExecuteRequestAsync<bool>(request);
         }
 
         /// <summary>
         /// Delete a product
+        /// https://msdn.microsoft.com/en-us/library/azure/dn776336.aspx#DeleteProduct
         /// </summary>
         /// <param name="product"></param>
         /// <returns></returns>
-        [RestCall("/products/{pid}", "DELETE")]
-        public Task<bool> DeleteProduct(Product product)
+        public Task<bool> DeleteProductAsync(Product product)
         {
             // Request header //If - Match
 
@@ -86,41 +81,120 @@ namespace SmallStepsLabs.Azure.ApiManagement
             //boolean
             //Specify true to indicate that any subscriptions associated with this product should be deleted; otherwise false.If this query parameter is missing, the default is false.
 
-            var request = base.BuildRequest(product);
+            var uri = String.Format("/products/{0}", product.Id);
+            var request = base.GetRequest(uri, "DELETE");
+
             return base.ExecuteRequestAsync<bool>(request);
         }
 
+        #endregion
 
-
+        #region Product APIs
 
         /// <summary>
         /// List APIs associated with a product
         /// https://msdn.microsoft.com/en-us/library/azure/dn776336.aspx#ListAPIs
         /// </summary>
-        /// <param name="productId"></param>
+        /// <param name="productId">Product identifier.</param>
         /// <returns></returns>
-        [RestCall("/products/{pid}/apis", "GET")]
-        public Task<List<API>> GetProductAPIs(string productId)
+        public Task<IEnumerable<API>> GetProductAPIsAsync(string productId)
         {
-            var request = base.BuildRequest(productId);
-            return base.ExecuteRequestAsync<List<API>>(request);
+            var uri = String.Format("/products/{0}/apis", productId);
+            var request = base.GetRequest(uri, "GET");
+
+            return base.ExecuteRequestAsync<IEnumerable<API>>(request);
         }
 
 
-        protected override string ResolveRequestUrl(string parameterizedUrl, object data)
+        /// <summary>
+        /// Adds an API to the specified product.
+        /// https://msdn.microsoft.com/en-us/library/azure/dn776336.aspx#AddAPI
+        /// </summary>
+        /// <param name="productId">Product identifier.</param>
+        /// <param name="apiId">API identifier.</param>
+        /// <returns></returns>
+        public Task<bool> AddProductAPIAsync(string productId, string apiId)
         {
-            if (data != null)
-                throw new Exception(""); //TODO: custom ex for now supplied data
+            var uri = String.Format("/products/{0}/apis/{0}", productId, apiId);
+            var request = base.GetRequest(uri, "PUT");
 
-            var productId = String.Empty;
-
-            if(data is Product)
-                productId = (data as Product).Id;
-
-            if(data is String)
-                productId = data as String;
-
-            return parameterizedUrl.Replace("{pid}", productId);
+            return base.ExecuteRequestAsync<bool>(request);
         }
+
+        /// <summary>
+        /// Removes the specified API from the specified product.
+        /// https://msdn.microsoft.com/en-us/library/azure/dn776336.aspx#RemoveAPI
+        /// </summary>
+        /// <param name="productId">Product identifier.</param>
+        /// <param name="apiId">API identifier.</param>
+        /// <returns></returns>
+        public Task<bool> RemoveProductAPIAsync(string productId, string apiId)
+        {
+            var uri = String.Format("/products/{0}/apis/{0}", productId, apiId);
+            var request = base.GetRequest(uri, "DELETE");
+
+            return base.ExecuteRequestAsync<bool>(request);
+        }
+
+        #endregion
+
+        #region Product Policy Configuration
+
+        /// <summary>
+        /// Gets the policy configuration for the specified product.
+        /// https://msdn.microsoft.com/en-us/library/azure/dn776336.aspx#GetPolicy
+        /// </summary>
+        /// <param name="productId">Product identifier.</param>
+        /// <returns></returns>
+        public Task<bool> GetProductPolicyAsync(string productId)
+        {
+            var uri = String.Format("/products/{0}/policy", productId);
+            var request = base.GetRequest(uri, "GET");
+
+            //TODO - xml response handling
+            return base.ExecuteRequestAsync<bool>(request);
+        }
+
+        /// <summary>
+        /// Determines if policy configuration is attached to the specified product.
+        /// </summary>
+        /// <param name="productId">Product identifier.</param>
+        /// <returns></returns>
+        public Task<bool> CheckProductPolicyAsync(string productId)
+        {
+            var uri = String.Format("/products/{0}/policy", productId);
+            var request = base.GetRequest(uri, "HEAD");
+
+            return base.ExecuteRequestAsync<bool>(request);
+        }
+
+        /// <summary>
+        /// Sets the policy configuration for the specified product.
+        /// https://msdn.microsoft.com/en-us/library/azure/dn776336.aspx#SetPolicy
+        /// </summary>
+        /// <param name="productId">Product identifier.</param>
+        /// <returns></returns>
+        public Task<bool> SetProductPolicyAsync(string productId)
+        {
+            var uri = String.Format("/products/{0}/policy", productId);
+            var request = base.GetRequest(uri, "PUT");
+
+            return base.ExecuteRequestAsync<bool>(request);
+        }
+
+        /// <summary>
+        /// Removes the policy configuration for the specified product.
+        /// </summary>
+        /// <param name="productId">Product identifier.</param>
+        /// <returns></returns>
+        public Task<bool> DeleteProductPolicyAsync(string productId)
+        {
+            var uri = String.Format("/products/{0}/policy", productId);
+            var request = base.GetRequest(uri, "DELETE");
+
+            return base.ExecuteRequestAsync<bool>(request);
+        }
+
+        #endregion
     }
 }

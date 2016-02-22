@@ -53,11 +53,10 @@
     <Compile Include="ApiManagementClient.cs" />
     <Compile Include="Model\API.cs" />
     <Compile Include="Services\ProductsClient.cs" />
-    <Compile Include="Services\ApiManagementClientBase.cs" />
+    <Compile Include="Services\ClientBase.cs" />
     <Compile Include="Model\Product.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utilities\Constants.cs" />
-    <Compile Include="Utilities\RestCallAttribute.cs" />
     <Compile Include="Utilities\Utility.cs" />
   </ItemGroup>
   <ItemGroup>
