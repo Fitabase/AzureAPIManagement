@@ -51,7 +51,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ApiManagementClient.cs" />
+    <Compile Include="Model\Group.cs" />
     <Compile Include="Model\API.cs" />
+    <Compile Include="Model\EntityBase.cs" />
     <Compile Include="Services\ProductsClient.cs" />
     <Compile Include="Services\ClientBase.cs" />
     <Compile Include="Model\Product.cs" />

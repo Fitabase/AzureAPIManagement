@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,27 +7,14 @@ using System.Threading.Tasks;
 
 namespace SmallStepsLabs.Azure.ApiManagement.Model
 {
-    public class Product
+    public class Product : EntityBase
     {
-        /// <summary>
-        /// Resource identifier. Uniquely identifies the product within the current API Management service instance. 
-        /// The value is a valid relative URL in the format of products/{pid} where {pid} is a product identifier. This property is read-only.
-        /// </summary>
-        public string Id { get; set; }
-
-        /// <summary>
-        /// Name of the product. Must not be empty. Maximum length is 100 characters.
-        /// </summary>
-        public string Name { get; set; }
-
-        /// <summary>
-        /// Description of the product. Must not be empty. May include HTML formatting tags. Maximum length is 1000 characters.
-        /// </summary>
-        public string Description { get; set; }
+        protected override string UriIdFormat { get { return "products/"; } }
 
         /// <summary>
         /// Product terms of use. Developers trying to subscribe to the product will be presented and required to accept these terms before they can complete the subscription process.
         /// </summary>
+        [JsonProperty("terms")]
         public string Terms { get; set; }
 
         /// <summary>
@@ -35,6 +23,7 @@ namespace SmallStepsLabs.Azure.ApiManagement.Model
         /// If false, the product is referred to as open and requests to an API included in the product can be made without a subscription key. 
         /// If this property is omitted when creating a new product the default is true.
         /// </summary>
+        [JsonProperty("subscriptionRequired")]
         public bool SubscriptionRequired { get; set; }
 
         /// <summary>
@@ -43,6 +32,7 @@ namespace SmallStepsLabs.Azure.ApiManagement.Model
         /// If true, administrators must manually approve the subscription before the developer can any of the product’s APIs.
         /// Can be present only if the subscriptionRequired property is present with a value of true.
         /// </summary>
+        [JsonProperty("approvalRequired")]
         public bool ApprovalRequired { get; set; }
 
         /// <summary>
@@ -50,17 +40,21 @@ namespace SmallStepsLabs.Azure.ApiManagement.Model
         /// Set to null or omit to allow unlimited per user subscriptions.
         /// Can be present only if the subscriptionRequired property is present with a value of true.
         /// </summary>
-        public byte SubscriptionsLimit { get; set; }
+        [JsonProperty("subscriptionsLimit")]
+        public int? SubscriptionsLimit { get; set; }
 
         /// <summary>
         /// Specifies whether the product is published or not. Published products are discoverable by developers on the developer portal. Non-published products are visible only to administrators.
         //  The allowable values for product state are published and notPublished.
         /// </summary>
+        [JsonProperty("state")]
         public string State { get; set; }
 
         /// <summary>
-        /// An array of Group entities that have visibility to the product.This property is optional and is only included in responses when the request has an expandGroups query parameter with a value of true.
+        /// An array of Group entities that have visibility to the product.
+        /// This property is optional and is only included in responses when the request has an expandGroups query parameter with a value of true.
         /// </summary>
-        // Public IEnumerable<Groups> Groups {get; set;}
+        [JsonProperty("groups")]
+        public IEnumerable<Group> Groups {get; set;}
     }
 }
