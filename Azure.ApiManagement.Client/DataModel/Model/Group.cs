@@ -22,7 +22,7 @@ namespace SmallStepsLabs.Azure.ApiManagement.Model
         /// The type of group, which is one of the following values: system, custom, or external. This property is read-only.
         /// </summary>
         [JsonProperty("type")]
-        public bool Type { get; set; }
+        public string Type { get; set; }
 
         /// <summary>
         /// For external groups, this property contains the id of the group from the external identity provider,
@@ -30,7 +30,7 @@ namespace SmallStepsLabs.Azure.ApiManagement.Model
         /// This property is read-only.
         /// </summary>
         [JsonProperty("externalId")]
-        public bool ExternalId { get; set; }
+        public string ExternalId { get; set; }
 
     }
 }

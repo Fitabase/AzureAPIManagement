@@ -40,14 +40,16 @@ namespace SmallStepsLabs.Azure.ApiManagement
 
         protected HttpRequestMessage GetRequest(string url, string method, string urlQuery = null, object data = null)
         {
+            // combine uri with query
             var requestUri = this.BuildRequestUri(url, urlQuery);
 
-            var request = new HttpRequestMessage(new HttpMethod(method), url);
+            var request = new HttpRequestMessage(new HttpMethod(method), requestUri);
 
-            // Set the SharedAccessSignature header
+            // set the access control header
             var token = Utility.CreateSharedAccessToken(this.ServiceIdentifier, this.AccessKey, DateTime.UtcNow.AddDays(1));
             request.Headers.Authorization = new AuthenticationHeaderValue(Constants.ApiManagement.AccessToken, token);
 
+            // embed data for request
             if (data != null)
             {
                 request.Content = new StringContent(Utility.SerializeToJson(data), Encoding.UTF8, Constants.MimeTypes.ApplicationJson);
@@ -62,21 +64,42 @@ namespace SmallStepsLabs.Azure.ApiManagement
 
             try
             {
+                // http rest client
                 httpClient = new HttpClient()
                 {
-                    BaseAddress = new Uri(String.Format(Constants.ApiManagement.Url.ServiceFormat, this.Host))
+                    BaseAddress = new Uri(String.Format(Constants.ApiManagement.Url.ServiceFormat, this.Host)),
                 };
 
+                // async making request
                 var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancellationToken);
 
+                // async reading response stream
                 var result = await response.Content.ReadAsStringAsync();
 
-                return Utility.DeserializeToJson<TResponse>(result);
+                var resultMediaType = response.Content.Headers.ContentType.MediaType;
+                switch (resultMediaType)
+                {
+                    case Constants.MimeTypes.ApplicationJson:
+                        return Utility.DeserializeToJson<TResponse>(result);
+
+                    default:
+                        throw new FormatException(String.Format("Response content format {0} is not supported.", resultMediaType));
+                }
             }
             finally
             {
+                // Cleanup
+                if(request != null)
+                {
+                    request.Dispose();
+                    request = null;
+                }
+
                 if (httpClient != null)
+                {
                     httpClient.Dispose();
+                    httpClient = null;
+                }
             }
         }
 
@@ -87,7 +110,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
         {
             if (urlQuery == null) urlQuery = String.Empty;
 
-            // decodes urlencoded pairs from uri.Query to HttpValueCollection
+            // decodes url-encoded pairs from uri.Query to HttpValueCollection
             var httpValueCollection = HttpUtility.ParseQueryString(urlQuery);
 
             // API Management REST Service requires version query parameter
@@ -97,7 +120,6 @@ namespace SmallStepsLabs.Azure.ApiManagement
             uri = String.Format("{0}?{1}", uri, httpValueCollection.ToString());
 
             return new Uri(uri, UriKind.Relative);
-
         }
 
         #endregion

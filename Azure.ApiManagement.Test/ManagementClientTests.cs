@@ -1,7 +1,10 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SmallStepsLabs.Azure.ApiManagement;
 using SmallStepsLabs.Azure.ApiManagement.Model;
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Azure.ApiManagement.Test
 {
@@ -46,10 +49,49 @@ namespace Azure.ApiManagement.Test
         #endregion
 
         [TestMethod]
+        [ExpectedException(typeof(OperationCanceledException))]
+        public void CancelRequest()
+        {
+            var cts = new CancellationTokenSource();
+            var task = Client.GetProductsAsync(cancellationToken: cts.Token);
+
+            cts.CancelAfter(250);
+            task.Wait(cts.Token);
+        }
+
+        [TestMethod]
         public void GetProducts()
         {
             var task = Client.GetProductsAsync();
             task.Wait();
+
+            Assert.AreNotEqual(null, task.Result);
+            Assert.AreNotEqual(null, task.Result.Values);
         }
+
+        [TestMethod]
+        public void GetProductsExpandGroups()
+        {
+            var task = Client.GetProductsAsync(expandGroups: true);
+            task.Wait();
+
+            Assert.AreEqual(true, task.Result.Values.Any(p => p.Groups != null));
+        }
+
+        [TestMethod]
+        public void GetProduct()
+        {
+            var task = Client.GetProductsAsync();
+            task.Wait();
+
+            var productId = task.Result.Values[0].Id;
+
+            var pTask = Client.GetProductAsync(productId);
+
+            Assert.AreNotEqual(null, pTask.Result);
+            Assert.AreNotEqual(productId, pTask.Id);
+        }
+
+
     }
 }
