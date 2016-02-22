@@ -9,7 +9,7 @@ namespace SmallStepsLabs.Azure.ApiManagement.Model
 {
     public class Product : EntityBase
     {
-        protected override string UriIdFormat { get { return "products/"; } }
+        protected override string UriIdFormat { get { return "/products/"; } }
 
         /// <summary>
         /// Product terms of use. Developers trying to subscribe to the product will be presented and required to accept these terms before they can complete the subscription process.
@@ -55,6 +55,6 @@ namespace SmallStepsLabs.Azure.ApiManagement.Model
         /// This property is optional and is only included in responses when the request has an expandGroups query parameter with a value of true.
         /// </summary>
         [JsonProperty("groups")]
-        public IEnumerable<Group> Groups {get; set;}
+        public List<Group> Groups {get; set;}
     }
 }

@@ -11,15 +11,13 @@ namespace SmallStepsLabs.Azure.ApiManagement.Model
     {
         protected abstract string UriIdFormat { get; }
 
+        [JsonIgnore]
         public string Id
         {
             get
             {
-                var formatString = this.UriIdFormat;
-                if (!formatString.EndsWith("/")) formatString += '/';
-
-                if (this.Uri.StartsWith(formatString, StringComparison.InvariantCultureIgnoreCase))
-                    return this.Uri.Substring(formatString.Length);
+                if (this.Uri.StartsWith(this.UriIdFormat, StringComparison.InvariantCultureIgnoreCase))
+                    return this.Uri.Substring(UriIdFormat.Length);
 
                 return null;
             }
@@ -50,7 +48,5 @@ namespace SmallStepsLabs.Azure.ApiManagement.Model
         public string Description { get; set; }
 
         #endregion
-
-
     }
 }

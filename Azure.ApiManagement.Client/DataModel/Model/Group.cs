@@ -9,7 +9,7 @@ namespace SmallStepsLabs.Azure.ApiManagement.Model
 {
     public class Group : EntityBase
     {
-        protected override string UriIdFormat {  get { return "groups/"; } }
+        protected override string UriIdFormat {  get { return "/groups/"; } }
 
         /// <summary>
         /// Returns true if the group is one of the three system groups (Administrators, Developers, or Guests); otherwise false. 

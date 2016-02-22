@@ -8,6 +8,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace SmallStepsLabs.Azure.ApiManagement
 {
@@ -39,9 +40,9 @@ namespace SmallStepsLabs.Azure.ApiManagement
             return Utility.CreateSharedAccessToken(id, key, expiry);
         }
 
-        protected HttpRequestMessage GetRequest(string url, string method, object data = null)
+        protected HttpRequestMessage GetRequest(string url, string method, string urlQuery = null, object data = null)
         {
-            var requestUri = this.BuildRequestUri(url);
+            var requestUri = this.BuildRequestUri(url, urlQuery);
 
             var request = new HttpRequestMessage(new HttpMethod(method), url);
 
@@ -84,18 +85,18 @@ namespace SmallStepsLabs.Azure.ApiManagement
 
         #region Private Helpers
 
-        private Uri BuildRequestUri(string uri)
+        private Uri BuildRequestUri(string uri, string urlQuery)
         {
             var baseUri = new UriBuilder(uri);
 
-            // API Management REST Service requires version query parameter
-            string queryToAppend = String.Format("{0}={1}", Constants.ApiManagement.Url.VersionQuery, Constants.ApiManagement.Versions.Feb2014);
+            // decodes urlencoded pairs from uri.Query to HttpValueCollection
+            var httpValueCollection = HttpUtility.ParseQueryString(urlQuery);
 
-            // Append query string
-            if (baseUri.Query != null && baseUri.Query.Length > 1)
-                baseUri.Query = baseUri.Query.Substring(1) + "&" + queryToAppend;
-            else
-                baseUri.Query = queryToAppend;
+            // API Management REST Service requires version query parameter
+            httpValueCollection.Add(Constants.ApiManagement.Url.VersionQuery, Constants.ApiManagement.Versions.Feb2014);
+
+            // Url encodes the whole HttpValueCollection
+            baseUri.Query = httpValueCollection.ToString();
 
             return baseUri.Uri;
 
