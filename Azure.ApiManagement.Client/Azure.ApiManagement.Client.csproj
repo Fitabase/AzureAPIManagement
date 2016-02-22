@@ -56,6 +56,7 @@
     <Compile Include="DataModel\Model\API.cs" />
     <Compile Include="DataModel\Abstract\EntityBase.cs" />
     <Compile Include="DataModel\Result\EntityOperationResult.cs" />
+    <Compile Include="DataModel\Result\ErrorOperationResult.cs" />
     <Compile Include="Services\ManagementClient.cs" />
     <Compile Include="Services\ClientBase.cs" />
     <Compile Include="DataModel\Model\Product.cs" />

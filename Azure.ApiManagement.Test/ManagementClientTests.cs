@@ -8,28 +8,48 @@ namespace Azure.ApiManagement.Test
     [TestClass]
     public class ManagementClientTests
     {
+        protected ManagementClient Client { get; set; }
+
+        [TestInitialize]
+        public void Setup()
+        {
+            var host = "devav";
+            var serviceId = "56ca4cd99e1436035c030003";
+            var accessKey = "NaS+Pv8qOESQ3H4HvnVz3JEQRVq16sVCgnkW+7ldqaT8cIqcKfFe089bSZUnhyHhVu1BXXEz0udjHHEh1w6JBw==";
+
+            this.Client = new ManagementClient(host, serviceId, accessKey);
+        }
+
+        #region Arguments Validation
+
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
         public void InvalidArgumentGetProduct()
         {
-            var client = new ManagementClient();
-            client.GetProductAsync(null).Wait();
+            Client.GetProductAsync(null).Wait();
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void InvalidArgumentCreateProduct()
         {
-            var client = new ManagementClient();
-            client.CreateProductAsync(null).Wait();
+            Client.CreateProductAsync(null).Wait();
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
         public void InvalidArgumentIdCreateProduct()
         {
-            var client = new ManagementClient();
-            client.CreateProductAsync(new Product()).Wait();
+            Client.CreateProductAsync(new Product()).Wait();
+        }
+
+        #endregion
+
+        [TestMethod]
+        public void GetProducts()
+        {
+            var task = Client.GetProductsAsync();
+            task.Wait();
         }
     }
 }

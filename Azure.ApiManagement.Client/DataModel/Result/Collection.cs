@@ -7,15 +7,29 @@ using System.Threading.Tasks;
 
 namespace SmallStepsLabs.Azure.ApiManagement.Model
 {
+    /// <summary>
+    /// This class represents a collection of service entities
+    /// https://msdn.microsoft.com/en-us/library/azure/dn776332.aspx#collection
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class EntityCollection<T> where T : EntityBase
     {
+        /// <summary>
+        /// The total number of elements in the collection.
+        /// </summary>
         [JsonProperty("count")]
-        internal int Count { get; set; }
+        public int Count { get; set; }
 
+        /// <summary>
+        /// Contains a collection of items included in this response.
+        /// </summary>
         [JsonProperty("value")]
-        internal List<T> Values { get; set; }
+        public List<T> Values { get; set; }
 
+        /// <summary>
+        /// The absolute url to the remaining items in the collection.
+        /// </summary>
         [JsonProperty("nextLink")]
-        internal string NextLink { get; set; }
+        public string NextLink { get; set; }
     }
 }
