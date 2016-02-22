@@ -23,6 +23,11 @@ namespace SmallStepsLabs.Azure.ApiManagement
             {
                 internal static readonly string Feb2014 = "2014-02-14-preview";
             }
+
+            internal static class Headers
+            {
+                internal static readonly string ETagMatch = "If-Match";
+            }
         }
 
         internal static class MimeTypes

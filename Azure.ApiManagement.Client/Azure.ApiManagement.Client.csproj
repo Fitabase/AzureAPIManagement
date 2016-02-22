@@ -51,12 +51,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ApiManagementClient.cs" />
+    <Compile Include="DataModel\Exceptions\FailedServiceCallExceltion.cs" />
     <Compile Include="DataModel\Result\Collection.cs" />
     <Compile Include="DataModel\Model\Group.cs" />
     <Compile Include="DataModel\Model\API.cs" />
     <Compile Include="DataModel\Abstract\EntityBase.cs" />
-    <Compile Include="DataModel\Result\EntityOperationResult.cs" />
     <Compile Include="DataModel\Result\ErrorOperationResult.cs" />
+    <Compile Include="DataModel\Result\OperationResult.cs" />
     <Compile Include="Services\ManagementClient.cs" />
     <Compile Include="Services\ClientBase.cs" />
     <Compile Include="DataModel\Model\Product.cs" />
@@ -67,9 +68,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="DataModel\Exceptions\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

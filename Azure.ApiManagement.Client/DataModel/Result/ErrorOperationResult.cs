@@ -6,13 +6,18 @@ namespace SmallStepsLabs.Azure.ApiManagement.Model
     /// Represents the result of an failed service operation
     /// https://msdn.microsoft.com/en-us/library/azure/dn776332.aspx#error
     /// </summary>
-    public class ErrorOperationResult
+    public class ErrorOperationResult : OperationResult
     {
         /// <summary>
         /// The error body containing the details of the error.
         /// </summary>
         [JsonProperty("error")]
         public ErrorData Error { get; set; }
+
+        public override bool IsSuccessfull()
+        {
+            return false;
+        }
     }
 
     /// <summary>

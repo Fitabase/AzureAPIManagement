@@ -92,6 +92,19 @@ namespace Azure.ApiManagement.Test
             Assert.AreNotEqual(productId, pTask.Id);
         }
 
+        [TestMethod]
+        public void UpdateProduct()
+        {
+            var task = Client.GetProductsAsync();
+            task.Wait();
 
+            var product = task.Result.Values.First();
+
+            product.Description = product.Description + " updated;";
+
+            var pTask = Client.UpdateProductAsync(product);
+            pTask.Wait();
+
+        }
     }
 }

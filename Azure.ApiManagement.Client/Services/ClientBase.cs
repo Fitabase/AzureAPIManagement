@@ -1,6 +1,9 @@
 ﻿using Newtonsoft.Json;
+using SmallStepsLabs.Azure.ApiManagement.Model;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
@@ -58,7 +61,8 @@ namespace SmallStepsLabs.Azure.ApiManagement
             return request;
         }
 
-        protected async Task<TResponse> ExecuteRequestAsync<TResponse>(HttpRequestMessage request, CancellationToken cancellationToken = default(CancellationToken))
+        protected async Task<TResponse> ExecuteRequestAsync<TResponse>(HttpRequestMessage request,
+             HttpStatusCode succesCode, CancellationToken cancellationToken = default(CancellationToken))
         {
             HttpClient httpClient = null;
 
@@ -77,19 +81,20 @@ namespace SmallStepsLabs.Azure.ApiManagement
                 var result = await response.Content.ReadAsStringAsync();
 
                 var resultMediaType = response.Content.Headers.ContentType.MediaType;
-                switch (resultMediaType)
-                {
-                    case Constants.MimeTypes.ApplicationJson:
-                        return Utility.DeserializeToJson<TResponse>(result);
 
-                    default:
-                        throw new FormatException(String.Format("Response content format {0} is not supported.", resultMediaType));
-                }
+                if (response.StatusCode == succesCode)
+                    return this.ResponseSuccess<TResponse>(resultMediaType, result);
+
+                var opResult = this.ResponseError(resultMediaType, result);
+                if (typeof(TResponse).IsAssignableFrom(typeof(IOperationResult)))
+                    return (TResponse)opResult;
+
+                throw new FailedServiceCallExceltion(opResult);
             }
             finally
             {
                 // Cleanup
-                if(request != null)
+                if (request != null)
                 {
                     request.Dispose();
                     request = null;
@@ -101,6 +106,15 @@ namespace SmallStepsLabs.Azure.ApiManagement
                     httpClient = null;
                 }
             }
+        }
+
+
+        protected void EntityStateUpdate(HttpRequestMessage request, string value)
+        {
+            if (request == null)
+                throw new ArgumentNullException("request");
+
+            request.Headers.Add(Constants.ApiManagement.Headers.ETagMatch, value);
         }
 
 
@@ -120,6 +134,30 @@ namespace SmallStepsLabs.Azure.ApiManagement
             uri = String.Format("{0}?{1}", uri, httpValueCollection.ToString());
 
             return new Uri(uri, UriKind.Relative);
+        }
+
+        private IOperationResult ResponseError(string resultMediaType, string result)
+        {
+            switch (resultMediaType)
+            {
+                case Constants.MimeTypes.ApplicationJson:
+                    return Utility.DeserializeToJson<ErrorOperationResult>(result);
+
+                default:
+                    throw new FormatException(String.Format("Response content format {0} is not supported.", resultMediaType));
+            }
+        }
+
+        private TResponse ResponseSuccess<TResponse>(string resultMediaType, string result)
+        {
+            switch (resultMediaType)
+            {
+                case Constants.MimeTypes.ApplicationJson:
+                    return Utility.DeserializeToJson<TResponse>(result);
+
+                default:
+                    throw new FormatException(String.Format("Response content format {0} is not supported.", resultMediaType));
+            }
         }
 
         #endregion

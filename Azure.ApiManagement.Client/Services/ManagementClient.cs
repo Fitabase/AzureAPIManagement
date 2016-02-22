@@ -1,5 +1,7 @@
 ﻿using SmallStepsLabs.Azure.ApiManagement.Model;
 using System;
+using System.Collections.Generic;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -25,7 +27,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
             var uriQuery = expandGroups ? "expandGroups=true" : String.Empty;
 
             var request = base.GetRequest("/products", "GET", uriQuery);
-            return base.ExecuteRequestAsync<EntityCollection<Product>>(request, cancellationToken);
+            return base.ExecuteRequestAsync<EntityCollection<Product>>(request, HttpStatusCode.OK , cancellationToken);
         }
 
         /// <summary>
@@ -42,7 +44,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
             var uri = String.Format("/products/{0}", productId);
             var request = base.GetRequest(uri, "GET");
 
-            return base.ExecuteRequestAsync<Product>(request, cancellationToken);
+            return base.ExecuteRequestAsync<Product>(request, HttpStatusCode.OK, cancellationToken);
         }
 
         /// <summary>
@@ -51,7 +53,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
         /// </summary>
         /// <param name="product"></param>
         /// <returns></returns>
-        public Task<EntityOperationResult> CreateProductAsync(Product product, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<IOperationResult> CreateProductAsync(Product product, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (product == null)
                 throw new ArgumentNullException("product");
@@ -61,7 +63,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
             var uri = String.Format("/products/{0}", product.Id);
             var request = base.GetRequest(uri, "PUT");
 
-            return base.ExecuteRequestAsync<EntityOperationResult>(request, cancellationToken);
+            return base.ExecuteRequestAsync<IOperationResult>(request, HttpStatusCode.Created, cancellationToken);
         }
 
         /// <summary>
@@ -70,19 +72,20 @@ namespace SmallStepsLabs.Azure.ApiManagement
         /// </summary>
         /// <param name="product"></param>
         /// <returns></returns>
-        public Task<EntityOperationResult> UpdateProductAsync(Product product, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<IOperationResult> UpdateProductAsync(Product product, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (product == null)
                 throw new ArgumentNullException("product");
             if (String.IsNullOrEmpty(product.Id))
                 throw new ArgumentException("Valid Product Id is required");
 
-            // Request header //If - Match
-
             var uri = String.Format("/products/{0}", product.Id);
             var request = base.GetRequest(uri, "PATCH");
 
-            return base.ExecuteRequestAsync<EntityOperationResult>(request, cancellationToken);
+            // Apply changes regardless of entity state
+            base.EntityStateUpdate(request, "*");
+
+            return base.ExecuteRequestAsync<IOperationResult>(request, HttpStatusCode.NoContent, cancellationToken);
         }
 
         /// <summary>
@@ -92,7 +95,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
         /// <param name="product"></param>
         /// <param name="deleteSubscriptions">Specify true to indicate that any subscriptions associated with this product should be deleted; otherwise false.If this query parameter is missing, the default is false</param>
         /// <returns></returns>
-        public Task<EntityOperationResult> DeleteProductAsync(Product product, bool deleteSubscriptions = false,
+        public Task<IOperationResult> DeleteProductAsync(Product product, bool deleteSubscriptions = false,
              CancellationToken cancellationToken = default(CancellationToken))
         {
             if (product == null)
@@ -104,10 +107,12 @@ namespace SmallStepsLabs.Azure.ApiManagement
 
             // conditional operation
             var uriQuery = deleteSubscriptions ? "deleteSubscriptions=true" : String.Empty;
-
             var request = base.GetRequest(uri, "DELETE", uriQuery);
 
-            return base.ExecuteRequestAsync<EntityOperationResult>(request, cancellationToken);
+            // Apply changes regardless of entity state
+            base.EntityStateUpdate(request, "*");
+
+            return base.ExecuteRequestAsync<IOperationResult>(request, HttpStatusCode.NoContent, cancellationToken);
         }
 
         #endregion
@@ -128,7 +133,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
             var uri = String.Format("/products/{0}/apis", productId);
             var request = base.GetRequest(uri, "GET");
 
-            return base.ExecuteRequestAsync<EntityCollection<API>>(request, cancellationToken);
+            return base.ExecuteRequestAsync<EntityCollection<API>>(request, HttpStatusCode.OK, cancellationToken);
         }
 
 
@@ -139,7 +144,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
         /// <param name="productId">Product identifier.</param>
         /// <param name="apiId">API identifier.</param>
         /// <returns></returns>
-        public Task<EntityOperationResult> AddProductAPIAsync(string productId, string apiId,
+        public Task<IOperationResult> AddProductAPIAsync(string productId, string apiId,
              CancellationToken cancellationToken = default(CancellationToken))
         {
             if (String.IsNullOrEmpty(productId))
@@ -150,7 +155,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
             var uri = String.Format("/products/{0}/apis/{0}", productId, apiId);
             var request = base.GetRequest(uri, "PUT");
 
-            return base.ExecuteRequestAsync<EntityOperationResult>(request, cancellationToken);
+            return base.ExecuteRequestAsync<IOperationResult>(request, HttpStatusCode.Created, cancellationToken);
         }
 
         /// <summary>
@@ -160,7 +165,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
         /// <param name="productId">Product identifier.</param>
         /// <param name="apiId">API identifier.</param>
         /// <returns></returns>
-        public Task<EntityOperationResult> RemoveProductAPIAsync(string productId, string apiId,
+        public Task<IOperationResult> RemoveProductAPIAsync(string productId, string apiId,
              CancellationToken cancellationToken = default(CancellationToken))
         {
             if (String.IsNullOrEmpty(productId))
@@ -171,7 +176,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
             var uri = String.Format("/products/{0}/apis/{0}", productId, apiId);
             var request = base.GetRequest(uri, "DELETE");
 
-            return base.ExecuteRequestAsync<EntityOperationResult>(request, cancellationToken);
+            return base.ExecuteRequestAsync<IOperationResult>(request, HttpStatusCode.NoContent, cancellationToken);
         }
 
         #endregion
@@ -184,7 +189,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
         /// </summary>
         /// <param name="productId">Product identifier.</param>
         /// <returns></returns>
-        public Task<EntityOperationResult> GetProductPolicyAsync(string productId, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<IOperationResult> GetProductPolicyAsync(string productId, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (String.IsNullOrEmpty(productId))
                 throw new ArgumentException("productId is required");
@@ -193,7 +198,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
             var request = base.GetRequest(uri, "GET");
 
             //TODO - xml response handling
-            return base.ExecuteRequestAsync<EntityOperationResult>(request, cancellationToken);
+            return base.ExecuteRequestAsync<IOperationResult>(request, HttpStatusCode.OK, cancellationToken);
         }
 
         /// <summary>
@@ -201,7 +206,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
         /// </summary>
         /// <param name="productId">Product identifier.</param>
         /// <returns></returns>
-        public Task<EntityOperationResult> CheckProductPolicyAsync(string productId, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<IOperationResult> CheckProductPolicyAsync(string productId, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (String.IsNullOrEmpty(productId))
                 throw new ArgumentException("productId is required");
@@ -209,7 +214,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
             var uri = String.Format("/products/{0}/policy", productId);
             var request = base.GetRequest(uri, "HEAD");
 
-            return base.ExecuteRequestAsync<EntityOperationResult>(request, cancellationToken);
+            return base.ExecuteRequestAsync<IOperationResult>(request, HttpStatusCode.OK, cancellationToken);
         }
 
         /// <summary>
@@ -218,7 +223,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
         /// </summary>
         /// <param name="productId">Product identifier.</param>
         /// <returns></returns>
-        public Task<EntityOperationResult> SetProductPolicyAsync(string productId, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<IOperationResult> SetProductPolicyAsync(string productId, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (String.IsNullOrEmpty(productId))
                 throw new ArgumentException("productId is required");
@@ -226,7 +231,10 @@ namespace SmallStepsLabs.Azure.ApiManagement
             var uri = String.Format("/products/{0}/policy", productId);
             var request = base.GetRequest(uri, "PUT");
 
-            return base.ExecuteRequestAsync<EntityOperationResult>(request, cancellationToken);
+            // Apply changes regardless of entity state
+            base.EntityStateUpdate(request, "*");
+
+            return base.ExecuteRequestAsync<IOperationResult>(request, HttpStatusCode.Created, cancellationToken);
         }
 
         /// <summary>
@@ -234,7 +242,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
         /// </summary>
         /// <param name="productId">Product identifier.</param>
         /// <returns></returns>
-        public Task<EntityOperationResult> DeleteProductPolicyAsync(string productId, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<IOperationResult> DeleteProductPolicyAsync(string productId, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (String.IsNullOrEmpty(productId))
                 throw new ArgumentException("productId is required");
@@ -242,7 +250,10 @@ namespace SmallStepsLabs.Azure.ApiManagement
             var uri = String.Format("/products/{0}/policy", productId);
             var request = base.GetRequest(uri, "DELETE");
 
-            return base.ExecuteRequestAsync<EntityOperationResult>(request, cancellationToken);
+            // Apply changes regardless of entity state
+            base.EntityStateUpdate(request, "*");
+
+            return base.ExecuteRequestAsync<IOperationResult>(request, HttpStatusCode.NoContent, cancellationToken);
         }
 
         #endregion
@@ -258,7 +269,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
              CancellationToken cancellationToken = default(CancellationToken))
         {
             var request = base.GetRequest("/apis", "GET");
-            return base.ExecuteRequestAsync<EntityCollection<API>>(request, cancellationToken);
+            return base.ExecuteRequestAsync<EntityCollection<API>>(request, HttpStatusCode.OK, cancellationToken);
         }
 
         /// <summary>
@@ -275,7 +286,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
             var uri = String.Format("/apis/{0}", apiId);
             var request = base.GetRequest(uri, "GET");
 
-            return base.ExecuteRequestAsync<Product>(request, cancellationToken);
+            return base.ExecuteRequestAsync<Product>(request, HttpStatusCode.OK, cancellationToken);
         }
 
         #endregion
