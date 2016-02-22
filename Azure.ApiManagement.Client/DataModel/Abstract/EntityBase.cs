@@ -16,6 +16,9 @@ namespace SmallStepsLabs.Azure.ApiManagement.Model
         {
             get
             {
+                if (String.IsNullOrEmpty(this.Uri))
+                    return null;
+
                 if (this.Uri.StartsWith(this.UriIdFormat, StringComparison.InvariantCultureIgnoreCase))
                     return this.Uri.Substring(UriIdFormat.Length);
 

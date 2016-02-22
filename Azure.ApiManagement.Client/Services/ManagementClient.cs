@@ -1,6 +1,5 @@
 ﻿using SmallStepsLabs.Azure.ApiManagement.Model;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace SmallStepsLabs.Azure.ApiManagement
@@ -28,6 +27,9 @@ namespace SmallStepsLabs.Azure.ApiManagement
         /// <returns></returns>
         public Task<Product> GetProductAsync(string productId)
         {
+            if (String.IsNullOrEmpty(productId))
+                throw new ArgumentException("productId is required");
+
             var uri = String.Format("/products/{0}", productId);
             var request = base.GetRequest(uri, "GET");
 
@@ -42,6 +44,11 @@ namespace SmallStepsLabs.Azure.ApiManagement
         /// <returns></returns>
         public Task<EntityOperationResult> CreateProductAsync(Product product)
         {
+            if (product == null)
+                throw new ArgumentNullException("product");
+            if (String.IsNullOrEmpty(product.Id))
+                throw new ArgumentException("Valid Product Id is required");
+
             var uri = String.Format("/products/{0}", product.Id);
             var request = base.GetRequest(uri, "PUT");
 
@@ -56,6 +63,11 @@ namespace SmallStepsLabs.Azure.ApiManagement
         /// <returns></returns>
         public Task<EntityOperationResult> UpdateProductAsync(Product product)
         {
+            if (product == null)
+                throw new ArgumentNullException("product");
+            if (String.IsNullOrEmpty(product.Id))
+                throw new ArgumentException("Valid Product Id is required");
+
             // Request header //If - Match
 
             var uri = String.Format("/products/{0}", product.Id);
@@ -73,6 +85,11 @@ namespace SmallStepsLabs.Azure.ApiManagement
         /// <returns></returns>
         public Task<EntityOperationResult> DeleteProductAsync(Product product, bool deleteSubscriptions = false)
         {
+            if (product == null)
+                throw new ArgumentNullException("product");
+            if (String.IsNullOrEmpty(product.Id))
+                throw new ArgumentException("Valid Product Id is required");
+
             // Request header //If - Match
 
             var uri = String.Format("/products/{0}", product.Id);
@@ -97,6 +114,9 @@ namespace SmallStepsLabs.Azure.ApiManagement
         /// <returns></returns>
         public Task<EntityCollection<API>> GetProductAPIsAsync(string productId)
         {
+            if (String.IsNullOrEmpty(productId))
+                throw new ArgumentException("productId is required");
+
             var uri = String.Format("/products/{0}/apis", productId);
             var request = base.GetRequest(uri, "GET");
 
@@ -113,6 +133,11 @@ namespace SmallStepsLabs.Azure.ApiManagement
         /// <returns></returns>
         public Task<EntityOperationResult> AddProductAPIAsync(string productId, string apiId)
         {
+            if (String.IsNullOrEmpty(productId))
+                throw new ArgumentException("productId is required");
+            if (String.IsNullOrEmpty(apiId))
+                throw new ArgumentException("apiId is required");
+
             var uri = String.Format("/products/{0}/apis/{0}", productId, apiId);
             var request = base.GetRequest(uri, "PUT");
 
@@ -128,6 +153,11 @@ namespace SmallStepsLabs.Azure.ApiManagement
         /// <returns></returns>
         public Task<EntityOperationResult> RemoveProductAPIAsync(string productId, string apiId)
         {
+            if (String.IsNullOrEmpty(productId))
+                throw new ArgumentException("productId is required");
+            if (String.IsNullOrEmpty(apiId))
+                throw new ArgumentException("apiId is required");
+
             var uri = String.Format("/products/{0}/apis/{0}", productId, apiId);
             var request = base.GetRequest(uri, "DELETE");
 
@@ -146,6 +176,9 @@ namespace SmallStepsLabs.Azure.ApiManagement
         /// <returns></returns>
         public Task<EntityOperationResult> GetProductPolicyAsync(string productId)
         {
+            if (String.IsNullOrEmpty(productId))
+                throw new ArgumentException("productId is required");
+
             var uri = String.Format("/products/{0}/policy", productId);
             var request = base.GetRequest(uri, "GET");
 
@@ -160,6 +193,9 @@ namespace SmallStepsLabs.Azure.ApiManagement
         /// <returns></returns>
         public Task<EntityOperationResult> CheckProductPolicyAsync(string productId)
         {
+            if (String.IsNullOrEmpty(productId))
+                throw new ArgumentException("productId is required");
+
             var uri = String.Format("/products/{0}/policy", productId);
             var request = base.GetRequest(uri, "HEAD");
 
@@ -174,6 +210,9 @@ namespace SmallStepsLabs.Azure.ApiManagement
         /// <returns></returns>
         public Task<EntityOperationResult> SetProductPolicyAsync(string productId)
         {
+            if (String.IsNullOrEmpty(productId))
+                throw new ArgumentException("productId is required");
+
             var uri = String.Format("/products/{0}/policy", productId);
             var request = base.GetRequest(uri, "PUT");
 
@@ -187,6 +226,9 @@ namespace SmallStepsLabs.Azure.ApiManagement
         /// <returns></returns>
         public Task<EntityOperationResult> DeleteProductPolicyAsync(string productId)
         {
+            if (String.IsNullOrEmpty(productId))
+                throw new ArgumentException("productId is required");
+
             var uri = String.Format("/products/{0}/policy", productId);
             var request = base.GetRequest(uri, "DELETE");
 
@@ -216,6 +258,9 @@ namespace SmallStepsLabs.Azure.ApiManagement
         /// <returns></returns>
         public Task<Product> GetAPIAsync(string apiId) //TODO: Export support ?
         {
+            if (String.IsNullOrEmpty(apiId))
+                throw new ArgumentException("apiId is required");
+
             var uri = String.Format("/apis/{0}", apiId);
             var request = base.GetRequest(uri, "GET");
 
