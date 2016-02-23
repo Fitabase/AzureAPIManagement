@@ -308,7 +308,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
         /// </summary>
         /// <param name="apiId">API identifier.</param>
         /// <returns></returns>
-        public Task<Product> GetAPIAsync(string apiId, CancellationToken cancellationToken = default(CancellationToken)) //TODO: Export support ?
+        public Task<API> GetAPIAsync(string apiId, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (String.IsNullOrEmpty(apiId))
                 throw new ArgumentException("apiId is required");
@@ -316,7 +316,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
             var uri = String.Format("/apis/{0}", apiId);
             var request = base.GetRequest(uri, "GET");
 
-            return base.ExecuteRequestAsync<Product>(request, HttpStatusCode.OK, cancellationToken);
+            return base.ExecuteRequestAsync<API>(request, HttpStatusCode.OK, cancellationToken);
         }
 
         #endregion

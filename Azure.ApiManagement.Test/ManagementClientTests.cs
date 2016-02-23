@@ -87,7 +87,7 @@ namespace Azure.ApiManagement.Test
 
             var pTask = Client.GetProductAsync(productId);
 
-            Assert.AreNotEqual(null, pTask.Result);
+            Assert.IsNotNull(pTask.Result);
             Assert.AreNotEqual(productId, pTask.Id);
         }
 
@@ -166,7 +166,7 @@ namespace Azure.ApiManagement.Test
 
                 Client.GetProductAsync(newProduct.Id).Wait();
             }
-            catch(AggregateException ex)
+            catch (AggregateException ex)
             {
                 throw ex.InnerException;
             }
@@ -184,7 +184,7 @@ namespace Azure.ApiManagement.Test
             var pTask = Client.GetProductAPIsAsync(productId);
             pTask.Wait();
 
-            Assert.AreNotEqual(null, pTask.Result);
+            Assert.IsNotNull(pTask.Result);
         }
 
         [TestMethod]
@@ -198,10 +198,51 @@ namespace Azure.ApiManagement.Test
             var pTask = Client.GetProductAPIsAsync(productId);
             pTask.Wait();
 
-            if(pTask.Result.Count > 0)
+            if (pTask.Result.Count > 0)
             {
                 var apiId = pTask.Result[0].Id;
+
+                Client.RemoveProductAPIAsync(productId, apiId).Wait();
+                Client.AddProductAPIAsync(productId, apiId).Wait();
+
+                // assert
+                pTask = Client.GetProductAPIsAsync(productId);
+                pTask.Wait();
+
+                Assert.IsNotNull(pTask.Result.First(apis => apis.Id == apiId));
             }
+
+            else Assert.Inconclusive("Selected Product didn`t have assigned APIs");
+        }
+
+        [TestMethod]
+        public void GetAPIs()
+        {
+            var task = Client.GetAPIsAsync();
+            task.Wait();
+
+            Assert.IsNotNull(task.Result);
+        }
+
+
+        [TestMethod]
+        public void GetAPI()
+        {
+            var task = Client.GetAPIsAsync();
+            task.Wait();
+
+            if (task.Result.Count > 0)
+            {
+                var apiId = task.Result.First().Id;
+
+                var aTask = Client.GetAPIAsync(apiId);
+                aTask.Wait();
+
+                Assert.IsNotNull(aTask.Result);
+                Assert.AreEqual(apiId, aTask.Result.Id);
+            }
+
+            else Assert.Inconclusive("No APIs defined");
         }
     }
 }
