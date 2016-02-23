@@ -11,4 +11,10 @@ namespace SmallStepsLabs.Azure.ApiManagement.Model
         notPublished,
         published
     }
+
+    public enum UserState
+    {
+        active,
+        blocked
+    }
 }

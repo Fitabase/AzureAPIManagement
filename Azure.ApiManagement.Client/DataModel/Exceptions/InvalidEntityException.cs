@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace SmallStepsLabs.Azure.ApiManagement.Model
 {
-    public class InvalidProductException : Exception
+    public class InvalidEntityException : Exception
     {
-        public InvalidProductException(string message) : base(message) { }
+        public InvalidEntityException(string message) : base(message) { }
     }
 }

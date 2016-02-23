@@ -305,5 +305,27 @@ namespace Azure.ApiManagement.Test
             else Assert.Inconclusive("No Products found.");
         }
 
+        [TestMethod]
+        public void CreateUserGetLogin()
+        {
+            var uid = Guid.NewGuid().ToString("N");
+            var newUser = new User()
+            {
+                Email = String.Format("test_{0}@test.com", uid),
+                FirstName = "First Name",
+                LastName = "Last Name",
+                Password = "P@ssWo3d",
+                State = UserState.active,
+                Note = "notes.."
+            };
+
+            Client.CreateUserAsync(uid, newUser).Wait();
+
+            var uTask = Client.GetUserSsoLoginAsync(uid);
+            uTask.Wait();
+
+            Assert.IsNotNull(uTask.Result);
+            Assert.IsTrue(Uri.IsWellFormedUriString(uTask.Result.Url, UriKind.Absolute));
+        }
     }
 }

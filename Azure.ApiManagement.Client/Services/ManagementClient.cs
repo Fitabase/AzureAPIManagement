@@ -48,69 +48,31 @@ namespace SmallStepsLabs.Azure.ApiManagement
             //return signature;
         }
 
-        public async Task<SsoUrl> LoginUserWithSsoUrlAsync(string userId)
+        public Task<bool> CreateUserAsync(string userId, User user, CancellationToken cancellationToken = default(CancellationToken))
         {
-            throw new NotImplementedException();
+            if (user == null)
+                throw new ArgumentNullException("user");
+            if (String.IsNullOrEmpty(userId))
+                throw new ArgumentException("Valid User Id is required");
 
-            //using (var client = new HttpClient())
-            //{
-            //    client.BaseAddress = new Uri(_ApimRestHost);
-            //    client.DefaultRequestHeaders.Add("Authorization", ApimRestAuthHeader());
-            //    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/json"));
+            Utility.ValidateUser(user);
 
-            //    HttpResponseMessage response = await client.PostAsync("/users/" + userId + "/generateSsoUrl?api-version=" + _ApimRestApiVersion, new StringContent("", Encoding.UTF8, "text/json"));
-            //    string httpContent = await response.Content.ReadAsStringAsync();
-            //    if (response.IsSuccessStatusCode)
-            //    {
-            //        //We got an SSO token - redirect
-            //        //HttpContent receiveStream = response.Content;
-            //        //var SsoUrlJson = await receiveStream.ReadAsStringAsync();
-            //        SsoUrl su = DeserializeToJson<SsoUrl>(httpContent);
-            //        return su;
-            //    }
-            //    else
-            //    {
-            //        throw new HttpException((int)response.StatusCode, httpContent);
-            //    }
+            var uri = String.Format("/users/{0}", userId);
+            var request = base.BuildRequest(uri, "PUT");
+            base.BuildRequestContent(request, user);
 
-            //}
+            return base.ExecuteRequestAsync(request, HttpStatusCode.Created, cancellationToken);
         }
 
-        public async Task<bool> CreateUserAsync(string userId, string userFirstName, string userLastName, string userEmail, string userPassword)
+        public Task<SsoUrl> GetUserSsoLoginAsync(string userId, CancellationToken cancellationToken = default(CancellationToken))
         {
-            throw new NotImplementedException();
+            if (String.IsNullOrEmpty(userId))
+                throw new ArgumentException("Valid User Id is required");
 
-            ////create user in APIM as well
-            //using (var client = new HttpClient())
-            //{
-            //    client.BaseAddress = new Uri(_ApimRestHost);
-            //    client.DefaultRequestHeaders.Add("Authorization", ApimRestAuthHeader());
-            //    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/json"));
+            var uri = String.Format("/users/{0}/generateSsoUrl", userId);
+            var request = base.BuildRequest(uri, "POST");
 
-            //    var ApimUser = new
-            //    {
-            //        firstName = userFirstName,
-            //        lastName = userLastName,
-            //        email = userEmail,
-            //        password = userPassword,
-            //        state = "active"
-            //    };
-
-            //    var ApimUserJson = SerializeToJson(ApimUser);
-
-            //    HttpResponseMessage response = await client.PutAsync("/users/" + userId + "?api-version=" + _ApimRestApiVersion, new StringContent(ApimUserJson, Encoding.UTF8, "text/json"));
-            //    string httpContent = await response.Content.ReadAsStringAsync();
-            //    if (response.IsSuccessStatusCode)
-            //    {
-            //        //User created successfully
-
-            //        return true;
-            //    }
-            //    else
-            //    {
-            //        throw new HttpException((int)response.StatusCode, httpContent);
-            //    }
-            //}
+            return base.ExecuteRequestAsync<SsoUrl>(request, HttpStatusCode.OK, cancellationToken);
         }
 
         #endregion
