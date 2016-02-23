@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using SmallStepsLabs.Azure.ApiManagement.Model;
 using System;
 using System.Globalization;
 using System.IO;
@@ -68,6 +69,23 @@ namespace SmallStepsLabs.Azure.ApiManagement
             var jsonReader = new JsonTextReader(reader);
 
             return (TAnything)serializer.Deserialize(jsonReader, typeof(TAnything));
+        }
+
+        internal static void ValidateProduct(Product product)
+        {
+            if (String.IsNullOrEmpty(product.Name) && product.Name.Length > 100)
+                throw new InvalidProductException("Product configuration is not valid. 'Name' is required and must not exceed 100 characters.");
+
+            if (String.IsNullOrEmpty(product.Description) && product.Description.Length > 1000)
+                throw new InvalidProductException("Product configuration is not valid. 'Description' is required and must not exceed 1000 characters.");
+
+            // Cannot provide values for approvalRequired and subscriptionsLimit when subscriptionRequired is set to false in the request payload
+            if (!product.SubscriptionRequired)
+            {
+                if (product.ApprovalRequired.HasValue || product.SubscriptionsLimit.HasValue)
+                    throw new InvalidProductException("Product configuration is not valid. Subscription requirement cannot be false while either Subscription limit or Approval required is set");
+            }
+
         }
     }
 }

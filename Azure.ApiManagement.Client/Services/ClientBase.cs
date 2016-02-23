@@ -38,7 +38,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
             this.AccessKey = accessKey;
         }
 
-        protected HttpRequestMessage GetRequest(string url, string method, NameValueCollection query = null, object data = null)
+        protected HttpRequestMessage BuildRequest(string url, string method, NameValueCollection query = null)
         {
             // combine uri with query
             var requestUri = this.BuildRequestUri(url, query);
@@ -49,13 +49,29 @@ namespace SmallStepsLabs.Azure.ApiManagement
             var token = Utility.CreateSharedAccessToken(this.ServiceIdentifier, this.AccessKey, DateTime.UtcNow.AddDays(1));
             request.Headers.Authorization = new AuthenticationHeaderValue(Constants.ApiManagement.AccessToken, token);
 
-            // embed data for request
-            if (data != null)
-            {
-                request.Content = new StringContent(Utility.SerializeToJson(data), Encoding.UTF8, Constants.MimeTypes.ApplicationJson);
-            }
-
             return request;
+        }
+
+        protected void BuildRequestContent(HttpRequestMessage request, object data, string mimeType = null)
+        {
+            if (request == null)
+                throw new ArgumentNullException("request");
+
+            if (data == null) return;
+
+            // embed data for request
+            switch (mimeType)
+            {
+                case Constants.MimeTypes.ApplicationXmlPolicy:
+                    request.Content = new StringContent(data.ToString(), Encoding.UTF8, Constants.MimeTypes.ApplicationXmlPolicy);
+                    return;
+
+                case Constants.MimeTypes.ApplicationJson:
+                    request.Content = new StringContent(Utility.SerializeToJson(data), Encoding.UTF8, Constants.MimeTypes.ApplicationJson);
+                    return;
+
+                default: goto case Constants.MimeTypes.ApplicationJson;
+            }
         }
 
         protected async Task<bool> ExecuteRequestAsync(HttpRequestMessage request,
@@ -79,7 +95,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
         }
 
         protected async Task<TEntity> ExecuteRequestAsync<TEntity>(HttpRequestMessage request,
-            HttpStatusCode succesCode, CancellationToken cancellationToken = default(CancellationToken)) where TEntity : new()
+            HttpStatusCode succesCode, CancellationToken cancellationToken = default(CancellationToken))
         {
             // async making request
             var response = await this.ExecuteRequestInternalAsync(request, cancellationToken);
@@ -161,14 +177,13 @@ namespace SmallStepsLabs.Azure.ApiManagement
 
         private TResponse ParseResponse<TResponse>(string resultMediaType, string result)
         {
-            // default type of error content
-            if (!String.IsNullOrEmpty(resultMediaType))
-                resultMediaType = Constants.MimeTypes.ApplicationJson;
-
             switch (resultMediaType)
             {
                 case Constants.MimeTypes.ApplicationJson:
                     return Utility.DeserializeToJson<TResponse>(result);
+
+                case Constants.MimeTypes.ApplicationXmlPolicy:
+                    return (TResponse)(object)result;
 
                 default:
                     throw new FormatException(String.Format("Response content format {0} is not supported.", resultMediaType));

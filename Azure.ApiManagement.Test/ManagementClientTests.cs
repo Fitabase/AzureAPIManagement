@@ -224,7 +224,6 @@ namespace Azure.ApiManagement.Test
             Assert.IsNotNull(task.Result);
         }
 
-
         [TestMethod]
         public void GetAPI()
         {
@@ -244,5 +243,67 @@ namespace Azure.ApiManagement.Test
 
             else Assert.Inconclusive("No APIs defined");
         }
+
+        [TestMethod]
+        public void CheckProductPolicy()
+        {
+            var task = Client.GetProductsAsync();
+            task.Wait();
+            if (task.Result.Count > 0)
+            {
+                var productId = task.Result[0].Id;
+
+                var pTask = Client.CheckProductPolicyAsync(productId);
+                pTask.Wait();
+
+            }
+
+            else Assert.Inconclusive("No Products found.");
+        }
+
+        [TestMethod]
+        public void GetProductPolicy()
+        {
+            var task = Client.GetProductsAsync();
+            task.Wait();
+
+            if (task.Result.Count > 0)
+            {
+                var productId = task.Result[0].Id;
+
+                var pTask = Client.GetProductPolicyAsync(productId);
+                pTask.Wait();
+
+                Assert.IsNotNull(pTask.Result);
+
+            }
+
+            else Assert.Inconclusive("No Products found.");
+        }
+
+        [TestMethod]
+        public void SetProductPolicy()
+        {
+            var task = Client.GetProductsAsync();
+            task.Wait();
+
+            if (task.Result.Count > 0)
+            {
+                var productId = task.Result[0].Id;
+
+                var pTask = Client.GetProductPolicyAsync(productId);
+                pTask.Wait();
+
+                var policy = pTask.Result;
+
+                var updateTask = Client.SetProductPolicyAsync(productId, policy);
+
+                Assert.IsNotNull(pTask.Result);
+
+            }
+
+            else Assert.Inconclusive("No Products found.");
+        }
+
     }
 }

@@ -37,6 +37,8 @@ namespace SmallStepsLabs.Azure.ApiManagement
         {
             ///<summary>JavaScript Object Notation JSON; Defined in RFC 4627</summary>
             public const string ApplicationJson = "application/json";
+
+            public const string ApplicationXmlPolicy = "application/vnd.ms-azure-apim.policy+xml";
         }
     }
 }

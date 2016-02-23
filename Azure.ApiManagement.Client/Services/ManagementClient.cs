@@ -136,7 +136,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
             if (expandGroups)
                 query.Add("expandGroups", "true");
 
-            var request = base.GetRequest("/products", "GET", query);
+            var request = base.BuildRequest("/products", "GET", query);
             return base.ExecuteRequestAsync<EntityCollection<Product>>(request, HttpStatusCode.OK, cancellationToken)
                        .ContinueWith(t =>
                        {
@@ -157,7 +157,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
                 throw new ArgumentException("productId is required");
 
             var uri = String.Format("/products/{0}", productId);
-            var request = base.GetRequest(uri, "GET");
+            var request = base.BuildRequest(uri, "GET");
 
             return base.ExecuteRequestAsync<Product>(request, HttpStatusCode.OK, cancellationToken);
         }
@@ -175,10 +175,11 @@ namespace SmallStepsLabs.Azure.ApiManagement
             if (String.IsNullOrEmpty(product.Id))
                 throw new ArgumentException("Valid Product Id is required");
 
-            this.ValidateProduct(product);
+            Utility.ValidateProduct(product);
 
             var uri = String.Format("/products/{0}", product.Id);
-            var request = base.GetRequest(uri, "PUT", data: product);
+            var request = base.BuildRequest(uri, "PUT");
+            base.BuildRequestContent(request, product);
 
             return base.ExecuteRequestAsync(request, HttpStatusCode.Created, cancellationToken);
         }
@@ -197,10 +198,11 @@ namespace SmallStepsLabs.Azure.ApiManagement
             if (String.IsNullOrEmpty(product.Id))
                 throw new ArgumentException("Valid Product Id is required");
 
-            this.ValidateProduct(product);
+            Utility.ValidateProduct(product);
 
             var uri = String.Format("/products/{0}", product.Id);
-            var request = base.GetRequest(uri, "PATCH", data: product);
+            var request = base.BuildRequest(uri, "PATCH");
+            base.BuildRequestContent(request, product);
 
             // Apply changes regardless of entity state
             base.EntityStateUpdate(request, "*");
@@ -230,7 +232,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
             if (deleteSubscriptions)
                 query.Add("deleteSubscriptions", "true");
 
-            var request = base.GetRequest(uri, "DELETE", query);
+            var request = base.BuildRequest(uri, "DELETE", query);
 
             // Apply changes regardless of entity state
             base.EntityStateUpdate(request, "*");
@@ -255,7 +257,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
                 throw new ArgumentException("productId is required");
 
             var uri = String.Format("/products/{0}/apis", productId);
-            var request = base.GetRequest(uri, "GET");
+            var request = base.BuildRequest(uri, "GET");
 
             return base.ExecuteRequestAsync<EntityCollection<API>>(request, HttpStatusCode.OK, cancellationToken)
                        .ContinueWith<List<API>>(t =>
@@ -281,7 +283,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
                 throw new ArgumentException("apiId is required");
 
             var uri = String.Format("/products/{0}/apis/{1}", productId, apiId);
-            var request = base.GetRequest(uri, "PUT");
+            var request = base.BuildRequest(uri, "PUT");
 
             return base.ExecuteRequestAsync(request, HttpStatusCode.Created, cancellationToken);
         }
@@ -303,7 +305,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
                 throw new ArgumentException("apiId is required");
 
             var uri = String.Format("/products/{0}/apis/{1}", productId, apiId);
-            var request = base.GetRequest(uri, "DELETE");
+            var request = base.BuildRequest(uri, "DELETE");
 
             return base.ExecuteRequestAsync(request, HttpStatusCode.NoContent, cancellationToken);
         }
@@ -398,16 +400,15 @@ namespace SmallStepsLabs.Azure.ApiManagement
         /// <exception cref="HttpResponseException">Thrown on invalid operation.</exception>
         /// <param name="productId">Product identifier.</param>
         /// <returns></returns>
-        public Task<bool> GetProductPolicyAsync(string productId, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<string> GetProductPolicyAsync(string productId, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (String.IsNullOrEmpty(productId))
                 throw new ArgumentException("productId is required");
 
             var uri = String.Format("/products/{0}/policy", productId);
-            var request = base.GetRequest(uri, "GET");
+            var request = base.BuildRequest(uri, "GET");
 
-            //TODO - xml response handling
-            return base.ExecuteRequestAsync(request, HttpStatusCode.OK, cancellationToken);
+            return base.ExecuteRequestAsync<string>(request, HttpStatusCode.OK, cancellationToken);
         }
 
         /// <summary>
@@ -422,7 +423,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
                 throw new ArgumentException("productId is required");
 
             var uri = String.Format("/products/{0}/policy", productId);
-            var request = base.GetRequest(uri, "HEAD");
+            var request = base.BuildRequest(uri, "HEAD");
 
             return base.ExecuteRequestAsync(request, HttpStatusCode.OK, cancellationToken);
         }
@@ -433,14 +434,16 @@ namespace SmallStepsLabs.Azure.ApiManagement
         /// </summary>
         /// <exception cref="HttpResponseException">Thrown on invalid operation.</exception>
         /// <param name="productId">Product identifier.</param>
+        /// <param name="policy">Policy content (xml).</param>
         /// <returns></returns>
-        public Task<bool> SetProductPolicyAsync(string productId, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<bool> SetProductPolicyAsync(string productId, string policy, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (String.IsNullOrEmpty(productId))
                 throw new ArgumentException("productId is required");
 
             var uri = String.Format("/products/{0}/policy", productId);
-            var request = base.GetRequest(uri, "PUT");
+            var request = base.BuildRequest(uri, "PUT");
+            base.BuildRequestContent(request, policy, Constants.MimeTypes.ApplicationXmlPolicy);
 
             // Apply changes regardless of entity state
             base.EntityStateUpdate(request, "*");
@@ -460,7 +463,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
                 throw new ArgumentException("productId is required");
 
             var uri = String.Format("/products/{0}/policy", productId);
-            var request = base.GetRequest(uri, "DELETE");
+            var request = base.BuildRequest(uri, "DELETE");
 
             // Apply changes regardless of entity state
             base.EntityStateUpdate(request, "*");
@@ -486,7 +489,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
             if (!String.IsNullOrEmpty(filter))
                 query.Add(Constants.ApiManagement.Url.FilterQuery, filter);
 
-            var request = base.GetRequest("/apis", "GET", query);
+            var request = base.BuildRequest("/apis", "GET", query);
             return base.ExecuteRequestAsync<EntityCollection<API>>(request, HttpStatusCode.OK, cancellationToken)
                        .ContinueWith<List<API>>(t =>
                        {
@@ -507,30 +510,9 @@ namespace SmallStepsLabs.Azure.ApiManagement
                 throw new ArgumentException("apiId is required");
 
             var uri = String.Format("/apis/{0}", apiId);
-            var request = base.GetRequest(uri, "GET");
+            var request = base.BuildRequest(uri, "GET");
 
             return base.ExecuteRequestAsync<API>(request, HttpStatusCode.OK, cancellationToken);
-        }
-
-        #endregion
-
-        #region Helpers
-
-        private void ValidateProduct(Product product)
-        {
-            if (String.IsNullOrEmpty(product.Name) && product.Name.Length > 100)
-                throw new InvalidProductException("Product configuration is not valid. 'Name' is required and must not exceed 100 characters.");
-
-            if (String.IsNullOrEmpty(product.Description) && product.Description.Length > 1000)
-                throw new InvalidProductException("Product configuration is not valid. 'Description' is required and must not exceed 1000 characters.");
-
-            // Cannot provide values for approvalRequired and subscriptionsLimit when subscriptionRequired is set to false in the request payload
-            if (!product.SubscriptionRequired)
-            {
-                if (product.ApprovalRequired.HasValue || product.SubscriptionsLimit.HasValue)
-                    throw new InvalidProductException("Product configuration is not valid. Subscription requirement cannot be false while either Subscription limit or Approval required is set");
-            }
-
         }
 
         #endregion
