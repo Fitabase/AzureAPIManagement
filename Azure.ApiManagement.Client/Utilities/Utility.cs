@@ -1,14 +1,12 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace SmallStepsLabs.Azure.ApiManagement 
+namespace SmallStepsLabs.Azure.ApiManagement
 {
     internal static class Utility
     {
@@ -35,7 +33,14 @@ namespace SmallStepsLabs.Azure.ApiManagement
 
         internal static string SerializeToJson<TAnything>(TAnything value)
         {
-            var settings = new JsonSerializerSettings { DateTimeZoneHandling = DateTimeZoneHandling.Utc };
+            var settings = new JsonSerializerSettings
+            {
+                DateTimeZoneHandling = DateTimeZoneHandling.Utc,
+                ContractResolver = new DefaultContractResolver()
+                {
+                    IgnoreSerializableInterface = true
+                }
+            };
             var formatting = Formatting.None;
             var writer = new StringWriter();
 
@@ -49,7 +54,14 @@ namespace SmallStepsLabs.Azure.ApiManagement
 
         internal static TAnything DeserializeToJson<TAnything>(String value)
         {
-            var settings = new JsonSerializerSettings { DateTimeZoneHandling = DateTimeZoneHandling.Utc };
+            var settings = new JsonSerializerSettings
+            {
+                DateTimeZoneHandling = DateTimeZoneHandling.Utc,
+                ContractResolver = new DefaultContractResolver()
+                {
+                    IgnoreSerializableInterface = true
+                }
+            };
             var reader = new StringReader(value);
 
             var serializer = JsonSerializer.Create(settings);

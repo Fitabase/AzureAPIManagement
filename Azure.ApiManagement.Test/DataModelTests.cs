@@ -149,7 +149,7 @@ namespace Azure.ApiManagement.Test
             var result = Utility.DeserializeToJson<Product>(content);
 
             Assert.AreEqual("53e10f187e888000b4060002", result.Id);
-            Assert.AreEqual("published", result.State);
+            Assert.AreEqual(ProductState.published, result.State);
             Assert.AreEqual(true, result.ApprovalRequired);
         }
 

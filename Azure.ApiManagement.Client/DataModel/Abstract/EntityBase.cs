@@ -11,22 +11,28 @@ namespace SmallStepsLabs.Azure.ApiManagement.Model
     {
         protected abstract string UriIdFormat { get; }
 
+        private string _id;
         [JsonIgnore]
         public string Id
         {
             get
             {
-                if (String.IsNullOrEmpty(this.Uri))
-                    return null;
+                if (String.IsNullOrEmpty(_id))
+                {
 
-                if (this.Uri.StartsWith(this.UriIdFormat, StringComparison.InvariantCultureIgnoreCase))
-                    return this.Uri.Substring(UriIdFormat.Length);
+                    if (!String.IsNullOrEmpty(this.Uri))
+                    {
 
-                return null;
+                        if (this.Uri.StartsWith(this.UriIdFormat, StringComparison.InvariantCultureIgnoreCase))
+                            _id = this.Uri.Substring(UriIdFormat.Length);
+                    }
+                }
+
+                return _id;
             }
             set
             {
-                //TODO
+                _id = value;
             }
         }
 

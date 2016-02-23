@@ -100,11 +100,61 @@ namespace Azure.ApiManagement.Test
 
             var product = task.Result.Values.First();
 
-            product.Description = product.Description + " updated;";
+            var testDesc = DateTime.Now.ToLongTimeString();
 
-            var pTask = Client.UpdateProductAsync(product);
-            pTask.Wait();
+            product.Description = testDesc;
 
+            Client.UpdateProductAsync(product).Wait();
+
+            var pickTask = Client.GetProductAsync(product.Id);
+            pickTask.Wait();
+
+            Assert.AreEqual(testDesc, pickTask.Result.Description);
+        }
+
+        [TestMethod]
+        public void CreateProduct()
+        {
+            var id = Guid.NewGuid().ToString("N");
+            var newProduct = new Product()
+            {
+                Id = id,
+                Name = "Testing product " + id,
+                Description = "Testing"
+            };
+
+            Client.CreateProductAsync(newProduct).Wait();
+
+            var pickTask = Client.GetProductAsync(newProduct.Id);
+            pickTask.Wait();
+
+            Assert.AreEqual(newProduct.Id, pickTask.Result.Id);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(HttpResponseException))]
+        public void DeleteProduct()
+        {
+            var id = Guid.NewGuid().ToString("N");
+            var newProduct = new Product()
+            {
+                Id = id,
+                Name = "Testing product " + id,
+                Description = "Testing"
+            };
+
+            Client.CreateProductAsync(newProduct).Wait();
+            Client.DeleteProductAsync(newProduct.Id, true).Wait();
+
+            try
+            {
+
+                Client.GetProductAsync(newProduct.Id).Wait();
+            }
+            catch(AggregateException ex)
+            {
+                throw ex.InnerException;
+            }
         }
     }
 }

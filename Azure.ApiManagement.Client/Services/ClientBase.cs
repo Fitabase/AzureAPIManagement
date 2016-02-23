@@ -1,13 +1,8 @@
-﻿using Newtonsoft.Json;
-using SmallStepsLabs.Azure.ApiManagement.Model;
+﻿using SmallStepsLabs.Azure.ApiManagement.Model;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -80,16 +75,21 @@ namespace SmallStepsLabs.Azure.ApiManagement
                 // async reading response stream
                 var result = await response.Content.ReadAsStringAsync();
 
-                var resultMediaType = response.Content.Headers.ContentType.MediaType;
+                var resultMediaType = response.Content?.Headers?.ContentType?.MediaType;
 
                 if (response.StatusCode == succesCode)
-                    return this.ResponseSuccess<TResponse>(resultMediaType, result);
+                {
+                    // generic operation result
+                    if (typeof(TResponse) == typeof(bool))
+                        return (TResponse)(object)true;
 
-                var opResult = this.ResponseError(resultMediaType, result);
-                if (typeof(TResponse).IsAssignableFrom(typeof(IOperationResult)))
-                    return (TResponse)opResult;
+                    return this.ParseResponse<TResponse>(resultMediaType, result);
+                }
 
-                throw new FailedServiceCallExceltion(opResult);
+                // faulted state
+                var errorEx = this.ParseResponse<HttpResponseException>(resultMediaType, result);
+                errorEx.StatusCode = response.StatusCode;
+                throw errorEx;
             }
             finally
             {
@@ -136,19 +136,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
             return new Uri(uri, UriKind.Relative);
         }
 
-        private IOperationResult ResponseError(string resultMediaType, string result)
-        {
-            switch (resultMediaType)
-            {
-                case Constants.MimeTypes.ApplicationJson:
-                    return Utility.DeserializeToJson<ErrorOperationResult>(result);
-
-                default:
-                    throw new FormatException(String.Format("Response content format {0} is not supported.", resultMediaType));
-            }
-        }
-
-        private TResponse ResponseSuccess<TResponse>(string resultMediaType, string result)
+        private TResponse ParseResponse<TResponse>(string resultMediaType, string result)
         {
             switch (resultMediaType)
             {

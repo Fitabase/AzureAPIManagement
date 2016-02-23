@@ -1,4 +1,7 @@
 ﻿using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Net;
 
 namespace SmallStepsLabs.Azure.ApiManagement.Model
 {
@@ -6,7 +9,7 @@ namespace SmallStepsLabs.Azure.ApiManagement.Model
     /// Represents the result of an failed service operation
     /// https://msdn.microsoft.com/en-us/library/azure/dn776332.aspx#error
     /// </summary>
-    public class ErrorOperationResult : OperationResult
+    public class HttpResponseException : Exception
     {
         /// <summary>
         /// The error body containing the details of the error.
@@ -14,9 +17,16 @@ namespace SmallStepsLabs.Azure.ApiManagement.Model
         [JsonProperty("error")]
         public ErrorData Error { get; set; }
 
-        public override bool IsSuccessfull()
+        public HttpStatusCode StatusCode { get; set; }
+
+        public override string Message
         {
-            return false;
+            get
+            {
+                if (this.Error != null)
+                    return this.Error.Message;
+                else return String.Empty;
+            }
         }
     }
 
@@ -42,7 +52,7 @@ namespace SmallStepsLabs.Azure.ApiManagement.Model
         /// In case of validation errors this field contains a list of invalid fields sent in the request.
         /// </summary>
         [JsonProperty("details")]
-        public ErrorValidationDetails ValidationDetails { get; set; }
+        public List<ErrorValidationDetails> ValidationDetails { get; set; }
     }
 
     /// <summary>

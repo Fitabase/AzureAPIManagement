@@ -51,13 +51,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ApiManagementClient.cs" />
-    <Compile Include="DataModel\Exceptions\FailedServiceCallExceltion.cs" />
-    <Compile Include="DataModel\Result\Collection.cs" />
+    <Compile Include="DataModel\Exceptions\InvalidProductException.cs" />
+    <Compile Include="DataModel\Model\Enums.cs" />
+    <Compile Include="DataModel\Result\EntityCollection.cs" />
     <Compile Include="DataModel\Model\Group.cs" />
     <Compile Include="DataModel\Model\API.cs" />
     <Compile Include="DataModel\Abstract\EntityBase.cs" />
-    <Compile Include="DataModel\Result\ErrorOperationResult.cs" />
-    <Compile Include="DataModel\Result\OperationResult.cs" />
+    <Compile Include="DataModel\Exceptions\HttpResponseException.cs" />
     <Compile Include="Services\ManagementClient.cs" />
     <Compile Include="Services\ClientBase.cs" />
     <Compile Include="DataModel\Model\Product.cs" />

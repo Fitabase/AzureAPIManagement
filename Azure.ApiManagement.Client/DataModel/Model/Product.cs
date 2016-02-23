@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,7 +34,7 @@ namespace SmallStepsLabs.Azure.ApiManagement.Model
         /// Can be present only if the subscriptionRequired property is present with a value of true.
         /// </summary>
         [JsonProperty("approvalRequired")]
-        public bool ApprovalRequired { get; set; }
+        public bool? ApprovalRequired { get; set; }
 
         /// <summary>
         /// Specifies the number of subscriptions a user can have to this product at the same time. 
@@ -48,7 +49,8 @@ namespace SmallStepsLabs.Azure.ApiManagement.Model
         //  The allowable values for product state are published and notPublished.
         /// </summary>
         [JsonProperty("state")]
-        public string State { get; set; }
+        [JsonConverter(typeof(StringEnumConverter))]
+        public ProductState State { get; set; }
 
         /// <summary>
         /// An array of Group entities that have visibility to the product.
@@ -57,4 +59,6 @@ namespace SmallStepsLabs.Azure.ApiManagement.Model
         [JsonProperty("groups")]
         public List<Group> Groups {get; set;}
     }
+
+   
 }
