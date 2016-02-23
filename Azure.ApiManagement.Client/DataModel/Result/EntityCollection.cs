@@ -12,7 +12,7 @@ namespace SmallStepsLabs.Azure.ApiManagement.Model
     /// https://msdn.microsoft.com/en-us/library/azure/dn776332.aspx#collection
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class EntityCollection<T> where T : EntityBase
+    internal class EntityCollection<T> where T : EntityBase
     {
         /// <summary>
         /// The total number of elements in the collection.

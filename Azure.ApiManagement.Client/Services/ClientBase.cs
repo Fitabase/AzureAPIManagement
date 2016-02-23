@@ -1,5 +1,6 @@
 ﻿using SmallStepsLabs.Azure.ApiManagement.Model;
 using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Net;
 using System.Net.Http;
@@ -57,8 +58,59 @@ namespace SmallStepsLabs.Azure.ApiManagement
             return request;
         }
 
-        protected async Task<TResponse> ExecuteRequestAsync<TResponse>(HttpRequestMessage request,
+        protected async Task<bool> ExecuteRequestAsync(HttpRequestMessage request,
              HttpStatusCode succesCode, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            // async making request
+            var response = await this.ExecuteRequestInternalAsync(request, cancellationToken);
+
+            // async reading response stream
+            var result = await response.Content.ReadAsStringAsync();
+
+            if (response.StatusCode == succesCode)
+                return true;
+
+            // faulted state
+            var resultMediaType = response.Content?.Headers?.ContentType?.MediaType;
+            var errorEx = this.ParseResponse<HttpResponseException>(resultMediaType, result);
+            errorEx.StatusCode = response.StatusCode;
+            throw errorEx;
+
+        }
+
+        protected async Task<TEntity> ExecuteRequestAsync<TEntity>(HttpRequestMessage request,
+            HttpStatusCode succesCode, CancellationToken cancellationToken = default(CancellationToken)) where TEntity : new()
+        {
+            // async making request
+            var response = await this.ExecuteRequestInternalAsync(request, cancellationToken);
+
+            // async reading response stream
+            var result = await response.Content.ReadAsStringAsync();
+
+            var resultMediaType = response.Content?.Headers?.ContentType?.MediaType;
+
+            if (response.StatusCode == succesCode)
+                return this.ParseResponse<TEntity>(resultMediaType, result);
+
+            // faulted state
+            var errorEx = this.ParseResponse<HttpResponseException>(resultMediaType, result);
+            errorEx.StatusCode = response.StatusCode;
+            throw errorEx;
+        }
+
+
+        protected void EntityStateUpdate(HttpRequestMessage request, string value)
+        {
+            if (request == null)
+                throw new ArgumentNullException("request");
+
+            request.Headers.Add(Constants.ApiManagement.Headers.ETagMatch, value);
+        }
+
+
+        #region Private Helpers
+
+        private async Task<HttpResponseMessage> ExecuteRequestInternalAsync(HttpRequestMessage request, CancellationToken cancellationToken = default(CancellationToken))
         {
             HttpClient httpClient = null;
 
@@ -71,26 +123,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
                 };
 
                 // async making request
-                var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancellationToken);
-
-                // async reading response stream
-                var result = await response.Content.ReadAsStringAsync();
-
-                var resultMediaType = response.Content?.Headers?.ContentType?.MediaType;
-
-                if (response.StatusCode == succesCode)
-                {
-                    // generic operation result
-                    if (typeof(TResponse) == typeof(bool))
-                        return (TResponse)(object)true;
-
-                    return this.ParseResponse<TResponse>(resultMediaType, result);
-                }
-
-                // faulted state
-                var errorEx = this.ParseResponse<HttpResponseException>(resultMediaType, result);
-                errorEx.StatusCode = response.StatusCode;
-                throw errorEx;
+                return await httpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancellationToken);
             }
             finally
             {
@@ -108,18 +141,6 @@ namespace SmallStepsLabs.Azure.ApiManagement
                 }
             }
         }
-
-
-        protected void EntityStateUpdate(HttpRequestMessage request, string value)
-        {
-            if (request == null)
-                throw new ArgumentNullException("request");
-
-            request.Headers.Add(Constants.ApiManagement.Headers.ETagMatch, value);
-        }
-
-
-        #region Private Helpers
 
         private Uri BuildRequestUri(string uri, NameValueCollection query)
         {
@@ -140,6 +161,10 @@ namespace SmallStepsLabs.Azure.ApiManagement
 
         private TResponse ParseResponse<TResponse>(string resultMediaType, string result)
         {
+            // default type of error content
+            if (!String.IsNullOrEmpty(resultMediaType))
+                resultMediaType = Constants.MimeTypes.ApplicationJson;
+
             switch (resultMediaType)
             {
                 case Constants.MimeTypes.ApplicationJson:

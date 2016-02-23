@@ -66,7 +66,6 @@ namespace Azure.ApiManagement.Test
             task.Wait();
 
             Assert.AreNotEqual(null, task.Result);
-            Assert.AreNotEqual(null, task.Result.Values);
         }
 
         [TestMethod]
@@ -75,7 +74,7 @@ namespace Azure.ApiManagement.Test
             var task = Client.GetProductsAsync(expandGroups: true);
             task.Wait();
 
-            Assert.AreEqual(true, task.Result.Values.Any(p => p.Groups != null));
+            Assert.AreEqual(true, task.Result.Any(p => p.Groups != null));
         }
 
         [TestMethod]
@@ -84,7 +83,7 @@ namespace Azure.ApiManagement.Test
             var task = Client.GetProductsAsync();
             task.Wait();
 
-            var productId = task.Result.Values[0].Id;
+            var productId = task.Result[0].Id;
 
             var pTask = Client.GetProductAsync(productId);
 
@@ -98,14 +97,14 @@ namespace Azure.ApiManagement.Test
             var task = Client.GetProductsAsync();
             task.Wait();
 
-            var productId = task.Result.Values.Last().Id;
+            var productId = task.Result.Last().Id;
 
             var filter = String.Format("id eq '{0}'", productId);
             var pTask = Client.GetProductsAsync(filter);
             pTask.Wait();
 
-            Assert.IsTrue(pTask.Result.Values.Count == 1);
-            Assert.AreEqual(productId, pTask.Result.Values.First().Id);
+            Assert.IsTrue(pTask.Result.Count == 1);
+            Assert.AreEqual(productId, pTask.Result.First().Id);
         }
 
         [TestMethod]
@@ -114,7 +113,7 @@ namespace Azure.ApiManagement.Test
             var task = Client.GetProductsAsync();
             task.Wait();
 
-            var product = task.Result.Values.First();
+            var product = task.Result.First();
 
             var testDesc = DateTime.Now.ToLongTimeString();
 
@@ -170,6 +169,38 @@ namespace Azure.ApiManagement.Test
             catch(AggregateException ex)
             {
                 throw ex.InnerException;
+            }
+        }
+
+
+        [TestMethod]
+        public void GetProductAPIs()
+        {
+            var task = Client.GetProductsAsync();
+            task.Wait();
+
+            var productId = task.Result[0].Id;
+
+            var pTask = Client.GetProductAPIsAsync(productId);
+            pTask.Wait();
+
+            Assert.AreNotEqual(null, pTask.Result);
+        }
+
+        [TestMethod]
+        public void GetProductAddRemoveAPIs()
+        {
+            var task = Client.GetProductsAsync();
+            task.Wait();
+
+            var productId = task.Result[0].Id;
+
+            var pTask = Client.GetProductAPIsAsync(productId);
+            pTask.Wait();
+
+            if(pTask.Result.Count > 0)
+            {
+                var apiId = pTask.Result[0].Id;
             }
         }
     }

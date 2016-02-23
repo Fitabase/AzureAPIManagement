@@ -21,7 +21,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
         /// https://msdn.microsoft.com/en-us/library/azure/dn776336.aspx#ListProducts
         /// </summary>
         /// <returns></returns>
-        public Task<EntityCollection<Product>> GetProductsAsync(string filter = null, bool expandGroups = false,
+        public Task<List<Product>> GetProductsAsync(string filter = null, bool expandGroups = false,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             var query = new NameValueCollection();
@@ -35,7 +35,11 @@ namespace SmallStepsLabs.Azure.ApiManagement
                 query.Add("expandGroups", "true");
 
             var request = base.GetRequest("/products", "GET", query);
-            return base.ExecuteRequestAsync<EntityCollection<Product>>(request, HttpStatusCode.OK, cancellationToken);
+            return base.ExecuteRequestAsync<EntityCollection<Product>>(request, HttpStatusCode.OK, cancellationToken)
+                       .ContinueWith(t =>
+                       {
+                           return t.Result.Values;
+                       });
         }
 
         /// <summary>
@@ -73,7 +77,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
             var uri = String.Format("/products/{0}", product.Id);
             var request = base.GetRequest(uri, "PUT", data: product);
 
-            return base.ExecuteRequestAsync<bool>(request, HttpStatusCode.Created, cancellationToken);
+            return base.ExecuteRequestAsync(request, HttpStatusCode.Created, cancellationToken);
         }
 
         /// <summary>
@@ -97,7 +101,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
             // Apply changes regardless of entity state
             base.EntityStateUpdate(request, "*");
 
-            return base.ExecuteRequestAsync<bool>(request, HttpStatusCode.NoContent, cancellationToken);
+            return base.ExecuteRequestAsync(request, HttpStatusCode.NoContent, cancellationToken);
         }
 
         /// <summary>
@@ -126,7 +130,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
             // Apply changes regardless of entity state
             base.EntityStateUpdate(request, "*");
 
-            return base.ExecuteRequestAsync<bool>(request, HttpStatusCode.NoContent, cancellationToken);
+            return base.ExecuteRequestAsync(request, HttpStatusCode.NoContent, cancellationToken);
         }
 
         #endregion
@@ -139,7 +143,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
         /// </summary>
         /// <param name="productId">Product identifier.</param>
         /// <returns></returns>
-        public Task<EntityCollection<API>> GetProductAPIsAsync(string productId, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<List<API>> GetProductAPIsAsync(string productId, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (String.IsNullOrEmpty(productId))
                 throw new ArgumentException("productId is required");
@@ -147,9 +151,12 @@ namespace SmallStepsLabs.Azure.ApiManagement
             var uri = String.Format("/products/{0}/apis", productId);
             var request = base.GetRequest(uri, "GET");
 
-            return base.ExecuteRequestAsync<EntityCollection<API>>(request, HttpStatusCode.OK, cancellationToken);
+            return base.ExecuteRequestAsync<EntityCollection<API>>(request, HttpStatusCode.OK, cancellationToken)
+                       .ContinueWith<List<API>>(t =>
+                       {
+                           return t.Result.Values;
+                       });
         }
-
 
         /// <summary>
         /// Adds an API to the specified product.
@@ -169,7 +176,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
             var uri = String.Format("/products/{0}/apis/{0}", productId, apiId);
             var request = base.GetRequest(uri, "PUT");
 
-            return base.ExecuteRequestAsync<bool>(request, HttpStatusCode.Created, cancellationToken);
+            return base.ExecuteRequestAsync(request, HttpStatusCode.Created, cancellationToken);
         }
 
         /// <summary>
@@ -190,7 +197,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
             var uri = String.Format("/products/{0}/apis/{0}", productId, apiId);
             var request = base.GetRequest(uri, "DELETE");
 
-            return base.ExecuteRequestAsync<bool>(request, HttpStatusCode.NoContent, cancellationToken);
+            return base.ExecuteRequestAsync(request, HttpStatusCode.NoContent, cancellationToken);
         }
 
         #endregion
@@ -212,7 +219,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
             var request = base.GetRequest(uri, "GET");
 
             //TODO - xml response handling
-            return base.ExecuteRequestAsync<bool>(request, HttpStatusCode.OK, cancellationToken);
+            return base.ExecuteRequestAsync(request, HttpStatusCode.OK, cancellationToken);
         }
 
         /// <summary>
@@ -228,7 +235,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
             var uri = String.Format("/products/{0}/policy", productId);
             var request = base.GetRequest(uri, "HEAD");
 
-            return base.ExecuteRequestAsync<bool>(request, HttpStatusCode.OK, cancellationToken);
+            return base.ExecuteRequestAsync(request, HttpStatusCode.OK, cancellationToken);
         }
 
         /// <summary>
@@ -248,7 +255,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
             // Apply changes regardless of entity state
             base.EntityStateUpdate(request, "*");
 
-            return base.ExecuteRequestAsync<bool>(request, HttpStatusCode.Created, cancellationToken);
+            return base.ExecuteRequestAsync(request, HttpStatusCode.Created, cancellationToken);
         }
 
         /// <summary>
@@ -267,7 +274,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
             // Apply changes regardless of entity state
             base.EntityStateUpdate(request, "*");
 
-            return base.ExecuteRequestAsync<bool>(request, HttpStatusCode.NoContent, cancellationToken);
+            return base.ExecuteRequestAsync(request, HttpStatusCode.NoContent, cancellationToken);
         }
 
         #endregion
@@ -279,7 +286,7 @@ namespace SmallStepsLabs.Azure.ApiManagement
         /// https://msdn.microsoft.com/en-us/library/azure/dn781423.aspx#ListAPIs
         /// </summary>
         /// <returns></returns>
-        public Task<EntityCollection<API>> GetAPIsAsync(string filter = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<List<API>> GetAPIsAsync(string filter = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             var query = new NameValueCollection();
 
@@ -288,7 +295,11 @@ namespace SmallStepsLabs.Azure.ApiManagement
                 query.Add(Constants.ApiManagement.Url.FilterQuery, filter);
 
             var request = base.GetRequest("/apis", "GET", query);
-            return base.ExecuteRequestAsync<EntityCollection<API>>(request, HttpStatusCode.OK, cancellationToken);
+            return base.ExecuteRequestAsync<EntityCollection<API>>(request, HttpStatusCode.OK, cancellationToken)
+                       .ContinueWith<List<API>>(t =>
+                       {
+                           return t.Result.Values;
+                       });
         }
 
         /// <summary>
