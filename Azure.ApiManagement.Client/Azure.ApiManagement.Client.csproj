@@ -53,6 +53,7 @@
     <Compile Include="ApiManagementClient.cs" />
     <Compile Include="DataModel\Exceptions\InvalidProductException.cs" />
     <Compile Include="DataModel\Model\Enums.cs" />
+    <Compile Include="DataModel\Model\SsoUrl.cs" />
     <Compile Include="DataModel\Result\EntityCollection.cs" />
     <Compile Include="DataModel\Model\Group.cs" />
     <Compile Include="DataModel\Model\API.cs" />
