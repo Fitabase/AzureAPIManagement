@@ -1,5 +1,6 @@
 ﻿using SmallStepsLabs.Azure.ApiManagement.Model;
 using System;
+using System.Collections.Specialized;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -36,10 +37,10 @@ namespace SmallStepsLabs.Azure.ApiManagement
             this.AccessKey = accessKey;
         }
 
-        protected HttpRequestMessage GetRequest(string url, string method, string urlQuery = null, object data = null)
+        protected HttpRequestMessage GetRequest(string url, string method, NameValueCollection query = null, object data = null)
         {
             // combine uri with query
-            var requestUri = this.BuildRequestUri(url, urlQuery);
+            var requestUri = this.BuildRequestUri(url, query);
 
             var request = new HttpRequestMessage(new HttpMethod(method), requestUri);
 
@@ -120,12 +121,13 @@ namespace SmallStepsLabs.Azure.ApiManagement
 
         #region Private Helpers
 
-        private Uri BuildRequestUri(string uri, string urlQuery)
+        private Uri BuildRequestUri(string uri, NameValueCollection query)
         {
-            if (urlQuery == null) urlQuery = String.Empty;
-
             // decodes url-encoded pairs from uri.Query to HttpValueCollection
-            var httpValueCollection = HttpUtility.ParseQueryString(urlQuery);
+            var httpValueCollection = HttpUtility.ParseQueryString(String.Empty);
+
+            // integrate existing query 
+            if (query != null) httpValueCollection.Add(query);
 
             // API Management REST Service requires version query parameter
             httpValueCollection.Add(Constants.ApiManagement.Url.VersionQuery, Constants.ApiManagement.Versions.Feb2014);

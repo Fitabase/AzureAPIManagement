@@ -93,6 +93,22 @@ namespace Azure.ApiManagement.Test
         }
 
         [TestMethod]
+        public void GetProductByFilter()
+        {
+            var task = Client.GetProductsAsync();
+            task.Wait();
+
+            var productId = task.Result.Values.Last().Id;
+
+            var filter = String.Format("id eq '{0}'", productId);
+            var pTask = Client.GetProductsAsync(filter);
+            pTask.Wait();
+
+            Assert.IsTrue(pTask.Result.Values.Count == 1);
+            Assert.AreEqual(productId, pTask.Result.Values.First().Id);
+        }
+
+        [TestMethod]
         public void UpdateProduct()
         {
             var task = Client.GetProductsAsync();

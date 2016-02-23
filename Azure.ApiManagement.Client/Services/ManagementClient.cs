@@ -1,6 +1,7 @@
 ﻿using SmallStepsLabs.Azure.ApiManagement.Model;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,13 +21,20 @@ namespace SmallStepsLabs.Azure.ApiManagement
         /// https://msdn.microsoft.com/en-us/library/azure/dn776336.aspx#ListProducts
         /// </summary>
         /// <returns></returns>
-        public Task<EntityCollection<Product>> GetProductsAsync(int start = 0, int limit = 10, bool expandGroups = false,
+        public Task<EntityCollection<Product>> GetProductsAsync(string filter = null, bool expandGroups = false,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            // conditional operation
-            var uriQuery = expandGroups ? "expandGroups=true" : String.Empty;
+            var query = new NameValueCollection();
 
-            var request = base.GetRequest("/products", "GET", uriQuery);
+            // conditional filter
+            if (!String.IsNullOrEmpty(filter))
+                query.Add(Constants.ApiManagement.Url.FilterQuery, filter);
+
+            // conditional operation
+            if (expandGroups)
+                query.Add("expandGroups", "true");
+
+            var request = base.GetRequest("/products", "GET", query);
             return base.ExecuteRequestAsync<EntityCollection<Product>>(request, HttpStatusCode.OK, cancellationToken);
         }
 
@@ -107,9 +115,13 @@ namespace SmallStepsLabs.Azure.ApiManagement
 
             var uri = String.Format("/products/{0}", productId);
 
-            // conditional operation
-            var uriQuery = deleteSubscriptions ? "deleteSubscriptions=true" : String.Empty;
-            var request = base.GetRequest(uri, "DELETE", uriQuery);
+            var query = new NameValueCollection();
+
+            // conditional filter
+            if (deleteSubscriptions)
+                query.Add("deleteSubscriptions", "true");
+
+            var request = base.GetRequest(uri, "DELETE", query);
 
             // Apply changes regardless of entity state
             base.EntityStateUpdate(request, "*");
@@ -267,10 +279,15 @@ namespace SmallStepsLabs.Azure.ApiManagement
         /// https://msdn.microsoft.com/en-us/library/azure/dn781423.aspx#ListAPIs
         /// </summary>
         /// <returns></returns>
-        public Task<EntityCollection<API>> GetAPIsAsync(int start = 0, int limit = 10,
-             CancellationToken cancellationToken = default(CancellationToken))
+        public Task<EntityCollection<API>> GetAPIsAsync(string filter = null, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var request = base.GetRequest("/apis", "GET");
+            var query = new NameValueCollection();
+
+            // conditional filter
+            if (!String.IsNullOrEmpty(filter))
+                query.Add(Constants.ApiManagement.Url.FilterQuery, filter);
+
+            var request = base.GetRequest("/apis", "GET", query);
             return base.ExecuteRequestAsync<EntityCollection<API>>(request, HttpStatusCode.OK, cancellationToken);
         }
 

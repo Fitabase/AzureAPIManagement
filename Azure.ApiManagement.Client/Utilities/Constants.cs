@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,6 +18,8 @@ namespace SmallStepsLabs.Azure.ApiManagement
                 internal static readonly string ServiceFormat = "https://{0}.management.azure-api.net/";
 
                 internal static readonly string VersionQuery = "api-version";
+
+                internal static readonly string FilterQuery = "$filter";
             }
 
             internal static class Versions
