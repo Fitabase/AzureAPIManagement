@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Net;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,50 +17,79 @@ namespace SmallStepsLabs.Azure.ApiManagement
 
         #region User Operations
 
-        public string GetRequestOperationSignature(string operation, string salt, string returnUrl = null, string productId = null, string userId = null, string subscriptionId = null)
+        public string GetRequestOperationSignature(string operation, string salt, string delegationValidationKey,
+            string returnUrl = null, string productId = null, string userId = null, string subscriptionId = null)
         {
-            throw new NotImplementedException();
+            var encoder = new System.Security.Cryptography.HMACSHA512(Convert.FromBase64String(delegationValidationKey));
+            string signature;
 
-            //string key = _delegationValidationKey;
-            //var encoder = new HMACSHA512(Convert.FromBase64String(key));
-            //string signature;
+            switch (operation)
+            {
+                case "SignIn":
+                    signature = Convert.ToBase64String(encoder.ComputeHash(Encoding.UTF8.GetBytes(salt + "\n" + returnUrl)));
+                    break;
+                case "Subscribe":
+                    signature = Convert.ToBase64String(encoder.ComputeHash(Encoding.UTF8.GetBytes(salt + "\n" + productId + "\n" + userId)));
+                    break;
+                case "Unsubscribe":
+                    signature = Convert.ToBase64String(encoder.ComputeHash(Encoding.UTF8.GetBytes(salt + "\n" + subscriptionId)));
+                    break;
+                case "ChangeProfile":
+                case "ChangePassword":
+                case "SignOut":
+                    signature = Convert.ToBase64String(encoder.ComputeHash(Encoding.UTF8.GetBytes(salt + "\n" + userId)));
+                    break;
+                default:
+                    signature = "";
+                    break;
+            }
 
-            //switch (operation)
-            //{
-            //    case "SignIn":
-            //        signature = Convert.ToBase64String(encoder.ComputeHash(Encoding.UTF8.GetBytes(salt + "\n" + returnUrl)));
-            //        break;
-            //    case "Subscribe":
-            //        signature = Convert.ToBase64String(encoder.ComputeHash(Encoding.UTF8.GetBytes(salt + "\n" + productId + "\n" + userId)));
-            //        break;
-            //    case "Unsubscribe":
-            //        signature = Convert.ToBase64String(encoder.ComputeHash(Encoding.UTF8.GetBytes(salt + "\n" + subscriptionId)));
-            //        break;
-            //    case "ChangeProfile":
-            //    case "ChangePassword":
-            //    case "SignOut":
-            //        signature = Convert.ToBase64String(encoder.ComputeHash(Encoding.UTF8.GetBytes(salt + "\n" + userId)));
-            //        break;
-            //    default:
-            //        signature = "";
-            //        break;
-            //}
-
-            //return signature;
+            return signature;
         }
 
-        public Task<bool> CreateUserAsync(string userId, User user, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<List<User>> GetUsersAsync(string filter = null, bool expandGroups = false,
+          CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var query = new NameValueCollection();
+
+            // conditional filter
+            if (!String.IsNullOrEmpty(filter))
+                query.Add(Constants.ApiManagement.Url.FilterQuery, filter);
+
+            // conditional operation
+            if (expandGroups)
+                query.Add("expandGroups", "true");
+
+            var request = base.BuildRequest("/users", "GET", query);
+            return base.ExecuteRequestAsync<EntityCollection<User>>(request, HttpStatusCode.OK, cancellationToken)
+                       .ContinueWith(t =>
+                       {
+                           return t.Result.Values;
+                       });
+        }
+
+        public Task<bool> CreateUserAsync(User user, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (user == null)
                 throw new ArgumentNullException("user");
-            if (String.IsNullOrEmpty(userId))
+            if (String.IsNullOrEmpty(user.Id))
                 throw new ArgumentException("Valid User Id is required");
 
             Utility.ValidateUser(user);
 
-            var uri = String.Format("/users/{0}", userId);
+            var uri = String.Format("/users/{0}", user.Id);
             var request = base.BuildRequest(uri, "PUT");
-            base.BuildRequestContent(request, user);
+
+            // build content from supported fields
+            base.BuildRequestContent(request, new User
+            {
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                Password = user.Password,
+                State = user.State,
+                Note = user.Note,
+            });
 
             return base.ExecuteRequestAsync(request, HttpStatusCode.Created, cancellationToken);
         }
@@ -276,79 +306,46 @@ namespace SmallStepsLabs.Azure.ApiManagement
 
         #region Product Subscription
 
-        public async Task<bool> AddProductSubscriptionAsync(string userId, string productId, string createSubscriptionId)
+        public Task<bool> AddProductSubscriptionAsync(Subscription subscription, CancellationToken cancellationToken = default(CancellationToken))
         {
-            throw new NotImplementedException();
-
-            ////Register user for product
-            //using (var client = new HttpClient())
-            //{
-            //    client.BaseAddress = new Uri(_ApimRestHost);
-            //    client.DefaultRequestHeaders.Add("Authorization", ApimRestAuthHeader());
-            //    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/json"));
-
-            //    HttpResponseMessage response;
-
-            //    var ApimSubscription = new
-            //    {
-            //        userId = "/users/" + userId,
-            //        productId = "/products/" + productId,
-            //        state = "active"
-            //    };
-
-            //    var ApimSubscriptionJson = SerializeToJson(ApimSubscription);
-
-            //    //Guid subscriptionId = Guid.NewGuid();
-
-            //    response = await client.PutAsync("/subscriptions/" + createSubscriptionId + "?api-version=" + _ApimRestApiVersion, new StringContent(ApimSubscriptionJson, Encoding.UTF8, "text/json"));
-            //    string httpContent = await response.Content.ReadAsStringAsync();
+            if (subscription == null)
+                throw new ArgumentNullException("subscription");
+            if (String.IsNullOrEmpty(subscription.Id))
+                throw new ArgumentException("Valid Subscription Id is required");
+            if (String.IsNullOrEmpty(subscription.UserId))
+                throw new ArgumentException("Valid Subscription User Id is required");
+            if (String.IsNullOrEmpty(subscription.ProductId))
+                throw new ArgumentException("Valid Subscription Product Id is required");
 
 
-            //    if (response.IsSuccessStatusCode)
-            //    {
-            //        //Subscription created
+            var uri = String.Format("/subscriptions/{0}", subscription.Id);
+            var request = base.BuildRequest(uri, "PUT");
 
-            //        //return Redirect(Request.QueryString["returnUrl"]);
-            //        return true; //Redirect("https://contosoinc.portal.azure-api.net/developer");
-            //    }
-            //    else
-            //    {
-            //        throw new HttpException((int)response.StatusCode, httpContent);
-            //    }
-            //}
+            // build content from supported fields
+            base.BuildRequestContent(request, new Subscription
+            {
+                UserId = subscription.UserId,
+                ProductId = subscription.ProductId,
+                State = subscription.State,
+                PrimaryKey = subscription.PrimaryKey,
+                SecondaryKey = subscription.SecondaryKey
+            });
 
+            return base.ExecuteRequestAsync(request, HttpStatusCode.Created, cancellationToken);
         }
 
-        public async Task<bool> RemoveProductSubscriptionAsync(string userId, string subscriptionId)
+        public Task<bool> RemoveProductSubscriptionAsync(string subscriptionId, CancellationToken cancellationToken = default(CancellationToken))
         {
-            throw new NotImplementedException();
+            if (String.IsNullOrEmpty(subscriptionId))
+                throw new ArgumentException("subscriptionId is required");
+           
+            var uri = String.Format("/subscriptions/{0}", subscriptionId);
+            var request = base.BuildRequest(uri, "DELETE");
 
-            //////Register user for product
-            ////using (var client = new HttpClient())
-            ////{
-            ////    client.BaseAddress = new Uri(_ApimRestHost);
-            ////    client.DefaultRequestHeaders.Add("Authorization", ApimRestAuthHeader());
-            ////    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/json"));
+            // Apply changes regardless of entity state
+            base.EntityStateUpdate(request, "*");
 
-            ////    HttpResponseMessage response;
-
-            ////    client.DefaultRequestHeaders.Add("If-Match", "*");
-            ////    response = await client.DeleteAsync("/subscriptions/" + subscriptionId + "?api-version=" + _ApimRestApiVersion);
-
-
-            ////    if (response.IsSuccessStatusCode)
-            ////    {
-            ////        //Subscription created
-
-            ////        //return Redirect(Request.QueryString["returnUrl"]);
-            ////        return true; //return Redirect("https://contosoinc.portal.azure-api.net/developer");
-            ////    }
-            ////    else
-            ////    {
-            ////        throw new HttpException((int)response.StatusCode, await response.RequestMessage.Content.ReadAsStringAsync());
-            ////    }
-
-            ////}
+            return base.ExecuteRequestAsync(request, HttpStatusCode.NoContent, cancellationToken);
         }
 
         #endregion

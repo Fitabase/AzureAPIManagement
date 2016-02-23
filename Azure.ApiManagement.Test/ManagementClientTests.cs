@@ -311,6 +311,7 @@ namespace Azure.ApiManagement.Test
             var uid = Guid.NewGuid().ToString("N");
             var newUser = new User()
             {
+                Id = uid,
                 Email = String.Format("test_{0}@test.com", uid),
                 FirstName = "First Name",
                 LastName = "Last Name",
@@ -319,13 +320,50 @@ namespace Azure.ApiManagement.Test
                 Note = "notes.."
             };
 
-            Client.CreateUserAsync(uid, newUser).Wait();
+            Client.CreateUserAsync(newUser).Wait();
 
             var uTask = Client.GetUserSsoLoginAsync(uid);
             uTask.Wait();
 
             Assert.IsNotNull(uTask.Result);
             Assert.IsTrue(Uri.IsWellFormedUriString(uTask.Result.Url, UriKind.Absolute));
+        }
+
+
+        [TestMethod]
+        public void AddRemoveUserSubscription()
+        {
+            var uid = Guid.NewGuid().ToString("N");
+            var newUser = new User()
+            {
+                Id = uid,
+                Email = String.Format("test_{0}@test.com", uid),
+                FirstName = "First Name",
+                LastName = "Last Name",
+                Password = "P@ssWo3d",
+                State = UserState.active,
+                Note = "notes.."
+            };
+
+            Client.CreateUserAsync(newUser).Wait();
+
+            var ptask = Client.GetProductsAsync();
+            ptask.Wait();
+
+            uid = "/users/" + uid;
+            var pid = ptask.Result.First(p => p.State == ProductState.published).Uri; // only state which can be used in subscriptions
+
+            var sid = Guid.NewGuid().ToString("N");
+            var newsubsc = new Subscription()
+            {
+                Id = sid,
+                UserId = uid,
+                ProductId = pid,
+                State = SubscriptionState.active,
+            };
+
+            Client.AddProductSubscriptionAsync(newsubsc).Wait();
+            Client.RemoveProductSubscriptionAsync(newsubsc.Id).Wait();
         }
     }
 }

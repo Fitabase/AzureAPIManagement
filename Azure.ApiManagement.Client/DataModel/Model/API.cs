@@ -12,6 +12,18 @@ namespace SmallStepsLabs.Azure.ApiManagement.Model
         protected override string UriIdFormat {  get { return "/apis/"; } }
 
         /// <summary>
+        /// Name of the entity. Must not be empty. Maximum length is 100 characters.
+        /// </summary>
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        /// <summary>
+        /// Description of the entity. Must not be empty. May include HTML formatting tags. Maximum length is 1000 characters.
+        /// </summary>
+        [JsonProperty("description")]
+        public string Description { get; set; }
+
+        /// <summary>
         /// Absolute URL of the backend service implementing this API.
         /// </summary>
         [JsonProperty("serviceUrl")]

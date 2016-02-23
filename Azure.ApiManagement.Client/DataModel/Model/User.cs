@@ -8,8 +8,10 @@ using System.Threading.Tasks;
 
 namespace SmallStepsLabs.Azure.ApiManagement.Model
 {
-    public class User
+    public class User : EntityBase
     {
+        protected override string UriIdFormat { get { return "/users/"; } }
+
         /// <summary>
         /// First name. Must not be empty. Maximum length is 100 characters.
         /// </summary>
@@ -35,6 +37,12 @@ namespace SmallStepsLabs.Azure.ApiManagement.Model
         public string Password { get; set; }
 
         /// <summary>
+        /// User registration date, in ISO 8601 format
+        /// </summary>
+        [JsonProperty("registrationDate", NullValueHandling = NullValueHandling.Ignore)]
+        public DateTime? RegistrationDate { get; set; }
+
+        /// <summary>
         /// Specifies whether the user is active or not. Blocked users cannot authenticate on the developer portal or call any APIs of the products to which they are subscribed.
         /// </summary>
         [JsonProperty("state")]
@@ -46,5 +54,11 @@ namespace SmallStepsLabs.Azure.ApiManagement.Model
         /// </summary>
         [JsonProperty("note")]
         public string Note { get; set; }
+
+        /// <summary>
+        /// An array of Group entities that have visibility to the user.
+        /// This property is optional and is only included in responses when the request has an expandGroups query parameter with a value of true.
+        [JsonProperty("groups", NullValueHandling = NullValueHandling.Ignore)]
+        public List<Group> Groups { get; set; }
     }
 }

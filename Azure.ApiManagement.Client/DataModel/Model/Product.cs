@@ -13,6 +13,18 @@ namespace SmallStepsLabs.Azure.ApiManagement.Model
         protected override string UriIdFormat { get { return "/products/"; } }
 
         /// <summary>
+        /// Name of the entity. Must not be empty. Maximum length is 100 characters.
+        /// </summary>
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        /// <summary>
+        /// Description of the entity. Must not be empty. May include HTML formatting tags. Maximum length is 1000 characters.
+        /// </summary>
+        [JsonProperty("description")]
+        public string Description { get; set; }
+
+        /// <summary>
         /// Product terms of use. Developers trying to subscribe to the product will be presented and required to accept these terms before they can complete the subscription process.
         /// </summary>
         [JsonProperty("terms")]
