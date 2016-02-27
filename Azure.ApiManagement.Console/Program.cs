@@ -4,10 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AzureAPIManagement
+namespace SmallStepsLabs.Azure.ApiManagement.Console
 {
-    public class SsoUrl
+    class Program
     {
-        public string value;
+        static void Main(string[] args)
+        {
+        }
     }
 }
