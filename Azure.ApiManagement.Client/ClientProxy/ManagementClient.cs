@@ -1,4 +1,4 @@
-﻿using SmallStepsLabs.Azure.ApiManagement.Model;
+﻿using Fitabase.Azure.ApiManagement.Model;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace SmallStepsLabs.Azure.ApiManagement
+namespace Fitabase.Azure.ApiManagement
 {
     public class ManagementClient : ClientBase
     {

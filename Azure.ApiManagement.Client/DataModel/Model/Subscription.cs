@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace SmallStepsLabs.Azure.ApiManagement.Model
+namespace Fitabase.Azure.ApiManagement.Model
 {
     public class Subscription : EntityBase
     {

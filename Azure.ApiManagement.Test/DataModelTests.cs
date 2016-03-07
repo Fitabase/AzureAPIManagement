@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SmallStepsLabs.Azure.ApiManagement;
-using SmallStepsLabs.Azure.ApiManagement.Model;
+using Fitabase.Azure.ApiManagement;
+using Fitabase.Azure.ApiManagement.Model;
 
 namespace Azure.ApiManagement.Test
 {
