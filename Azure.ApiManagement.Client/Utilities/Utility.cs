@@ -1,13 +1,13 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using SmallStepsLabs.Azure.ApiManagement.Model;
+using Fitabase.Azure.ApiManagement.Model;
 using System;
 using System.Globalization;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace SmallStepsLabs.Azure.ApiManagement
+namespace Fitabase.Azure.ApiManagement
 {
     internal static class Utility
     {

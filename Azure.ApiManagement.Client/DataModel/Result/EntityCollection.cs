@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SmallStepsLabs.Azure.ApiManagement.Model
+namespace Fitabase.Azure.ApiManagement.Model
 {
     /// <summary>
     /// This class represents a collection of service entities
