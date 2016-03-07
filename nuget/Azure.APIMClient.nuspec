@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Fitbit.NET.OAuth1Migration</id>
+    <version>1.0.0-beta-build$buildNumber$</version>
+    <title>Azure APIM Client</title>
+    <authors>Azure APIM Client</authors>
+    <owners></owners>
+    <licenseUrl>https://github.com/Fitabase/AzureAPIManagement</licenseUrl>
+    <projectUrl>https://github.com/Fitabase/AzureAPIManagement</projectUrl>
+    <iconUrl></iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Client for Azure API Management service</description>
+    <summary>Manage your Azure API Management instance programatically</summary>
+    <releaseNotes>
+            Manage your Azure API Management instance programatically
+    </releaseNotes>
+    <copyright>Copyright 2016</copyright>
+    <tags>Azure APIM</tags>
+    <dependencies>
+	  <dependency id="Newtonsoft.Json" version="8.0.2" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="$buildOutputPath$\SmallStepsLabs.Azure.ApiManagement.Client.dll" target="lib\net452" exclude="" />
+    <file src="$buildOutputPath$\SmallStepsLabs.Azure.ApiManagement.Client.pdb" target="lib\net452" exclude="" />
+  </files>
+</package>
