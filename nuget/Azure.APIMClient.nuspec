@@ -8,7 +8,6 @@
     <owners></owners>
     <licenseUrl>https://github.com/Fitabase/AzureAPIManagement</licenseUrl>
     <projectUrl>https://github.com/Fitabase/AzureAPIManagement</projectUrl>
-    <iconUrl></iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Client for Azure API Management service</description>
     <summary>Manage your Azure API Management instance programatically</summary>
