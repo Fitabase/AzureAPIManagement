@@ -317,6 +317,14 @@ namespace Fitabase.Azure.ApiManagement
             if (String.IsNullOrEmpty(subscription.ProductId))
                 throw new ArgumentException("Valid Subscription Product Id is required");
 
+            //these 2 have a special "relative url" format they need to be passed with
+            //https://msdn.microsoft.com/en-us/library/azure/dn776325.aspx#SubscribeProduct
+
+            if (!subscription.UserId.Contains("/users/"))
+                subscription.UserId = String.Format("/users/{0}", subscription.UserId);
+
+            if (!subscription.ProductId.Contains("/products/"))
+                subscription.ProductId = String.Format("/products/{0}", subscription.ProductId);
 
             var uri = String.Format("/subscriptions/{0}", subscription.Id);
             var request = base.BuildRequest(uri, "PUT");
@@ -324,6 +332,7 @@ namespace Fitabase.Azure.ApiManagement
             // build content from supported fields
             base.BuildRequestContent(request, new Subscription
             {
+                Id = subscription.Id,
                 UserId = subscription.UserId,
                 ProductId = subscription.ProductId,
                 State = subscription.State,
