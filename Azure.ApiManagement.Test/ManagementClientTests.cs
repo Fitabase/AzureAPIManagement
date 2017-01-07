@@ -5,6 +5,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace Azure.ApiManagement.Test
 {
@@ -16,9 +17,9 @@ namespace Azure.ApiManagement.Test
         [TestInitialize]
         public void Setup()
         {
-            var host = "devav";
-            var serviceId = "56ca4cd99e1436035c030003";
-            var accessKey = "NaS+Pv8qOESQ3H4HvnVz3JEQRVq16sVCgnkW+7ldqaT8cIqcKfFe089bSZUnhyHhVu1BXXEz0udjHHEh1w6JBw==";
+            var host = "unittestsfitabase";
+            var serviceId = "5870184f9898000087030003";
+            var accessKey = "fvKRkR1J9hG0K+/NtVM+fAvC/TcuecN90C2QToCN3j5YTNVFNhfsCSXBfLAuxCxANnmXXG+0tYS4DJWIP3XW7A==";
 
             this.Client = new ManagementClient(host, serviceId, accessKey);
         }
@@ -185,6 +186,60 @@ namespace Azure.ApiManagement.Test
             pTask.Wait();
 
             Assert.IsNotNull(pTask.Result);
+        }
+
+
+        [TestMethod]
+        public void GetProductGroups()
+        {
+            var task = Client.GetProductsAsync();
+            task.Wait();
+
+            var productId = task.Result[0].Id;
+
+            var pTask = Client.GetProductGroupsAsync(productId);
+            pTask.Wait();
+
+            Assert.IsNotNull(pTask.Result);
+        }
+
+        [TestMethod]
+        public async Task GetRemoveAndAddBackProductGroup()
+        {
+            //get some existing products
+            var task = Client.GetProductsAsync(null, true);
+            task.Wait();
+
+            //let's try this with the first in the list
+            var productId = task.Result[0].Id;
+            List<Group> originalGroups = task.Result[0].Groups;
+
+            List<Group> groups = await Client.GetProductGroupsAsync(productId);
+
+            Assert.AreEqual(originalGroups.Count, groups.Count);
+
+            //delete the first group
+            bool bSucceededDelete = await Client.RemoveProductGroupAsync(productId, originalGroups[0].Id);
+
+            Assert.AreEqual(true, bSucceededDelete);
+
+            //now go back and check the group is gone
+            groups = await Client.GetProductGroupsAsync(productId);
+
+            //check that group is gone
+            Assert.AreEqual(2, groups.Count);
+            Assert.AreEqual(0, groups.Where(t => t.Id == originalGroups[0].Id).Count());
+
+            bool bSucceededReAdd = await Client.AddProductGroupAsync(productId, originalGroups[0].Id);
+
+            Assert.AreEqual(true, bSucceededReAdd);
+
+            //now go back and check the group is gone
+            groups = await Client.GetProductGroupsAsync(productId);
+
+            //check that group is gone
+            Assert.AreEqual(3, groups.Count);
+
         }
 
         [TestMethod]
