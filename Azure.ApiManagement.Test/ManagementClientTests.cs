@@ -5,6 +5,9 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.IO;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Azure.ApiManagement.Test
 {
@@ -16,9 +19,30 @@ namespace Azure.ApiManagement.Test
         [TestInitialize]
         public void Setup()
         {
-            var host = "devav";
-            var serviceId = "56ca4cd99e1436035c030003";
-            var accessKey = "NaS+Pv8qOESQ3H4HvnVz3JEQRVq16sVCgnkW+7ldqaT8cIqcKfFe089bSZUnhyHhVu1BXXEz0udjHHEh1w6JBw==";
+            string apiKeysContent;
+            var host = "";
+            var serviceId = "";
+            var accessKey = "";
+
+            try
+            {
+                //provide to reader your complete text file
+                using (StreamReader sr = new StreamReader(".\\APIMKeys.json")) //make sure this file has "Copy to output directory" Set to "Copy Always"
+                {
+                    apiKeysContent = sr.ReadToEnd();
+                    //Console.WriteLine(line);
+                    var json = JObject.Parse(apiKeysContent);
+                    host = json["host"].ToString();
+                    serviceId = json["serviceId"].ToString();
+                    accessKey = json["accessKey"].ToString();
+
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("The file could not be read:");
+                Console.WriteLine(e.Message);
+            }
 
             this.Client = new ManagementClient(host, serviceId, accessKey);
         }
