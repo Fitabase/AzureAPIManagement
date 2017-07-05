@@ -58,6 +58,7 @@
     <Compile Include="DataModelTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ManagementClientTests.cs" />
+    <Compile Include="TestFitabaseAPIClient.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Azure.ApiManagement.Client\Azure.ApiManagement.Client.csproj">
@@ -67,9 +68,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="APIMKeys.BLANK.json" />
-    <None Include="APIMKeys.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    <None Include="APIMKeys.json" />
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>

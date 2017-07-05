@@ -15,6 +15,7 @@ namespace Fitabase.Azure.ApiManagement
             base(host, serviceId, accessKey)
         { }
 
+
         #region User Operations
 
         public string GetRequestOperationSignature(string operation, string salt, string delegationValidationKey,
@@ -441,6 +442,8 @@ namespace Fitabase.Azure.ApiManagement
 
         #endregion
 
+        
+        
         #region APIs CRUD
 
         /// <summary>
@@ -457,7 +460,7 @@ namespace Fitabase.Azure.ApiManagement
             if (!String.IsNullOrEmpty(filter))
                 query.Add(Constants.ApiManagement.Url.FilterQuery, filter);
 
-            var request = base.BuildRequest("/apis", "GET", query);
+            var request = base.BuildRequest(Constants.Request.API_REQUEST, "GET", query);
             return base.ExecuteRequestAsync<EntityCollection<API>>(request, HttpStatusCode.OK, cancellationToken)
                        .ContinueWith<List<API>>(t =>
                        {
@@ -477,9 +480,8 @@ namespace Fitabase.Azure.ApiManagement
             if (String.IsNullOrEmpty(apiId))
                 throw new ArgumentException("apiId is required");
 
-            var uri = String.Format("/apis/{0}", apiId);
+            var uri = String.Format("{0}/{1}", Constants.Request.API_REQUEST, apiId);
             var request = base.BuildRequest(uri, "GET");
-
             return base.ExecuteRequestAsync<API>(request, HttpStatusCode.OK, cancellationToken);
         }
 

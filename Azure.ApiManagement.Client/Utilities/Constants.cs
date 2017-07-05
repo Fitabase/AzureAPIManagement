@@ -9,9 +9,23 @@ namespace Fitabase.Azure.ApiManagement
 {
     internal static class Constants
     {
+
+        internal static readonly string FITABSE_TOKEN = "FitabaseToken";
+        //internal static readonly string FITABASE_API_VERSION = "Fitabase-API-Version";
+
+        
+        internal static class Request
+        {
+            internal static readonly string PRODUCT_REQUEST = "/products";
+            internal static readonly string API_REQUEST = "/apis";
+        }
+
+
+
         internal static class ApiManagement
         {
             internal static readonly string AccessToken = "SharedAccessSignature";
+
 
             internal static class Url
             {

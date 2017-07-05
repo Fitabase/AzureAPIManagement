@@ -12,7 +12,7 @@ using Newtonsoft.Json.Linq;
 namespace Azure.ApiManagement.Test
 {
     [TestClass]
-    public class ManagementClientTests
+    public class Testuser
     {
         protected ManagementClient Client { get; set; }
 
@@ -27,7 +27,12 @@ namespace Azure.ApiManagement.Test
             try
             {
                 //provide to reader your complete text file
-                using (StreamReader sr = new StreamReader(".\\APIMKeys.json")) //make sure this file has "Copy to output directory" Set to "Copy Always"
+                string filePath = @"C:\Repositories\AzureAPIManagement\Azure.ApiManagement.Test\APIMKeys.json";
+
+                //System.Diagnostics.Debug.WriteLine(File.Exists(filePath) ? "File exists" : "Unable to find the file");
+                
+
+                using (StreamReader sr = new StreamReader(filePath)) //make sure this file has "Copy to output directory" Set to "Copy Always"
                 {
                     apiKeysContent = sr.ReadToEnd();
                     //Console.WriteLine(line);
@@ -35,7 +40,6 @@ namespace Azure.ApiManagement.Test
                     host = json["host"].ToString();
                     serviceId = json["serviceId"].ToString();
                     accessKey = json["accessKey"].ToString();
-
                 }
             }
             catch (Exception e)
@@ -109,7 +113,14 @@ namespace Azure.ApiManagement.Test
 
             var productId = task.Result[0].Id;
 
+            //System.Diagnostics.Debug.WriteLine(task.Result[0].Description);
+            //System.Diagnostics.Debug.WriteLine(task.Result[0].Uri);
+            //System.Diagnostics.Debug.WriteLine(task.Result[0].Name);
+            //System.Diagnostics.Debug.WriteLine(productId);
+
+
             var pTask = Client.GetProductAsync(productId);
+
 
             Assert.IsNotNull(pTask.Result);
             Assert.AreNotEqual(productId, pTask.Id);
@@ -261,6 +272,11 @@ namespace Azure.ApiManagement.Test
                 var aTask = Client.GetAPIAsync(apiId);
                 aTask.Wait();
 
+                API api = aTask.Result;
+                System.Diagnostics.Debug.WriteLine(api.Id);
+                System.Diagnostics.Debug.WriteLine(api.Uri);
+                System.Diagnostics.Debug.WriteLine(api.Name);
+
                 Assert.IsNotNull(aTask.Result);
                 Assert.AreEqual(apiId, aTask.Result.Id);
             }
@@ -337,8 +353,8 @@ namespace Azure.ApiManagement.Test
             {
                 Id = uid,
                 Email = String.Format("test_{0}@test.com", uid),
-                FirstName = "First Name",
-                LastName = "Last Name",
+                FirstName = "First1",
+                LastName = "Last1",
                 Password = "P@ssWo3d",
                 State = UserState.active,
                 Note = "notes.."
@@ -351,6 +367,18 @@ namespace Azure.ApiManagement.Test
 
             Assert.IsNotNull(uTask.Result);
             Assert.IsTrue(Uri.IsWellFormedUriString(uTask.Result.Url, UriKind.Absolute));
+        }
+
+
+        [TestMethod]
+        public void TestGetUser()
+        {
+            string userId = "66da331f7a1c49d98ac8a4ad136c7c64";
+            var uTask = Client.GetUserSsoLoginAsync(userId);
+            uTask.Wait();
+            Assert.IsNotNull(uTask.Result);
+            Assert.IsTrue(Uri.IsWellFormedUriString(uTask.Result.Url, UriKind.Absolute));
+
         }
 
 

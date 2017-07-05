@@ -42,12 +42,15 @@ namespace Fitabase.Azure.ApiManagement
         {
             // combine uri with query
             var requestUri = this.BuildRequestUri(url, query);
-
             var request = new HttpRequestMessage(new HttpMethod(method), requestUri);
+
 
             // set the access control header
             var token = Utility.CreateSharedAccessToken(this.ServiceIdentifier, this.AccessKey, DateTime.UtcNow.AddDays(1));
+            
             request.Headers.Authorization = new AuthenticationHeaderValue(Constants.ApiManagement.AccessToken, token);
+
+
 
             return request;
         }
@@ -100,8 +103,11 @@ namespace Fitabase.Azure.ApiManagement
             // async making request
             var response = await this.ExecuteRequestInternalAsync(request, cancellationToken);
 
+            
             // async reading response stream
             var result = await response.Content.ReadAsStringAsync();
+
+            System.Diagnostics.Debug.WriteLine("Result: " + result);
 
             var resultMediaType = response.Content?.Headers?.ContentType?.MediaType;
 
@@ -132,14 +138,18 @@ namespace Fitabase.Azure.ApiManagement
 
             try
             {
+
                 // http rest client
                 httpClient = new HttpClient()
                 {
                     BaseAddress = new Uri(String.Format(Constants.ApiManagement.Url.ServiceFormat, this.Host)),
+                    
                 };
+                
 
                 // async making request
-                return await httpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancellationToken);
+                var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancellationToken);
+                return response;
             }
             finally
             {
@@ -168,11 +178,13 @@ namespace Fitabase.Azure.ApiManagement
 
             // API Management REST Service requires version query parameter
             httpValueCollection.Add(Constants.ApiManagement.Url.VersionQuery, Constants.ApiManagement.Versions.Feb2014);
-
+            
             // Url encodes the whole HttpValueCollection
             uri = String.Format("{0}?{1}", uri, httpValueCollection.ToString());
 
-            return new Uri(uri, UriKind.Relative);
+            Uri damn =  new Uri(uri, UriKind.Relative);
+            
+            return damn;
         }
 
         private TResponse ParseResponse<TResponse>(string resultMediaType, string result)

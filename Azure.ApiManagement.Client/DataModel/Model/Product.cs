@@ -12,6 +12,14 @@ namespace Fitabase.Azure.ApiManagement.Model
     {
         protected override string UriIdFormat { get { return "/products/"; } }
 
+        public Product() { }
+
+        public Product(string name)
+        {
+            this.Name = name;
+        }
+
+
         /// <summary>
         /// Name of the entity. Must not be empty. Maximum length is 100 characters.
         /// </summary>
