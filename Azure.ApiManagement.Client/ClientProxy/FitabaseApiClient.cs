@@ -213,8 +213,6 @@ namespace Fitabase.Azure.ApiManagement
             string endpoint = String.Format("{0}/users/{1}", api_endpoint, id);
             return DoRequest<User>(endpoint, "GET");
         }
-      
-
         public FitabaseCollection<User> AllUsers()
         {
             string endpoint = String.Format("{0}/users", api_endpoint);
@@ -236,7 +234,6 @@ namespace Fitabase.Azure.ApiManagement
             string endpoint = String.Format("{0}/apis/{1}", api_endpoint, id);
             return DoRequest<API>(endpoint, "GET");
         }
-        
         public FitabaseCollection<API> AllAPIs()
         {
             string endpoint = String.Format("{0}/apis", api_endpoint);
@@ -265,6 +262,12 @@ namespace Fitabase.Azure.ApiManagement
             string endpoint = String.Format("{0}/products/{1}", api_endpoint, productId);
             return DoRequest<Product>(endpoint, "PUT", Utility.SerializeToJson(parameters));
         }
+
+        //public Product AddProductToGroup(string productId, string groupId)
+        //{
+        //    string endpoint = "";
+        //    return DoRequest<Product>
+        //}
 
         public FitabaseCollection<Product> AllProducts()
         {
