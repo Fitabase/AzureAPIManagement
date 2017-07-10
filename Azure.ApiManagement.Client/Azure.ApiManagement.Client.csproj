@@ -133,12 +133,6 @@
     <Reference Include="Swashbuckle.Swagger, Version=6.0.0.0, Culture=neutral, PublicKeyToken=62657d7474907593, processorArchitecture=MSIL">
       <HintPath>..\packages\Swashbuckle.Swagger.6.0.0-beta902\lib\net451\Swashbuckle.Swagger.dll</HintPath>
     </Reference>
-    <Reference Include="Swashbuckle.SwaggerGen, Version=6.0.0.0, Culture=neutral, PublicKeyToken=d84d99fb0135530a, processorArchitecture=MSIL">
-      <HintPath>..\packages\Swashbuckle.SwaggerGen.6.0.0-beta902\lib\net451\Swashbuckle.SwaggerGen.dll</HintPath>
-    </Reference>
-    <Reference Include="Swashbuckle.SwaggerUi, Version=6.0.0.0, Culture=neutral, PublicKeyToken=4232c99127b3c254, processorArchitecture=MSIL">
-      <HintPath>..\packages\Swashbuckle.SwaggerUi.6.0.0-beta902\lib\net451\Swashbuckle.SwaggerUi.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Buffers, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Buffers.4.0.0\lib\netstandard1.1\System.Buffers.dll</HintPath>
@@ -175,7 +169,6 @@
   <ItemGroup>
     <Compile Include="DataModel\Error.cs" />
     <Compile Include="DataModel\Properties\ParameterType.cs" />
-    <Compile Include="DataModel\Model\AzureResponseError.cs" />
     <Compile Include="DataModel\Model\Certificate.cs" />
     <Compile Include="DataModel\Exceptions\InvalidEntityException.cs" />
     <Compile Include="DataModel\Model\Enums.cs" />
@@ -195,8 +188,6 @@
     <Compile Include="ClientProxy\ManagementClient.cs" />
     <Compile Include="DataModel\Model\Product.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Swagger\SwaggerConfiguration.cs" />
-    <Compile Include="Swagger\SwaggerMetadata.cs" />
     <Compile Include="Utilities\Constants.cs" />
     <Compile Include="Utilities\PrintMessage.cs" />
     <Compile Include="Utilities\Utility.cs" />

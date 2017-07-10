@@ -80,15 +80,18 @@ namespace Azure.ApiManagement.Test
         public void UpdateUser()
         {
             var userId = "66da331f7a1c49d98ac8a4ad136c7c64";
-            var firstName = "omg";
+            var firstName = "Derek";
+            var lastName = "Nguyen";
 
             Hashtable parameters = new Hashtable();
             parameters.Add("firstName", firstName);
+            parameters.Add("lastName", lastName);
 
             Client.UpdateUser(userId, parameters);
 
             var currUser = Client.GetUser(userId);
             Assert.AreEqual(currUser.FirstName, firstName);
+            Assert.AreEqual(currUser.LastName, lastName);
         }
 
        
@@ -351,7 +354,7 @@ namespace Azure.ApiManagement.Test
         public void GeneratePrimaryKey()
         {
             var subscriptionId = "5870184f9898000087070001";
-            var key = Client.GeneratePrimaryKey(subscriptionId);
+            Client.GeneratePrimaryKey(subscriptionId);
         }
 
         [TestMethod]
