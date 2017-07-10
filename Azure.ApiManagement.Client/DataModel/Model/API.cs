@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace Fitabase.Azure.ApiManagement.Model
 {
+    /// <summary>
+    /// This class represents an api of Azure API Management.
+    /// </summary>
     public class API : EntityBase
     {
         protected override string UriIdFormat {  get { return "/apis/"; } }

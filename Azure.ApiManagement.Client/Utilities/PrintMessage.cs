@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Fitabase.Azure.ApiManagement
 {
+    /// <summary>
+    /// Helper class that is used to display debug code
+    /// </summary>
     internal static class PrintMessage
     {
 

@@ -1,7 +1,10 @@
 ﻿using Fitabase.Azure.ApiManagement.Model;
+using Newtonsoft.Json.Linq;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.IO;
 using System.Net;
 using System.Text;
 using System.Threading;
@@ -9,482 +12,440 @@ using System.Threading.Tasks;
 
 namespace Fitabase.Azure.ApiManagement
 {
-    public class ManagementClient : ClientBase
+    public class ManagementClient
     {
-        public ManagementClient(string host, string serviceId, string accessKey) :
-            base(host, serviceId, accessKey)
-        { }
+        //static readonly string user_agent = "Fitabase/v1";
+        public static readonly int RatesReqTimeout = 25;
+        public static readonly int TransactionReqTimeOut = 25;
+        static readonly Encoding encoding = Encoding.UTF8;
+
+        static string api_endpoint;
+        static string serviceId;
+        static string accessToken;
+        static string apiVersion;
 
 
-        #region User Operations
 
-        public string GetRequestOperationSignature(string operation, string salt, string delegationValidationKey,
-            string returnUrl = null, string productId = null, string userId = null, string subscriptionId = null)
+        public int TimeoutSeconds { get; set; }
+
+
+        public ManagementClient()
         {
-            var encoder = new System.Security.Cryptography.HMACSHA512(Convert.FromBase64String(delegationValidationKey));
-            string signature;
+            Init();
+            TimeoutSeconds = 25;
+        }
 
-            switch (operation)
+
+        /// <summary>
+        /// Read and initialize keys
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
+        private void Init(string filePath = @"C:\Repositories\AzureAPIManagement\Azure.ApiManagement.Test\APIMKeys.json")
+        {
+            string apiKeysContent;
+            try
             {
-                case "SignIn":
-                    signature = Convert.ToBase64String(encoder.ComputeHash(Encoding.UTF8.GetBytes(salt + "\n" + returnUrl)));
-                    break;
-                case "Subscribe":
-                    signature = Convert.ToBase64String(encoder.ComputeHash(Encoding.UTF8.GetBytes(salt + "\n" + productId + "\n" + userId)));
-                    break;
-                case "Unsubscribe":
-                    signature = Convert.ToBase64String(encoder.ComputeHash(Encoding.UTF8.GetBytes(salt + "\n" + subscriptionId)));
-                    break;
-                case "ChangeProfile":
-                case "ChangePassword":
-                case "SignOut":
-                    signature = Convert.ToBase64String(encoder.ComputeHash(Encoding.UTF8.GetBytes(salt + "\n" + userId)));
-                    break;
-                default:
-                    signature = "";
-                    break;
+                using (StreamReader sr = new StreamReader(filePath)) //make sure this file has "Copy to output directory" Set to "Copy Always"
+                {
+                    apiKeysContent = sr.ReadToEnd();
+                    var json = JObject.Parse(apiKeysContent);
+                    api_endpoint = json["apiEndpoint"].ToString();
+                    serviceId = json["serviceId"].ToString();
+                    accessToken = json["accessKey"].ToString();
+                    apiVersion = json["apiVersion"].ToString();
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("The file could not be read:");
+                Console.WriteLine(e.Message);
+            }
+        }
+
+        private string AppendUrlApiVersion(string url)
+        {
+            return (url.Contains("?"))
+                            ? ("&api-version=" + apiVersion)
+                            : ("?api-version=" + apiVersion);
+        }
+
+        /// <summary>
+        /// Set up request header metadata for each api call
+        /// </summary>
+        /// <param name="method">request method</param>
+        /// <param name="url">endpoint request url</param>
+        /// <returns>WebRequest</returns>
+        protected virtual WebRequest SetupRequestHeader(String method, string url, string body = null)
+        {
+            url += AppendUrlApiVersion(url);
+            string token = Utility.CreateSharedAccessToken(serviceId, accessToken, DateTime.UtcNow.AddDays(1));
+            
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            request.Method = method;
+            request.Timeout = TimeoutSeconds * 1000;
+            request.Headers.Add("Authorization", Constants.ApiManagement.AccessToken + " " + token);
+            request.Headers.Add("api-version", apiVersion);
+
+            // Add header metadata depending on request method
+            if (method == "POST" || method == "PUT")
+            {
+                request.ContentType = "application/json";
+                if (body == null)
+                {
+                    request.ContentLength = 0;
+                }
+            }
+            else if (method == "PATCH")
+            {
+                request.Accept = "application/json";
+                request.ContentType = "application/json";
+                request.Headers.Add("If-Match", "*");
+            }
+            else if (method == "DELETE")
+            {
+                request.Headers.Add("If-Match", "*");
             }
 
-            return signature;
+            return request;
         }
 
-        public Task<List<User>> GetUsersAsync(string filter = null, bool expandGroups = false,
-          CancellationToken cancellationToken = default(CancellationToken))
+        static string GetResponseAsString(WebResponse response)
         {
-            var query = new NameValueCollection();
-
-            // conditional filter
-            if (!String.IsNullOrEmpty(filter))
-                query.Add(Constants.ApiManagement.Url.FilterQuery, filter);
-
-            // conditional operation
-            if (expandGroups)
-                query.Add("expandGroups", "true");
-
-            var request = base.BuildRequest("/users", "GET", query);
-            return base.ExecuteRequestAsync<EntityCollection<User>>(request, HttpStatusCode.OK, cancellationToken)
-                       .ContinueWith(t =>
-                       {
-                           return t.Result.Values;
-                       });
-        }
-
-        public Task<bool> CreateUserAsync(User user, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            if (user == null)
-                throw new ArgumentNullException("user");
-            if (String.IsNullOrEmpty(user.Id))
-                throw new ArgumentException("Valid User Id is required");
-
-            Utility.ValidateUser(user);
-
-            var uri = String.Format("/users/{0}", user.Id);
-            var request = base.BuildRequest(uri, "PUT");
-
-            // build content from supported fields
-            base.BuildRequestContent(request, new User
+            using (StreamReader responseStreamReader = new StreamReader(response.GetResponseStream(), encoding))
             {
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Email = user.Email,
-                Password = user.Password,
-                State = user.State,
-                Note = user.Note,
-            });
-
-            return base.ExecuteRequestAsync(request, HttpStatusCode.Created, cancellationToken);
+                return responseStreamReader.ReadToEnd();
+            }
         }
 
-        public Task<SsoUrl> GetUserSsoLoginAsync(string userId, CancellationToken cancellationToken = default(CancellationToken))
+
+
+        #region Generic Requests
+
+        public virtual T DoRequest<T>(string endpoint, string method = "GET", string body = null)
         {
-            if (String.IsNullOrEmpty(userId))
-                throw new ArgumentException("Valid User Id is required");
-
-            var uri = String.Format("/users/{0}/generateSsoUrl", userId);
-            var request = base.BuildRequest(uri, "POST");
-
-            return base.ExecuteRequestAsync<SsoUrl>(request, HttpStatusCode.OK, cancellationToken);
+            var json = DoRequest(endpoint, method, body);
+            var jsonDeserialized = Utility.DeserializeToJson<T>(json);
+            return jsonDeserialized;
         }
 
-        #endregion
 
-        #region Products CRUD
-
-        /// <summary>
-        /// Get a list of all products
-        /// https://msdn.microsoft.com/en-us/library/azure/dn776336.aspx#ListProducts
-        /// </summary>
-        /// <exception cref="HttpResponseException">Thrown on invalid operation.</exception>
-        /// <returns></returns>
-        public Task<List<Product>> GetProductsAsync(string filter = null, bool expandGroups = false,
-            CancellationToken cancellationToken = default(CancellationToken))
+        public virtual string DoRequest(string endpoint, string method, string body)
         {
-            var query = new NameValueCollection();
+            string result = null;
 
-            // conditional filter
-            if (!String.IsNullOrEmpty(filter))
-                query.Add(Constants.ApiManagement.Url.FilterQuery, filter);
+            WebRequest request = SetupRequestHeader(method, endpoint);
 
-            // conditional operation
-            if (expandGroups)
-                query.Add("expandGroups", "true");
+            if (body != null)
+            {
+                byte[] requestBodyBytes = encoding.GetBytes(body.ToString());
+                request.ContentLength = requestBodyBytes.Length;
+                using (Stream postStream = request.GetRequestStream())
+                {
+                    postStream.Write(requestBodyBytes, 0, requestBodyBytes.Length);
+                }
+            }
 
-            var request = base.BuildRequest("/products", "GET", query);
-            return base.ExecuteRequestAsync<EntityCollection<Product>>(request, HttpStatusCode.OK, cancellationToken)
-                       .ContinueWith(t =>
-                       {
-                           return t.Result.Values;
-                       });
-        }
+            try
+            {
+                using (WebResponse resp = (WebResponse)request.GetResponse())
+                {
+                    result = GetResponseAsString(resp);
+                }
+            }
+            catch (WebException wexc)
+            {
+                if (wexc.Response != null)
+                {
+                    string json_error = GetResponseAsString(wexc.Response);
+                    HttpStatusCode status_code = HttpStatusCode.BadRequest;
+                    HttpWebResponse resp = wexc.Response as HttpWebResponse;
+                    
+                    if (resp != null)
+                        status_code = resp.StatusCode;
 
-        /// <summary>
-        /// Get a specific product
-        /// https://msdn.microsoft.com/en-us/library/azure/dn776336.aspx#GetProduct
-        /// </summary>
-        /// <param name="productId">Product identifier.</param>
-        /// <exception cref="HttpResponseException">Thrown on invalid operation.</exception>
-        /// <returns></returns>
-        public Task<Product> GetProductAsync(string productId, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            if (String.IsNullOrEmpty(productId))
-                throw new ArgumentException("productId is required");
-
-            var uri = String.Format("/products/{0}", productId);
-            var request = base.BuildRequest(uri, "GET");
-
-            return base.ExecuteRequestAsync<Product>(request, HttpStatusCode.OK, cancellationToken);
-        }
-
-        /// <summary>
-        /// Create a new product
-        /// https://msdn.microsoft.com/en-us/library/azure/dn776336.aspx#CreateProduct
-        /// </summary>
-        /// <param name="product"></param>
-        /// <returns></returns>
-        public Task<bool> CreateProductAsync(Product product, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            if (product == null)
-                throw new ArgumentNullException("product");
-            if (String.IsNullOrEmpty(product.Id))
-                throw new ArgumentException("Valid Product Id is required");
-
-            Utility.ValidateProduct(product);
-
-            var uri = String.Format("/products/{0}", product.Id);
-            var request = base.BuildRequest(uri, "PUT");
-            base.BuildRequestContent(request, product);
-
-            return base.ExecuteRequestAsync(request, HttpStatusCode.Created, cancellationToken);
-        }
-
-        /// <summary>
-        /// Update a product
-        /// https://msdn.microsoft.com/en-us/library/azure/dn776336.aspx#UpdateProduct
-        /// </summary>
-        /// <param name="product"></param>
-        /// <exception cref="HttpResponseException">Thrown on invalid operation.</exception>
-        /// <returns></returns>
-        public Task<bool> UpdateProductAsync(Product product, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            if (product == null)
-                throw new ArgumentNullException("product");
-            if (String.IsNullOrEmpty(product.Id))
-                throw new ArgumentException("Valid Product Id is required");
-
-            Utility.ValidateProduct(product);
-
-            var uri = String.Format("/products/{0}", product.Id);
-            var request = base.BuildRequest(uri, "PATCH");
-            base.BuildRequestContent(request, product);
-
-            // Apply changes regardless of entity state
-            base.EntityStateUpdate(request, "*");
-
-            return base.ExecuteRequestAsync(request, HttpStatusCode.NoContent, cancellationToken);
-        }
-
-        /// <summary>
-        /// Delete a product
-        /// https://msdn.microsoft.com/en-us/library/azure/dn776336.aspx#DeleteProduct
-        /// </summary>
-        /// <exception cref="HttpResponseException">Thrown on invalid operation.</exception>
-        /// <param name="productId">Product identifier.</param>
-        /// <param name="deleteSubscriptions">Specify true to indicate that any subscriptions associated with this product should be deleted; otherwise false.If this query parameter is missing, the default is false</param>
-        /// <returns></returns>
-        public Task<bool> DeleteProductAsync(string productId, bool deleteSubscriptions = false,
-             CancellationToken cancellationToken = default(CancellationToken))
-        {
-            if (String.IsNullOrEmpty(productId))
-                throw new ArgumentException("productId is required");
-
-            var uri = String.Format("/products/{0}", productId);
-
-            var query = new NameValueCollection();
-
-            // conditional filter
-            if (deleteSubscriptions)
-                query.Add("deleteSubscriptions", "true");
-
-            var request = base.BuildRequest(uri, "DELETE", query);
-
-            // Apply changes regardless of entity state
-            base.EntityStateUpdate(request, "*");
-
-            return base.ExecuteRequestAsync(request, HttpStatusCode.NoContent, cancellationToken);
+                    if ((int)status_code <= 500)
+                    {
+                        throw new Exception(json_error, wexc);
+                    }
+                }
+                throw;
+            }
+            return result;
         }
 
         #endregion
 
-        #region Product APIs
+
+
+
+        #region USER
 
         /// <summary>
-        /// List APIs associated with a product
-        /// https://msdn.microsoft.com/en-us/library/azure/dn776336.aspx#ListAPIs
+        /// Retrieves a redirection URL containing an authentication 
+        /// token for signing a given user into the developer portal.
         /// </summary>
-        /// <exception cref="HttpResponseException">Thrown on invalid operation.</exception>
-        /// <param name="productId">Product identifier.</param>
+        /// <param name="userId"></param>
         /// <returns></returns>
-        public Task<List<API>> GetProductAPIsAsync(string productId, CancellationToken cancellationToken = default(CancellationToken))
+        public SsoUrl GenerateSsoURL(string userId)
         {
-            if (String.IsNullOrEmpty(productId))
-                throw new ArgumentException("productId is required");
+            string endpoint = String.Format("{0}/users/{1}/generateSsoUrl", api_endpoint, userId);
+            return DoRequest<SsoUrl>(endpoint, "POST");
+        }
+        public User CreateUser(string userId, User user)
+        {
+            Validator.ValidateUser(user);
+            string endpoint = String.Format("{0}/users/{1}", api_endpoint, userId);
+            return DoRequest<User>(endpoint, "PUT", Utility.SerializeToJson(user));
+        }
+        public User GetUser(string userId)
+        {
+            string endpoint = String.Format("{0}/users/{1}", api_endpoint, userId);
+            return DoRequest<User>(endpoint, "GET");
+        }
 
-            var uri = String.Format("/products/{0}/apis", productId);
-            var request = base.BuildRequest(uri, "GET");
+        public EntityCollection<User> AllUsers()
+        {
+            string endpoint = String.Format("{0}/users", api_endpoint);
+            return DoRequest<EntityCollection<User>>(endpoint);
+        }
+        public User UpdateUser(string userId, Hashtable parameters)
+        {
+            string endpoint = String.Format("{0}/users/{1}", api_endpoint, userId);
+            return DoRequest<User>(endpoint, "PATCH", Utility.SerializeToJson(parameters));
+        }
+    
 
-            return base.ExecuteRequestAsync<EntityCollection<API>>(request, HttpStatusCode.OK, cancellationToken)
-                       .ContinueWith<List<API>>(t =>
-                       {
-                           return t.Result.Values;
-                       });
+        #endregion
+
+
+        #region API
+        public API CreateAPI(string apiId, API api)
+        {
+            string endpoint = String.Format("{0}/apis/{1}", api_endpoint, apiId);
+            return DoRequest<API>(endpoint, "PUT", Utility.SerializeToJson(api));
+        }
+        public API GetAPI(string id)
+        {
+            string endpoint = String.Format("{0}/apis/{1}", api_endpoint, id);
+            return DoRequest<API>(endpoint, "GET");
+        }
+        public EntityCollection<API> AllAPIs()
+        {
+            string endpoint = String.Format("{0}/apis", api_endpoint);
+            return DoRequest<EntityCollection<API>>(endpoint, "GET");
+        }
+
+
+        #endregion
+
+
+        #region API Operations
+
+        public APIOperation CreateAPIOperation(string apiId, string operationId, APIOperation operation)
+        {
+            string endpoint = String.Format("{0}/apis/{1}/operations/{2}",
+                                                api_endpoint, apiId, operationId);
+            return DoRequest<APIOperation>(endpoint, "PUT", Utility.SerializeToJson(operation));
+        }
+        public APIOperation GetAPIOperation(string apiId, string operationId)
+        {
+            string endpoint = String.Format("{0}/apis/{1}/operations/{2}",
+                                                api_endpoint, apiId, operationId);
+            return DoRequest<APIOperation>(endpoint, "GET");
+        }
+        public EntityCollection<APIOperation> GetByAPI(string apiId)
+        {
+            string endpoint = String.Format("{0}/apis/{1}/operations", api_endpoint, apiId);
+            return DoRequest<EntityCollection<APIOperation>>(endpoint, "GET");
+        }
+        public APIOperation DeleteOperation(string apiId, string operationId)
+        {
+            string endpoint = String.Format("{0}/apis/{1}/operations/{2}",
+                                                api_endpoint, apiId, operationId);
+            return DoRequest<APIOperation>(endpoint, "DELETE");
+        }
+        #endregion
+
+
+        #region Product
+        public Product CreateProduct(string productId, Product product)
+        {
+            Validator.ValidateProduct(product);
+            string endpoint = String.Format("{0}/products/{1}", api_endpoint, product);
+            return DoRequest<Product>(endpoint, "PUT", Utility.SerializeToJson(product));
+        }
+        public Product GetProduct(string productId)
+        {
+            string endpoint = String.Format("{0}/products/{1}", api_endpoint, productId);
+            return DoRequest<Product>(endpoint, "GET");
+        }
+        public void UpdateProduct(Product product)
+        {
+            string endpoint = String.Format("{0}/products/{1}", api_endpoint, product.Id);
+            DoRequest<Product>(endpoint, "PATCH", Utility.SerializeToJson(product));
+        }
+        public Product DeleteProduct(string productId)
+        {
+            string endpoint = String.Format("{0}/products/{1}?deleteSubscriptions=true", api_endpoint, productId);
+            return DoRequest<Product>(endpoint, "DELETE");
+        }
+        public EntityCollection<Product> AllProducts()
+        {
+            string endpoint = String.Format("{0}/products", api_endpoint);
+            return DoRequest<EntityCollection<Product>>(endpoint, "GET");
         }
 
         /// <summary>
         /// Adds an API to the specified product.
-        /// https://msdn.microsoft.com/en-us/library/azure/dn776336.aspx#AddAPI
         /// </summary>
-        /// <exception cref="HttpResponseException">Thrown on invalid operation.</exception>
-        /// <param name="productId">Product identifier.</param>
-        /// <param name="apiId">API identifier.</param>
-        /// <returns></returns>
-        public Task<bool> AddProductAPIAsync(string productId, string apiId,
-             CancellationToken cancellationToken = default(CancellationToken))
+        /// <param name="productId"></param>
+        /// <param name="api"></param>
+        public void AddProductAPI(string productId, string apiId)
         {
-            if (String.IsNullOrEmpty(productId))
-                throw new ArgumentException("productId is required");
-            if (String.IsNullOrEmpty(apiId))
-                throw new ArgumentException("apiId is required");
-
-            var uri = String.Format("/products/{0}/apis/{1}", productId, apiId);
-            var request = base.BuildRequest(uri, "PUT");
-
-            return base.ExecuteRequestAsync(request, HttpStatusCode.Created, cancellationToken);
+            string endpoint = String.Format("{0}/products/{1}/apis/{2}",
+                                    api_endpoint, productId, apiId);
+            DoRequest<API>(endpoint, "PUT");
         }
 
         /// <summary>
-        /// Removes the specified API from the specified product.
-        /// https://msdn.microsoft.com/en-us/library/azure/dn776336.aspx#RemoveAPI
+        /// Deletes the specified API from the specified product.
         /// </summary>
-        /// <exception cref="HttpResponseException">Thrown on invalid operation.</exception>
-        /// <param name="productId">Product identifier.</param>
-        /// <param name="apiId">API identifier.</param>
-        /// <returns></returns>
-        public Task<bool> RemoveProductAPIAsync(string productId, string apiId,
-             CancellationToken cancellationToken = default(CancellationToken))
+        /// <param name="productId"></param>
+        /// <param name="apiId"></param>
+        public void DeleteProductAPI(string productId, string apiId)
         {
-            if (String.IsNullOrEmpty(productId))
-                throw new ArgumentException("productId is required");
-            if (String.IsNullOrEmpty(apiId))
-                throw new ArgumentException("apiId is required");
+            string endpoint = String.Format("{0}/products/{1}/apis/{2}",
+                                    api_endpoint, productId, apiId);
+            DoRequest<API>(endpoint, "DELETE");
+        }
 
-            var uri = String.Format("/products/{0}/apis/{1}", productId, apiId);
-            var request = base.BuildRequest(uri, "DELETE");
+        /// <summary>
+        /// Lists the collection of apis to the specified product.
+        /// </summary>
+        /// <param name="productId"></param>
+        /// <returns></returns>
+        public EntityCollection<API> GetProductAPIs(string productId)
+        {
+            string endpoint = String.Format("{0}/products/{1}/apis",
+                                    api_endpoint, productId);
+            return DoRequest<EntityCollection<API>>(endpoint, "GET");
+        }
 
-            return base.ExecuteRequestAsync(request, HttpStatusCode.NoContent, cancellationToken);
+        /// <summary>
+        /// Lists the collection of subscriptions to the specified product.
+        /// </summary>
+        /// <param name="productId"></param>
+        /// <returns></returns>
+        public EntityCollection<Subscription> GetProductSubscriptions(string productId)
+        {
+            string endpoint = String.Format("{0}/products/{1}/subscriptions",
+                                    api_endpoint, productId);
+            return DoRequest<EntityCollection<Subscription>>(endpoint, "GET");
+        }
+
+        /// <summary>
+        /// Adds the association between the specified developer group with the specified product.
+        /// </summary>
+        /// <param name="productId"></param>
+        /// <param name="groupId"></param>
+        public void AddProductGroup(string productId, string groupId)
+        {
+            string endpoint = String.Format("{0}/products/{1}/groups/{2}",
+                                    api_endpoint, productId, groupId);
+            DoRequest<API>(endpoint, "PUT");
+
+        }
+
+        /// <summary>
+        /// Deletes the association between the specified group and product.
+        /// </summary>
+        /// <param name="productId"></param>
+        /// <param name="groupId"></param>
+        public void DeleteProductGroup(string productId, string groupId)
+        {
+            string endpoint = String.Format("{0}/products/{1}/groups/{2}",
+                                    api_endpoint, productId, groupId);
+            DoRequest<Group>(endpoint, "DELETE");
+        }
+
+        /// <summary>
+        /// Lists the collection of developer groups associated with the specified product.
+        /// </summary>
+        /// <param name="productId"></param>
+        /// <returns></returns>
+        public EntityCollection<Group> GetProductGroups(string productId)
+        {
+            string endpoint = String.Format("{0}/products/{1}/groups",
+                                    api_endpoint, productId);
+            return DoRequest<EntityCollection<Group>>(endpoint, "GET");
         }
 
         #endregion
 
-        #region Product Subscription
 
-        public Task<bool> AddProductSubscriptionAsync(Subscription subscription, CancellationToken cancellationToken = default(CancellationToken))
+        #region Group
+        public Group CreateGroup(string groupId, Group group)
         {
-            if (subscription == null)
-                throw new ArgumentNullException("subscription");
-            if (String.IsNullOrEmpty(subscription.Id))
-                throw new ArgumentException("Valid Subscription Id is required");
-            if (String.IsNullOrEmpty(subscription.UserId))
-                throw new ArgumentException("Valid Subscription User Id is required");
-            if (String.IsNullOrEmpty(subscription.ProductId))
-                throw new ArgumentException("Valid Subscription Product Id is required");
-
-            //these 2 have a special "relative url" format they need to be passed with
-            //https://msdn.microsoft.com/en-us/library/azure/dn776325.aspx#SubscribeProduct
-
-            if (!subscription.UserId.Contains("/users/"))
-                subscription.UserId = String.Format("/users/{0}", subscription.UserId);
-
-            if (!subscription.ProductId.Contains("/products/"))
-                subscription.ProductId = String.Format("/products/{0}", subscription.ProductId);
-
-            var uri = String.Format("/subscriptions/{0}", subscription.Id);
-            var request = base.BuildRequest(uri, "PUT");
-
-            // build content from supported fields
-            base.BuildRequestContent(request, new Subscription
-            {
-                Id = subscription.Id,
-                UserId = subscription.UserId,
-                ProductId = subscription.ProductId,
-                State = subscription.State,
-                PrimaryKey = subscription.PrimaryKey,
-                SecondaryKey = subscription.SecondaryKey
-            });
-
-            return base.ExecuteRequestAsync(request, HttpStatusCode.Created, cancellationToken);
+            string endpoint = String.Format("{0}/groups/{1}", api_endpoint, group);
+            return DoRequest<Group>(endpoint, "PUT", Utility.SerializeToJson(group));
         }
-
-        public Task<bool> RemoveProductSubscriptionAsync(string subscriptionId, CancellationToken cancellationToken = default(CancellationToken))
+        public Group GetGroup(string groupId)
         {
-            if (String.IsNullOrEmpty(subscriptionId))
-                throw new ArgumentException("subscriptionId is required");
-           
-            var uri = String.Format("/subscriptions/{0}", subscriptionId);
-            var request = base.BuildRequest(uri, "DELETE");
-
-            // Apply changes regardless of entity state
-            base.EntityStateUpdate(request, "*");
-
-            return base.ExecuteRequestAsync(request, HttpStatusCode.NoContent, cancellationToken);
+            string endpoint = String.Format("{0}/groups/{1}", api_endpoint, groupId);
+            return DoRequest<Group>(endpoint, "GET");
         }
-
+        public EntityCollection<Group> AllGroups()
+        {
+            string endpoint = String.Format("{0}/groups", api_endpoint);
+            return DoRequest<EntityCollection<Group>>(endpoint, "GET");
+        }
+        public Group DeleteGroup(string groupId)
+        {
+            string endpoint = String.Format("{0}/groups/{1}", api_endpoint, groupId);
+            return DoRequest<Group>(endpoint, "DELETE");
+        }
         #endregion
 
-        #region Product Policy Configuration
 
-        /// <summary>
-        /// Gets the policy configuration for the specified product.
-        /// https://msdn.microsoft.com/en-us/library/azure/dn776336.aspx#GetPolicy
-        /// </summary>
-        /// <exception cref="HttpResponseException">Thrown on invalid operation.</exception>
-        /// <param name="productId">Product identifier.</param>
-        /// <returns></returns>
-        public Task<string> GetProductPolicyAsync(string productId, CancellationToken cancellationToken = default(CancellationToken))
+        #region Subscription
+        public Subscription CreateSubscription(string subscriptionId, Product subscription)
         {
-            if (String.IsNullOrEmpty(productId))
-                throw new ArgumentException("productId is required");
-
-            var uri = String.Format("/products/{0}/policy", productId);
-            var request = base.BuildRequest(uri, "GET");
-
-            return base.ExecuteRequestAsync<string>(request, HttpStatusCode.OK, cancellationToken);
+            string endpoint = String.Format("{0}/subscriptions/{1}", api_endpoint, subscription);
+            return DoRequest<Subscription>(endpoint, "PUT", Utility.SerializeToJson(subscription));
+        }
+        public Subscription GetSubscription(string subscriptionId)
+        {
+            string endpoint = String.Format("{0}/subscriptions/{1}", api_endpoint, subscriptionId);
+            return DoRequest<Subscription>(endpoint, "GET");
+        }
+        public EntityCollection<Subscription> AllSubscriptions()
+        {
+            string endpoint = String.Format("{0}/subscriptions", api_endpoint);
+            return DoRequest<EntityCollection<Subscription>>(endpoint, "GET");
         }
 
         /// <summary>
-        /// Determines if policy configuration is attached to the specified product.
+        /// Gernerate subscription primary key
         /// </summary>
-        /// <exception cref="HttpResponseException">Thrown on invalid operation.</exception>
-        /// <param name="productId">Product identifier.</param>
-        /// <returns></returns>
-        public Task<bool> CheckProductPolicyAsync(string productId, CancellationToken cancellationToken = default(CancellationToken))
+        /// <param name="subscriptionId">Subscription credentials which uniquely identify Microsoft Azure subscription</param>
+        public void GeneratePrimaryKey(string subscriptionId)
         {
-            if (String.IsNullOrEmpty(productId))
-                throw new ArgumentException("productId is required");
-
-            var uri = String.Format("/products/{0}/policy", productId);
-            var request = base.BuildRequest(uri, "HEAD");
-
-            return base.ExecuteRequestAsync(request, HttpStatusCode.OK, cancellationToken);
+            string endPoint = String.Format("{0}/subscriptions/{1}/regeneratePrimaryKey", api_endpoint, subscriptionId);
+            DoRequest<string>(endPoint, "POST");
         }
 
         /// <summary>
-        /// Sets the policy configuration for the specified product.
-        /// https://msdn.microsoft.com/en-us/library/azure/dn776336.aspx#SetPolicy
+        /// Generate subscription secondary key
         /// </summary>
-        /// <exception cref="HttpResponseException">Thrown on invalid operation.</exception>
-        /// <param name="productId">Product identifier.</param>
-        /// <param name="policy">Policy content (xml).</param>
-        /// <returns></returns>
-        public Task<bool> SetProductPolicyAsync(string productId, string policy, CancellationToken cancellationToken = default(CancellationToken))
+        /// <param name="subscriptionId">Subscription credentials which uniquely identify Microsoft Azure subscription</param>
+        public void GenerateSecondaryKey(string subscriptionId)
         {
-            if (String.IsNullOrEmpty(productId))
-                throw new ArgumentException("productId is required");
-
-            var uri = String.Format("/products/{0}/policy", productId);
-            var request = base.BuildRequest(uri, "PUT");
-            base.BuildRequestContent(request, policy, Constants.MimeTypes.ApplicationXmlPolicy);
-
-            // Apply changes regardless of entity state
-            base.EntityStateUpdate(request, "*");
-
-            return base.ExecuteRequestAsync(request, HttpStatusCode.Created, cancellationToken);
+            string endPoint = String.Format("{0}/subscriptions/{1}/regenerateSecondaryKey", api_endpoint, subscriptionId);
+            DoRequest<string>(endPoint, "POST");
         }
-
-        /// <summary>
-        /// Removes the policy configuration for the specified product.
-        /// </summary>
-        /// <exception cref="HttpResponseException">Thrown on invalid operation.</exception>
-        /// <param name="productId">Product identifier.</param>
-        /// <returns></returns>
-        public Task<bool> DeleteProductPolicyAsync(string productId, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            if (String.IsNullOrEmpty(productId))
-                throw new ArgumentException("productId is required");
-
-            var uri = String.Format("/products/{0}/policy", productId);
-            var request = base.BuildRequest(uri, "DELETE");
-
-            // Apply changes regardless of entity state
-            base.EntityStateUpdate(request, "*");
-
-            return base.ExecuteRequestAsync(request, HttpStatusCode.NoContent, cancellationToken);
-        }
-
         #endregion
 
-        
-        
-        #region APIs CRUD
 
-        /// <summary>
-        /// Get a list of all APIs
-        /// https://msdn.microsoft.com/en-us/library/azure/dn781423.aspx#ListAPIs
-        /// </summary>
-        /// <exception cref="HttpResponseException">Thrown on invalid operation.</exception>
-        /// <returns></returns>
-        public Task<List<API>> GetAPIsAsync(string filter = null, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            var query = new NameValueCollection();
-
-            // conditional filter
-            if (!String.IsNullOrEmpty(filter))
-                query.Add(Constants.ApiManagement.Url.FilterQuery, filter);
-
-            var request = base.BuildRequest(Constants.Request.API_REQUEST, "GET", query);
-            return base.ExecuteRequestAsync<EntityCollection<API>>(request, HttpStatusCode.OK, cancellationToken)
-                       .ContinueWith<List<API>>(t =>
-                       {
-                           return t.Result.Values;
-                       });
-        }
-
-        /// <summary>
-        /// Get a specific API
-        /// https://msdn.microsoft.com/en-us/library/azure/dn776336.aspx#GetAPI
-        /// </summary>
-        /// <exception cref="HttpResponseException">Thrown on invalid operation.</exception>
-        /// <param name="apiId">API identifier.</param>
-        /// <returns></returns>
-        public Task<API> GetAPIAsync(string apiId, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            if (String.IsNullOrEmpty(apiId))
-                throw new ArgumentException("apiId is required");
-
-            var uri = String.Format("{0}/{1}", Constants.Request.API_REQUEST, apiId);
-            var request = base.BuildRequest(uri, "GET");
-            return base.ExecuteRequestAsync<API>(request, HttpStatusCode.OK, cancellationToken);
-        }
-
-        #endregion
     }
 }

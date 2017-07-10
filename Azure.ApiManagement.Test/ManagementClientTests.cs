@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace Azure.ApiManagement.Test
 {
@@ -15,407 +17,366 @@ namespace Azure.ApiManagement.Test
     public class Testuser
     {
         protected ManagementClient Client { get; set; }
+        
 
         [TestInitialize]
-        public void Setup()
+        public void SetUp()
         {
-            string apiKeysContent;
-            var host = "";
-            var serviceId = "";
-            var accessKey = "";
+            Client = new ManagementClient();
+        }
 
-            try
+
+
+        #region User TestCases
+
+        [TestMethod]
+        public void CreateUser()
+        {
+            var preCount = Client.AllUsers().Count;
+            var uid = Guid.NewGuid().ToString("N");
+            var newUser = new User()
             {
-                //provide to reader your complete text file
-                string filePath = @"C:\Repositories\AzureAPIManagement\Azure.ApiManagement.Test\APIMKeys.json";
+                Id = uid,
+                Email = String.Format("test_{0}@test.com", uid),
+                FirstName = "Derek100",
+                LastName = "Nguyen100",
+                Password = "P@ssWo3d",
+                State = UserState.active,
+                Note = "notes.."
+            };
+            var user = Client.CreateUser(uid, newUser);
+            var postCount = Client.AllUsers().Count;
+            Assert.IsNotNull(newUser);
+            Assert.AreEqual(preCount + 1, postCount);
+        }
 
-                //System.Diagnostics.Debug.WriteLine(File.Exists(filePath) ? "File exists" : "Unable to find the file");
-                
+        [TestMethod]
+        public void GetUserCollection()
+        {
+            var userCollection = Client.AllUsers();
+            Assert.IsNotNull(userCollection);
+            Assert.AreEqual(userCollection.Count, userCollection.Values.Count);
+        }
 
-                using (StreamReader sr = new StreamReader(filePath)) //make sure this file has "Copy to output directory" Set to "Copy Always"
-                {
-                    apiKeysContent = sr.ReadToEnd();
-                    //Console.WriteLine(line);
-                    var json = JObject.Parse(apiKeysContent);
-                    host = json["host"].ToString();
-                    serviceId = json["serviceId"].ToString();
-                    accessKey = json["accessKey"].ToString();
-                }
-            }
-            catch (Exception e)
+        [TestMethod]
+        public void GetUser()
+        {
+            string userId = "66da331f7a1c49d98ac8a4ad136c7c64";
+            var user = Client.GetUser(userId);
+            Assert.IsNotNull(user);
+            Assert.AreEqual(userId, user.Id);
+        }
+
+        [TestMethod]
+        public void GetUserSsoURL()
+        {
+            string userId = "66da331f7a1c49d98ac8a4ad136c7c64";
+            var user = Client.GenerateSsoURL(userId);
+            Assert.IsNotNull(user);
+            Assert.IsNotNull(user.Url);
+        }
+
+        [TestMethod]
+        public void UpdateUser()
+        {
+            var userId = "66da331f7a1c49d98ac8a4ad136c7c64";
+            var firstName = "omg";
+
+            Hashtable parameters = new Hashtable();
+            parameters.Add("firstName", firstName);
+
+            Client.UpdateUser(userId, parameters);
+
+            var currUser = Client.GetUser(userId);
+            Assert.AreEqual(currUser.FirstName, firstName);
+        }
+
+       
+
+        #endregion User TestCases
+
+        #region API TestCases
+
+        [TestMethod]
+        public void CreateApi()
+        {
+
+            var id = Guid.NewGuid().ToString("N");
+
+
+            var newAPI = new API();
+            newAPI.Id = id;
+            newAPI.Name = "Server Calculator";
+            newAPI.Description = "This is a calculator created in the server";
+            newAPI.ServiceUrl = "http://echoapi.cloudapp.net/calc";
+            newAPI.Path = "/derek/calc";
+            newAPI.Protocols = new List<String>() { "http", "https" };
+            newAPI.Authentication = null;
+            newAPI.CustomNames = null;
+
+             var api = Client.CreateAPI(id, newAPI);
+
+        }
+
+        [TestMethod]
+        public void GetApi()
+        {
+            string apiId = "65d17612d5074d8bbfde4026357a24da";
+            var api = Client.GetAPI(apiId);
+
+            Assert.IsNotNull(api);
+            Assert.AreEqual(api.Id, apiId);
+        }
+
+
+        [TestMethod]
+        public void ApiCollection()
+        {
+            var apis = Client.AllAPIs();
+            Assert.IsNotNull(apis);
+        }
+
+        #endregion APITestCases
+
+        #region API OperationsTestCases
+        [TestMethod]
+        public void CreateAPIOperation()
+        {
+            var apiId = "65d17612d5074d8bbfde4026357a24da";
+            var operationId = Guid.NewGuid().ToString("N");
+            var name = "Onemore API operation";
+            var method = "POST";
+            var urlTemplate = "/add/{c}/{d}";
+            var parameters = new List<TemplateParameter>()
             {
-                Console.WriteLine("The file could not be read:");
-                Console.WriteLine(e.Message);
-            }
+                new TemplateParameter("c", ParameterType.NUMBER),
+                new TemplateParameter("d", ParameterType.NUMBER)
+            };
 
-            this.Client = new ManagementClient(host, serviceId, accessKey);
+
+            RequestContract request = new RequestContract();
+
+            request.Headers = new List<RequestHeader>() {
+                                            new RequestHeader("Ocp-Apim-Subscription-Key", ParameterType.STRING)
+                                        };
+            request.QueryParameters = new List<QueryParameter>() {
+                                           new QueryParameter("queryParameter1", ParameterType.NUMBER)
+                                        };
+
+            var operation = new APIOperation(operationId, name, method, urlTemplate, parameters, request);
+
+            var entity = Client.CreateAPIOperation(apiId, operationId, operation);
         }
 
-        #region Arguments Validation
+
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public void InvalidArgumentGetProduct()
+        public void GetAPIOperationByAPI()
         {
-            Client.GetProductAsync(null).Wait();
+            var apiId = "65d17612d5074d8bbfde4026357a24da";
+            EntityCollection<APIOperation> collection = Client.GetByAPI(apiId);
+            Assert.IsNotNull(collection);
         }
 
+
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void InvalidArgumentCreateProduct()
+        public void DelteAPIOperation()
         {
-            Client.CreateProductAsync(null).Wait();
+            var apiId = "65d17612d5074d8bbfde4026357a24da";
+            var operationId = "d6be400efb924ea18c615cdcc486d278";
+            var precount = Client.GetByAPI(apiId).Count;
+
+            APIOperation operation = Client.DeleteOperation(apiId, operationId);
+            var postCount = Client.GetByAPI(apiId).Count;
+            Assert.IsNotNull(operation);
+            Assert.AreEqual(precount - 1, postCount);
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public void InvalidArgumentIdCreateProduct()
-        {
-            Client.CreateProductAsync(new Product()).Wait();
-        }
+        #endregion API OperationsTestCases
 
-        #endregion
+        #region ProductTestCases
 
         [TestMethod]
-        [ExpectedException(typeof(OperationCanceledException))]
-        public void CancelRequest()
+        public void CreateProduct()
         {
-            var cts = new CancellationTokenSource();
-            var task = Client.GetProductsAsync(cancellationToken: cts.Token);
 
-            cts.CancelAfter(250);
-            task.Wait(cts.Token);
-        }
+            var pid = Guid.NewGuid().ToString("N");
+            var product = new Product(pid, "Server producta", "server description");
+            var p = Client.CreateProduct(pid, product);
 
-        [TestMethod]
-        public void GetProducts()
-        {
-            var task = Client.GetProductsAsync();
-            task.Wait();
-
-            Assert.AreNotEqual(null, task.Result);
-        }
-
-        [TestMethod]
-        public void GetProductsExpandGroups()
-        {
-            var task = Client.GetProductsAsync(expandGroups: true);
-            task.Wait();
-
-            Assert.AreEqual(true, task.Result.Any(p => p.Groups != null));
+            Assert.IsNotNull(p);
+            Assert.IsNotNull(p.Id);
+            Assert.AreEqual(p.Id, pid);
         }
 
         [TestMethod]
         public void GetProduct()
         {
-            var task = Client.GetProductsAsync();
-            task.Wait();
+            var productId = "29f79d2acfab453eac057ddf3656a31b";
+            var product = Client.GetProduct(productId);
 
-            var productId = task.Result[0].Id;
-
-            //System.Diagnostics.Debug.WriteLine(task.Result[0].Description);
-            //System.Diagnostics.Debug.WriteLine(task.Result[0].Uri);
-            //System.Diagnostics.Debug.WriteLine(task.Result[0].Name);
-            //System.Diagnostics.Debug.WriteLine(productId);
-
-
-            var pTask = Client.GetProductAsync(productId);
-
-
-            Assert.IsNotNull(pTask.Result);
-            Assert.AreNotEqual(productId, pTask.Id);
-        }
-
-        [TestMethod]
-        public void GetProductByFilter()
-        {
-            var task = Client.GetProductsAsync();
-            task.Wait();
-
-            var productId = task.Result.Last().Id;
-
-            var filter = String.Format("id eq '{0}'", productId);
-            var pTask = Client.GetProductsAsync(filter);
-            pTask.Wait();
-
-            Assert.IsTrue(pTask.Result.Count == 1);
-            Assert.AreEqual(productId, pTask.Result.First().Id);
+            Assert.IsNotNull(product);
+            Assert.AreEqual(productId, product.Id);
         }
 
         [TestMethod]
         public void UpdateProduct()
         {
-            var task = Client.GetProductsAsync();
-            task.Wait();
+            var productId = "5956a9b92f02d30b88dfad7d";
+            var currProduct = Client.GetProduct(productId);
+            var desc = "much better description";
+            currProduct.Description = desc;
+            Client.UpdateProduct(currProduct);
+            var product = Client.GetProduct(productId);
 
-            var product = task.Result.First();
+            Assert.IsNotNull(product);
+            Assert.AreEqual(productId, product.Id);
+            Assert.AreEqual(product.Description, desc);
 
-            var testDesc = DateTime.Now.ToLongTimeString();
 
-            product.Description = testDesc;
-
-            Client.UpdateProductAsync(product).Wait();
-
-            var pickTask = Client.GetProductAsync(product.Id);
-            pickTask.Wait();
-
-            Assert.AreEqual(testDesc, pickTask.Result.Description);
         }
 
         [TestMethod]
-        public void CreateProduct()
+        public void DeletProduct()
         {
-            var id = Guid.NewGuid().ToString("N");
-            var newProduct = new Product()
-            {
-                Id = id,
-                Name = "Testing product " + id,
-                Description = "Testing"
-            };
+            var productId = "Fitabase.Azure.ApiManagement.Model.Product";
+            var collection = Client.AllProducts();
+            Client.DeleteProduct(productId);
+            var currCollection = Client.AllProducts();
 
-            Client.CreateProductAsync(newProduct).Wait();
+            Assert.AreEqual(collection.Count - 1, currCollection.Count);
 
-            var pickTask = Client.GetProductAsync(newProduct.Id);
-            pickTask.Wait();
-
-            Assert.AreEqual(newProduct.Id, pickTask.Result.Id);
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpResponseException))]
-        public void DeleteProduct()
+        public void ProductCollection()
         {
-            var id = Guid.NewGuid().ToString("N");
-            var newProduct = new Product()
-            {
-                Id = id,
-                Name = "Testing product " + id,
-                Description = "Testing"
-            };
+            var products = Client.AllProducts();
+            Assert.IsNotNull(products);
+        }
 
-            Client.CreateProductAsync(newProduct).Wait();
-            Client.DeleteProductAsync(newProduct.Id, true).Wait();
 
-            try
-            {
-
-                Client.GetProductAsync(newProduct.Id).Wait();
-            }
-            catch (AggregateException ex)
-            {
-                throw ex.InnerException;
-            }
+        [TestMethod]
+        public void GetProductSubscriptions()
+        {
+            var productId = "5956a9b92f02d30b88dfad7d";
+            var collection = Client.GetProductSubscriptions(productId);
+            Assert.IsNotNull(collection);
         }
 
 
         [TestMethod]
         public void GetProductAPIs()
         {
-            var task = Client.GetProductsAsync();
-            task.Wait();
-
-            var productId = task.Result[0].Id;
-
-            var pTask = Client.GetProductAPIsAsync(productId);
-            pTask.Wait();
-
-            Assert.IsNotNull(pTask.Result);
+            var productId = "5956a9b92f02d30b88dfad7d";
+            var collection = Client.GetProductAPIs(productId);
+            Assert.IsNotNull(collection);
         }
-
         [TestMethod]
-        public void GetProductAddRemoveAPIs()
+        public void AddProductApi()
         {
-            var task = Client.GetProductsAsync();
-            task.Wait();
+            var productId = "5956a9b92f02d30b88dfad7d";
+            var apiId = "65d17612d5074d8bbfde4026357a24da";
+            var preCount = Client.GetProductAPIs(productId).Count;
+            Client.AddProductAPI(productId, apiId);
+            var postCount = Client.GetProductAPIs(productId).Count;
 
-            var productId = task.Result[0].Id;
-
-            var pTask = Client.GetProductAPIsAsync(productId);
-            pTask.Wait();
-
-            if (pTask.Result.Count > 0)
-            {
-                var apiId = pTask.Result[0].Id;
-
-                Client.RemoveProductAPIAsync(productId, apiId).Wait();
-                Client.AddProductAPIAsync(productId, apiId).Wait();
-
-                // assert
-                pTask = Client.GetProductAPIsAsync(productId);
-                pTask.Wait();
-
-                Assert.IsNotNull(pTask.Result.First(apis => apis.Id == apiId));
-            }
-
-            else Assert.Inconclusive("Selected Product didn`t have assigned APIs");
+            Assert.AreEqual(preCount + 1, postCount);
         }
-
         [TestMethod]
-        public void GetAPIs()
+        public void DeleteProductApi()
         {
-            var task = Client.GetAPIsAsync();
-            task.Wait();
+            var productId = "5956a9b92f02d30b88dfad7d";
+            var apiId = "65d17612d5074d8bbfde4026357a24da";
+            var preCount = Client.GetProductAPIs(productId).Count;
+            Client.DeleteProductAPI(productId, apiId);
+            var postCount = Client.GetProductAPIs(productId).Count;
 
-            Assert.IsNotNull(task.Result);
-        }
-
-        [TestMethod]
-        public void GetAPI()
-        {
-            var task = Client.GetAPIsAsync();
-            task.Wait();
-
-            if (task.Result.Count > 0)
-            {
-                var apiId = task.Result.First().Id;
-
-                var aTask = Client.GetAPIAsync(apiId);
-                aTask.Wait();
-
-                API api = aTask.Result;
-                System.Diagnostics.Debug.WriteLine(api.Id);
-                System.Diagnostics.Debug.WriteLine(api.Uri);
-                System.Diagnostics.Debug.WriteLine(api.Name);
-
-                Assert.IsNotNull(aTask.Result);
-                Assert.AreEqual(apiId, aTask.Result.Id);
-            }
-
-            else Assert.Inconclusive("No APIs defined");
-        }
-
-        [TestMethod]
-        public void CheckProductPolicy()
-        {
-            var task = Client.GetProductsAsync();
-            task.Wait();
-            if (task.Result.Count > 0)
-            {
-                var productId = task.Result[0].Id;
-
-                var pTask = Client.CheckProductPolicyAsync(productId);
-                pTask.Wait();
-
-            }
-
-            else Assert.Inconclusive("No Products found.");
-        }
-
-        [TestMethod]
-        public void GetProductPolicy()
-        {
-            var task = Client.GetProductsAsync();
-            task.Wait();
-
-            if (task.Result.Count > 0)
-            {
-                var productId = task.Result[0].Id;
-
-                var pTask = Client.GetProductPolicyAsync(productId);
-                pTask.Wait();
-
-                Assert.IsNotNull(pTask.Result);
-
-            }
-
-            else Assert.Inconclusive("No Products found.");
-        }
-
-        [TestMethod]
-        public void SetProductPolicy()
-        {
-            var task = Client.GetProductsAsync();
-            task.Wait();
-
-            if (task.Result.Count > 0)
-            {
-                var productId = task.Result[0].Id;
-
-                var pTask = Client.GetProductPolicyAsync(productId);
-                pTask.Wait();
-
-                var policy = pTask.Result;
-
-                var updateTask = Client.SetProductPolicyAsync(productId, policy);
-
-                Assert.IsNotNull(pTask.Result);
-
-            }
-
-            else Assert.Inconclusive("No Products found.");
-        }
-
-        [TestMethod]
-        public void CreateUserGetLogin()
-        {
-            var uid = Guid.NewGuid().ToString("N");
-            var newUser = new User()
-            {
-                Id = uid,
-                Email = String.Format("test_{0}@test.com", uid),
-                FirstName = "First1",
-                LastName = "Last1",
-                Password = "P@ssWo3d",
-                State = UserState.active,
-                Note = "notes.."
-            };
-
-            Client.CreateUserAsync(newUser).Wait();
-
-            var uTask = Client.GetUserSsoLoginAsync(uid);
-            uTask.Wait();
-
-            Assert.IsNotNull(uTask.Result);
-            Assert.IsTrue(Uri.IsWellFormedUriString(uTask.Result.Url, UriKind.Absolute));
+            Assert.AreEqual(preCount - 1, postCount);
         }
 
 
         [TestMethod]
-        public void TestGetUser()
+        public void GetProductGroups()
         {
-            string userId = "66da331f7a1c49d98ac8a4ad136c7c64";
-            var uTask = Client.GetUserSsoLoginAsync(userId);
-            uTask.Wait();
-            Assert.IsNotNull(uTask.Result);
-            Assert.IsTrue(Uri.IsWellFormedUriString(uTask.Result.Url, UriKind.Absolute));
+            var productId = "5956a9b92f02d30b88dfad7d";
+            var collection = Client.GetProductGroups(productId);
+            Assert.IsNotNull(collection);
+        }
+        [TestMethod]
+        public void AddProductGroup()
+        {
+            var productId = "5956a9b92f02d30b88dfad7d";
+            var groupId = "5870184f9898000087020002";
+            var preCount = Client.GetProductGroups(productId).Count;
+            Client.AddProductGroup(productId, groupId);
+            var postCount = Client.GetProductGroups(productId).Count;
+            Assert.AreEqual(preCount + 1, postCount);
+        }
+        [TestMethod]
+        public void DeleteProductGroup()
+        {
+            var productId = "5956a9b92f02d30b88dfad7d";
+            var groupId = "5870184f9898000087020002";
+            var preCount = Client.GetProductGroups(productId).Count;
+            Client.DeleteProductGroup(productId, groupId);
+            var postCount = Client.GetProductGroups(productId).Count;
+            Assert.AreEqual(preCount - 1, postCount);
+        }
 
+
+        #endregion ProductTestCases
+
+        #region Subscription TestCases
+
+
+        [TestMethod]
+        public void SubscriptionCollection()
+        {
+            var collection = Client.AllSubscriptions();
+            Assert.IsNotNull(collection);
+        }
+
+        [TestMethod]
+        public void GetSubscription()
+        {
+            var subscriptionId = "5870184f9898000087070001";
+            var subscription = Client.GetSubscription(subscriptionId);
+            Assert.IsNotNull(subscription);
+            Assert.AreEqual(subscriptionId, subscription.Id);
         }
 
 
         [TestMethod]
-        public void AddRemoveUserSubscription()
+        public void GeneratePrimaryKey()
         {
-            var uid = Guid.NewGuid().ToString("N");
-            var newUser = new User()
-            {
-                Id = uid,
-                Email = String.Format("test_{0}@test.com", uid),
-                FirstName = "First Name",
-                LastName = "Last Name",
-                Password = "P@ssWo3d",
-                State = UserState.active,
-                Note = "notes.."
-            };
-
-            Client.CreateUserAsync(newUser).Wait();
-
-            var ptask = Client.GetProductsAsync();
-            ptask.Wait();
-
-            uid = "/users/" + uid;
-            var pid = ptask.Result.First(p => p.State == ProductState.published).Uri; // only state which can be used in subscriptions
-
-            var sid = Guid.NewGuid().ToString("N");
-            var newsubsc = new Subscription()
-            {
-                Id = sid,
-                UserId = uid,
-                ProductId = pid,
-                State = SubscriptionState.active,
-            };
-
-            Client.AddProductSubscriptionAsync(newsubsc).Wait();
-            Client.RemoveProductSubscriptionAsync(newsubsc.Id).Wait();
+            var subscriptionId = "5870184f9898000087070001";
+            var key = Client.GeneratePrimaryKey(subscriptionId);
         }
+
+        [TestMethod]
+        public void GenerateSecondaryKey()
+        {
+            var subscriptionId = "5870184f9898000087070001";
+            Client.GenerateSecondaryKey(subscriptionId);
+
+        }
+
+        #endregion Subscription TestCases
+
+        #region GroupTestCases
+
+
+        [TestMethod]
+        public void GroupCollection()
+        {
+            var collection = Client.AllGroups();
+            Assert.IsNotNull(collection);
+        }
+
+        #endregion GroupTestCases
+
+
+
     }
 }

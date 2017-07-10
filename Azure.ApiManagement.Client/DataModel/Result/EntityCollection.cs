@@ -12,7 +12,8 @@ namespace Fitabase.Azure.ApiManagement.Model
     /// https://msdn.microsoft.com/en-us/library/azure/dn776332.aspx#collection
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    internal class EntityCollection<T> where T : EntityBase
+    [JsonObject(MemberSerialization.OptIn)]
+    public class EntityCollection<T> where T : EntityBase
     {
         /// <summary>
         /// The total number of elements in the collection.

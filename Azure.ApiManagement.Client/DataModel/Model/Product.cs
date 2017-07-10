@@ -14,9 +14,11 @@ namespace Fitabase.Azure.ApiManagement.Model
 
         public Product() { }
 
-        public Product(string name)
+        public Product(string id, string name, string description)
         {
+            this.Id = id;
             this.Name = name;
+            this.Description = description;
         }
 
 
@@ -78,7 +80,9 @@ namespace Fitabase.Azure.ApiManagement.Model
         /// </summary>
         [JsonProperty("groups")]
         public List<Group> Groups {get; set;}
+
     }
+    
 
    
 }
