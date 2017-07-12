@@ -204,6 +204,24 @@ namespace Fitabase.Azure.ApiManagement
             return DoRequest<User>(endpoint, "GET");
         }
 
+        public EntityCollection<Subscription> GetUserSubscription(string userId)
+        {
+            string endpoint = String.Format("{0}/users/{1}/subscriptions", api_endpoint, userId);
+            return DoRequest<EntityCollection<Subscription>>(endpoint, "GET");
+        }
+
+        public User DeleteUser(string userId)
+        {
+            string endpoint = String.Format("{0}/users/{1}", api_endpoint, userId);
+            return DoRequest<User>(endpoint, "DELETE");
+        }
+
+        public User DeleteUserWithSubscriptions(string userId)
+        {
+            string endpoint = String.Format("{0}/users/{1}?deleteSubscriptions=true", api_endpoint, userId);
+            return DoRequest<User>(endpoint, "DELETE");
+        }
+
         public EntityCollection<User> AllUsers()
         {
             string endpoint = String.Format("{0}/users", api_endpoint);

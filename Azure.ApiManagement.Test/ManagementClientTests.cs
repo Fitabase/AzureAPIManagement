@@ -33,13 +33,15 @@ namespace Azure.ApiManagement.Test
         public void CreateUser()
         {
             var preCount = Client.AllUsers().Count;
+            var firstName = "Derek10";
+            var lastName = "Nguyen10";
             var uid = Guid.NewGuid().ToString("N");
             var newUser = new User()
             {
                 Id = uid,
-                Email = String.Format("test_{0}@test.com", uid),
-                FirstName = "Derek100",
-                LastName = "Nguyen100",
+                Email = String.Format("{0}{1}@test.com", firstName, lastName),
+                FirstName = firstName,
+                LastName =  lastName,
                 Password = "P@ssWo3d",
                 State = UserState.active,
                 Note = "notes.."
@@ -54,6 +56,7 @@ namespace Azure.ApiManagement.Test
         public void GetUserCollection()
         {
             var userCollection = Client.AllUsers();
+            PrintMessage.Debug(this.GetType().Name, Utility.SerializeToJson(userCollection));
             Assert.IsNotNull(userCollection);
             Assert.AreEqual(userCollection.Count, userCollection.Values.Count);
         }
@@ -65,6 +68,34 @@ namespace Azure.ApiManagement.Test
             var user = Client.GetUser(userId);
             Assert.IsNotNull(user);
             Assert.AreEqual(userId, user.Id);
+        }
+
+        [TestMethod]
+        public void GetUserSubscriptions()
+        {
+            var userId = "1";
+            var collection = Client.GetUserSubscription(userId);
+            PrintMessage.Debug(this.GetType().Name, Utility.SerializeToJson(collection));
+        }
+
+
+        [TestMethod]
+        public void DeleteUser()
+        {
+            var preCount = Client.AllUsers().Count;
+            var userId = "";
+            var deletedUser = Client.DeleteUser(userId);
+            var postCount = Client.AllUsers().Count;
+            Assert.AreEqual(preCount - 1, postCount);
+        }
+        [TestMethod]
+        public void DeleteUserWithSubscription()
+        {
+            var preCount = Client.AllUsers().Count;
+            var userId = "";
+            var deletedUser = Client.DeleteUser(userId);
+            var postCount = Client.AllUsers().Count;
+            Assert.AreEqual(preCount - 1, postCount);
         }
 
         [TestMethod]
@@ -337,6 +368,7 @@ namespace Azure.ApiManagement.Test
         public void SubscriptionCollection()
         {
             var collection = Client.AllSubscriptions();
+            PrintMessage.Debug(this.GetType().Name, Utility.SerializeToJson(collection));
             Assert.IsNotNull(collection);
         }
 
@@ -345,6 +377,7 @@ namespace Azure.ApiManagement.Test
         {
             var subscriptionId = "5870184f9898000087070001";
             var subscription = Client.GetSubscription(subscriptionId);
+            PrintMessage.Debug(this.GetType().Name, Utility.SerializeToJson(subscription));
             Assert.IsNotNull(subscription);
             Assert.AreEqual(subscriptionId, subscription.Id);
         }
