@@ -7,7 +7,7 @@
     <ProjectGuid>{E8EF2D86-AEAD-4D44-9909-0E5B2641A139}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SmallStepsLabs.Azure.ApiManagement</RootNamespace>
+    <RootNamespace>Fitabase.Azure.ApiManagement</RootNamespace>
     <AssemblyName>SmallStepsLabs.Azure.ApiManagement.Client</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -167,7 +167,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ClientProxy\APIPubliser.cs" />
     <Compile Include="DataModel\Error.cs" />
+    <Compile Include="DataModel\Properties\Documents.cs" />
     <Compile Include="DataModel\Properties\ParameterType.cs" />
     <Compile Include="DataModel\Model\Certificate.cs" />
     <Compile Include="DataModel\Exceptions\InvalidEntityException.cs" />
@@ -180,6 +182,7 @@
     <Compile Include="DataModel\Model\Subscription.cs" />
     <Compile Include="DataModel\Model\Tenant.cs" />
     <Compile Include="DataModel\Model\User.cs" />
+    <Compile Include="DataModel\Properties\RequestMethod.cs" />
     <Compile Include="DataModel\Result\EntityCollection.cs" />
     <Compile Include="DataModel\Model\Group.cs" />
     <Compile Include="DataModel\Model\API.cs" />
@@ -188,13 +191,12 @@
     <Compile Include="ClientProxy\ManagementClient.cs" />
     <Compile Include="DataModel\Model\Product.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Swagger\PathData.cs" />
-    <Compile Include="Swagger\Post.cs" />
-    <Compile Include="Swagger\SwaggerApiCaster.cs" />
-    <Compile Include="Swagger\SwaggerInfo.cs" />
+    <Compile Include="Swagger\ISwaggerFileReader.cs" />
+    <Compile Include="Swagger\SwaggerAPIComposer.cs" />
+    <Compile Include="Swagger\SwaggerConfiguration.cs" />
+    <Compile Include="Swagger\SwaggerJsonFileReader.cs" />
     <Compile Include="Swagger\SwaggerObject.cs" />
     <Compile Include="Swagger\SwaggerParser.cs" />
-    <Compile Include="Swagger\SwaggerResponse.cs" />
     <Compile Include="Utilities\Constants.cs" />
     <Compile Include="Utilities\PrintMessage.cs" />
     <Compile Include="Utilities\Utility.cs" />

@@ -4,12 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Fitabase.Azure.ApiManagement
+namespace Fitabase.Azure.ApiManagement.Swagger
 {
-
-    public class PathData
+    public class SwaggerConfiguration
     {
-        public Post post { get; set; }
     }
-
 }

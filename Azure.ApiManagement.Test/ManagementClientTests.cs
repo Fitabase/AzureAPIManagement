@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Collections;
 using System.Collections.Generic;
+using Fitabase.Azure.ApiManagement.DataModel.Properties;
 
 namespace Azure.ApiManagement.Test
 {
@@ -157,7 +158,6 @@ namespace Azure.ApiManagement.Test
         {
             string apiId = "65d17612d5074d8bbfde4026357a24da";
             var api = Client.GetAPI(apiId);
-
             Assert.IsNotNull(api);
             Assert.AreEqual(api.Id, apiId);
         }
@@ -168,6 +168,10 @@ namespace Azure.ApiManagement.Test
         {
             var apis = Client.AllAPIs();
             Assert.IsNotNull(apis);
+            foreach(API api in apis.Values)
+            {
+                PrintMessage.Debug(this.GetType().Name, Utility.SerializeToJson(api));
+            }
         }
 
         #endregion APITestCases
@@ -179,7 +183,7 @@ namespace Azure.ApiManagement.Test
             var apiId = "65d17612d5074d8bbfde4026357a24da";
             var operationId = Guid.NewGuid().ToString("N");
             var name = "Onemore API operation";
-            var method = "POST";
+            var method = RequestMethod.POST;
             var urlTemplate = "/add/{c}/{d}";
             var parameters = new List<TemplateParameter>()
             {

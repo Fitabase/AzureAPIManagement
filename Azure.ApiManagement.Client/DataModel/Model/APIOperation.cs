@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Fitabase.Azure.ApiManagement.DataModel.Properties;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,16 +11,31 @@ namespace Fitabase.Azure.ApiManagement.Model
     public class APIOperation : EntityBase
     {
         protected override string UriIdFormat => "/operations";
+        public static string GenerateIdSignature()
+        {
+            return new StringBuilder()
+                        .Append("APIOperation_")
+                        .Append(Guid.NewGuid().ToString("N"))
+                        .ToString();
+        }
+
 
         public APIOperation() { }
         public APIOperation(string id, string name, 
-                            string method, string urlTemplate, 
+                            RequestMethod method, string urlTemplate, 
                             List<TemplateParameter> parameters,
                             RequestContract request)
         {
+            if (String.IsNullOrWhiteSpace(id))
+                throw new ArgumentException("APIOperation id is required");
+            if (String.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("APIOperation name is required");
+            if (method == null)
+                throw new ArgumentException("APIOperation method is required");
+            
             this.Id = id;
             this.Name = name;
-            this.Method = method;
+            this.Method = method.ToString();
             this.UrlTemplate = urlTemplate;
             this.TemplateParameter = parameters;
             this.Request = request;
@@ -50,6 +66,46 @@ namespace Fitabase.Azure.ApiManagement.Model
         // An entity containing request details
         [JsonProperty("request")]
         public RequestContract Request { get; set; }
+
+        [JsonProperty("responses")]
+        public OperationResponse[] Responses { get; set; }
+
+
+        /// <summary>
+        /// Contain operation response
+        /// </summary>
+        public class OperationResponse
+        {
+
+            public OperationResponse(int statusCode, string description)
+            {
+                this.StatusCode = statusCode;
+                this.Description = description;
+            }
+
+
+            [JsonProperty("statusCode")]
+            public int StatusCode { get; set; }
+            
+            [JsonProperty("description")]
+            public string Description { get; set; }
+
+            [JsonProperty("representations")]
+            public List<Representation> Representations { get; set; }
+
+
+            /// <summary>
+            /// Operation response representation
+            /// </summary>
+            public class Representation
+            {
+                [JsonProperty("contentType")]
+                public string ContenType { get; set; }
+
+                [JsonProperty("sample")]
+                public string Sameple { get; set; }
+            }
+        }
     }
 
 

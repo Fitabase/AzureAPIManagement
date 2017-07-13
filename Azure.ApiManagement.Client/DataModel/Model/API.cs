@@ -14,6 +14,14 @@ namespace Fitabase.Azure.ApiManagement.Model
     {
         protected override string UriIdFormat {  get { return "/apis/"; } }
 
+        public static string GenerateIdSignature()
+        {
+            return new StringBuilder()
+                        .Append("API_")
+                        .Append(Guid.NewGuid().ToString("N"))
+                        .ToString();
+        }
+
         public API() { }
         public API(string name, string description, 
                    string serviceUrl, string path, 
@@ -74,6 +82,9 @@ namespace Fitabase.Azure.ApiManagement.Model
         /// </summary>
         [JsonProperty("subscriptionKeyParameterNames")]
         public SubscriptionKeyParameterNames CustomNames { get; set; }
+
+        [JsonIgnore]
+        public ICollection<APIOperation> Operations { get; set; }
 
     }
 

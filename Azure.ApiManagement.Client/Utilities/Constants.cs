@@ -9,6 +9,8 @@ namespace Fitabase.Azure.ApiManagement
 {
     internal static class Constants
     {
+      
+
 
         internal static readonly string FITABSE_TOKEN = "FitabaseToken";
         //internal static readonly string FITABASE_API_VERSION = "Fitabase-API-Version";
