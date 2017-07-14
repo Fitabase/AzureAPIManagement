@@ -1,44 +1,11 @@
 ﻿{
-  "swagger": "2.0",
-  "info": {
-    "version": "BodyTrace",
-    "title": "BodyTrace"
-  },
-  "host": "localhost:2598",
-  "schemes": [
-    "http"
-  ],
-  "paths": {
-    "/api/BodyTrace/Ingest": {
-      "post": {
-        "tags": [
-          "Todo"
-        ],
-        "operationId": "BodyTrace_Ingest",
-        "consumes": [],
-        "produces": [],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          }
-        }
-      }
-    },
-    "/api/BodyTrace": {
-      "post": {
-        "tags": [
-          "BodyTrace"
-        ],
-        "operationId": "BodyTrace_Ingest",
-        "consumes": [],
-        "produces": [],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          }
-        }
-      }
-    }
-  },
-  "definitions": {}
+  "name": "DerekAPI",
+  "description": "Derek first api",
+  "serviceUrl": "http://echoapi.cloudapp.net/calc",
+  "path": "calc",
+  "protocols": [ "http", "https" ],
+  "authenticationSettings": null,
+  "subscriptionKeyParameterNames": null,
+  "parameters": null,
+  "id": "/apis/5956a87a2f02d30b88dfad7b"
 }

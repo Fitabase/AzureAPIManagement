@@ -9,6 +9,10 @@ namespace Fitabase.Azure.ApiManagement.Model
     /// </summary>
     public class Subscription : EntityBase
     {
+        public Subscription() : base("Subscription")
+        {
+        }
+
         protected override string UriIdFormat { get { return "/subscriptions/"; } }
 
         /// <summary>

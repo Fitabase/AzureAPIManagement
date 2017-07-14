@@ -6,7 +6,14 @@ using System.Threading.Tasks;
 
 namespace Fitabase.Azure.ApiManagement.Swagger
 {
-    public class SwaggerConfiguration
+
+    /// <summary>
+    /// An object to hold data types produced and consumed by operations.
+    /// </summary>
+    public class Definition
     {
+
     }
+
+
 }

@@ -8,6 +8,10 @@ namespace Fitabase.Azure.ApiManagement.Model
 {
     public class Report : EntityBase
     {
+        public Report() : base("Report")
+        {
+        }
+
         protected override string UriIdFormat { get { return "/reports/"; } }
     }
 }

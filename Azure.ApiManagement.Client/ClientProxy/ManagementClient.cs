@@ -198,10 +198,10 @@ namespace Fitabase.Azure.ApiManagement
             string endpoint = String.Format("{0}/users/{1}/generateSsoUrl", api_endpoint, userId);
             return DoRequest<SsoUrl>(endpoint, RequestMethod.POST);
         }
-        public User CreateUser(string userId, User user)
+        public User CreateUser(User user)
         {
             Validator.ValidateUser(user);
-            string endpoint = String.Format("{0}/users/{1}", api_endpoint, userId);
+            string endpoint = String.Format("{0}/users/{1}", api_endpoint, user.Id);
             return DoRequest<User>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(user));
         }
         public User GetUser(string userId)
@@ -244,9 +244,9 @@ namespace Fitabase.Azure.ApiManagement
 
 
         #region API
-        public API CreateAPI(string apiId, API api)
+        public API CreateAPI(API api)
         {
-            string endpoint = String.Format("{0}/apis/{1}", api_endpoint, apiId);
+            string endpoint = String.Format("{0}/apis/{1}", api_endpoint, api.Id);
             return DoRequest<API>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(api));
         }
         public API GetAPI(string id)
@@ -266,10 +266,10 @@ namespace Fitabase.Azure.ApiManagement
 
         #region API Operations
 
-        public APIOperation CreateAPIOperation(string apiId, string operationId, APIOperation operation)
+        public APIOperation CreateAPIOperation(string apiId, APIOperation operation)
         {
             string endpoint = String.Format("{0}/apis/{1}/operations/{2}",
-                                                api_endpoint, apiId, operationId);
+                                                api_endpoint, apiId, operation.Id);
             return DoRequest<APIOperation>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(operation));
         }
         public APIOperation GetAPIOperation(string apiId, string operationId)
@@ -293,10 +293,10 @@ namespace Fitabase.Azure.ApiManagement
 
 
         #region Product
-        public Product CreateProduct(string productId, Product product)
+        public Product CreateProduct(Product product)
         {
             Validator.ValidateProduct(product);
-            string endpoint = String.Format("{0}/products/{1}", api_endpoint, product);
+            string endpoint = String.Format("{0}/products/{1}", api_endpoint, product.Id);
             return DoRequest<Product>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(product));
         }
         public Product GetProduct(string productId)
@@ -409,9 +409,9 @@ namespace Fitabase.Azure.ApiManagement
 
 
         #region Group
-        public Group CreateGroup(string groupId, Group group)
+        public Group CreateGroup(Group group)
         {
-            string endpoint = String.Format("{0}/groups/{1}", api_endpoint, group);
+            string endpoint = String.Format("{0}/groups/{1}", api_endpoint, group.Id);
             return DoRequest<Group>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(group));
         }
         public Group GetGroup(string groupId)
@@ -433,9 +433,9 @@ namespace Fitabase.Azure.ApiManagement
 
 
         #region Subscription
-        public Subscription CreateSubscription(string subscriptionId, Product subscription)
+        public Subscription CreateSubscription(Subscription subscription)
         {
-            string endpoint = String.Format("{0}/subscriptions/{1}", api_endpoint, subscription);
+            string endpoint = String.Format("{0}/subscriptions/{1}", api_endpoint, subscription.Id);
             return DoRequest<Subscription>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(subscription));
         }
         public Subscription GetSubscription(string subscriptionId)

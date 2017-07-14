@@ -13,6 +13,6 @@ namespace Fitabase.Azure.ApiManagement.Swagger
         /// </summary>
         /// <param name="filePath"></param>
         /// <returns></returns>
-        SwaggerObject GetSwaggerFromFile(string filePath);
+        SwaggerAPIComponent GetSwaggerFromFile(string filePath);
     }
 }

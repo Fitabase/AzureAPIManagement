@@ -11,11 +11,10 @@ namespace Fitabase.Azure.ApiManagement.DataModel.Properties
 {
     public static class Documents
     {
-        public static string BASE = @"C:\Users\inter\Desktop\";
 
-        public static string API_DOC => BASE + "api_doc.json";
+        public static string API_DOC = @"\api_doc.json";
 
-        public static string API_OPERATION_DOC => BASE + "apioperation_doc.json";
+        public static string API_OPERATION_DOC = @"\apioperation_doc.json";
 
 
 

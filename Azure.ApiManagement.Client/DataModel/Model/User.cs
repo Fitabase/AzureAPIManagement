@@ -12,52 +12,54 @@ namespace Fitabase.Azure.ApiManagement.Model
     {
         protected override string UriIdFormat { get { return "/users/"; } }
 
-        /// <summary>
-        /// First name. Must not be empty. Maximum length is 100 characters.
-        /// </summary>
+        public User() : base("User") { }
+
+        public User(string firstName, string lastName,
+                    string email, string password,
+                    UserState state = UserState.active, string note = "") : base("User")
+        {
+            PrintMessage.Debug("user: ", firstName);
+            PrintMessage.Debug("user: ", lastName);
+            if (String.IsNullOrWhiteSpace(firstName) || firstName.Length > 100)
+                throw new ArgumentException("Invalid firstname: " + firstName);
+            if (String.IsNullOrWhiteSpace(lastName) || lastName.Length > 100)
+                throw new ArgumentException("Invalid lastname: " + lastName);
+            if (String.IsNullOrWhiteSpace(email))
+                throw new ArgumentException("Invalid email: " + email);
+            if (String.IsNullOrWhiteSpace(password))
+                throw new ArgumentException("Invalid password: " + password);
+
+            this.FirstName = firstName;
+            this.LastName = lastName;
+            this.Email = email;
+            this.Password = password;
+            this.State = state;
+            this.Note = note;
+
+        }
+        
         [JsonProperty("firstName")]
         public string FirstName { get; set; }
 
-        /// <summary>
-        /// Last name. Must not be empty. Maximum length is 100 characters.
-        /// </summary>
         [JsonProperty("lastName")]
         public string LastName { get; set; }
 
-        /// <summary>
-        /// Email address. Must not be empty and must be unique within the service instance. Maximum length 254 characters.
-        /// </summary>
         [JsonProperty("email")]
         public string Email { get; set; }
 
-        /// <summary>
-        /// Password for user.
-        /// </summary>
         [JsonProperty("password")]
         public string Password { get; set; }
 
-        /// <summary>
-        /// User registration date, in ISO 8601 format
-        /// </summary>
         [JsonProperty("registrationDate", NullValueHandling = NullValueHandling.Ignore)]
         public DateTime? RegistrationDate { get; set; }
 
-        /// <summary>
-        /// Specifies whether the user is active or not. Blocked users cannot authenticate on the developer portal or call any APIs of the products to which they are subscribed.
-        /// </summary>
         [JsonProperty("state")]
         [JsonConverter(typeof(StringEnumConverter))]
         public UserState State { get; set; }
 
-        /// <summary>
-        /// Optional note about a user set by the administrator.
-        /// </summary>
         [JsonProperty("note")]
         public string Note { get; set; }
 
-        /// <summary>
-        /// An array of Group entities that have visibility to the user.
-        /// This property is optional and is only included in responses when the request has an expandGroups query parameter with a value of true.
         [JsonProperty("groups", NullValueHandling = NullValueHandling.Ignore)]
         public List<Group> Groups { get; set; }
     }

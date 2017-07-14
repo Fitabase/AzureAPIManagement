@@ -11,12 +11,10 @@ namespace Fitabase.Azure.ApiManagement.Model
     public class Product : EntityBase
     {
         protected override string UriIdFormat { get { return "/products/"; } }
+        
 
-        public Product() { }
-
-        public Product(string id, string name, string description)
+        public Product(string name, string description) : base("Product")
         {
-            this.Id = id;
             this.Name = name;
             this.Description = description;
         }

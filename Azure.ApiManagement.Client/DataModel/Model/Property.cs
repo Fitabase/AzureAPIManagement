@@ -8,6 +8,10 @@ namespace Fitabase.Azure.ApiManagement.Model
 {
     public class Property : EntityBase
     {
+        public Property() : base("Property")
+        {
+        }
+
         protected override string UriIdFormat { get { return "/properties/"; } }
     }
 }

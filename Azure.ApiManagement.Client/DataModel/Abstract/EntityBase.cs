@@ -9,37 +9,55 @@ namespace Fitabase.Azure.ApiManagement.Model
 {
     public abstract class EntityBase
     {
-        protected abstract string UriIdFormat { get; }
-
-        private string _id;
-        [JsonIgnore]
-        public string Id
+        public EntityBase(string prefixId)
         {
-            get
-            {
-                if (String.IsNullOrEmpty(_id))
-                {
-
-                    if (!String.IsNullOrEmpty(this.Uri))
-                    {
-
-                        if (this.Uri.StartsWith(this.UriIdFormat, StringComparison.InvariantCultureIgnoreCase))
-                            _id = this.Uri.Substring(UriIdFormat.Length);
-                    }
-                }
-
-                return _id;
-            }
-            set
-            {
-                _id = value;
-            }
+            PrintMessage.Debug(this.GetType().Name, _id);
+            if (String.IsNullOrWhiteSpace(_id))
+                this.Id = GenerateIdSignature(prefixId);
         }
 
+        private string GenerateIdSignature(string prefixId)
+        {
+            return new StringBuilder()
+                        .Append(prefixId).Append("_")
+                        .Append(Guid.NewGuid().ToString("N"))
+                        .ToString();
+        }
+
+        protected abstract string UriIdFormat { get; }
+
+        public string Id { get; set; }
+        private string _id;
+        //[JsonIgnore]
+        //public string Id
+        //{
+        //    get
+        //    {
+        //        if (String.IsNullOrEmpty(_id))
+        //        {
+
+        //            if (!String.IsNullOrEmpty(this.Uri))
+        //            {
+
+        //                if (this.Uri.StartsWith(this.UriIdFormat, StringComparison.InvariantCultureIgnoreCase))
+        //                    _id = this.Uri.Substring(UriIdFormat.Length);
+        //            }
+        //        }
+
+        //        return _id;
+        //    }
+        //    set
+        //    {
+        //        _id = value;
+        //    }
+        //}
+    
         /// <summary>
         /// Resource identifier. Uniquely identifies the entity within the current API Management service instance. 
         /// </summary>
-        [JsonProperty("id", NullValueHandling = NullValueHandling.Ignore)]
-        public string Uri { get; set; }
+        //[JsonProperty("id", NullValueHandling = NullValueHandling.Ignore)]
+        //public string Uri { get; set; }
+        
+        
     }
 }

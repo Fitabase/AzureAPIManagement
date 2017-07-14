@@ -8,6 +8,10 @@ namespace Fitabase.Azure.ApiManagement.Model
 {
     public class Certificate : EntityBase
     {
+        public Certificate() : base("Ceritificate")
+        {
+        }
+
         protected override string UriIdFormat { get { return "/certificates/"; } }
     }
 }

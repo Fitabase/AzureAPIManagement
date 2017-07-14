@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Fitabase.Azure.ApiManagement.Swagger
 {
-    public class SwaggerJsonFileReader : ISwaggerFileReader
+    public class JsonFileReader : ISwaggerFileReader
     {
 
         /// <summary>
@@ -16,10 +16,10 @@ namespace Fitabase.Azure.ApiManagement.Swagger
         /// </summary>
         /// <param name="filePath"></param>
         /// <returns></returns>
-        public SwaggerObject GetSwaggerFromFile(string filePath)
+        public SwaggerAPIComponent GetSwaggerFromFile(string filePath)
         {
             var jsonStr = GetJson(filePath);
-            return JsonConvert.DeserializeObject<SwaggerObject>(jsonStr);
+            return JsonConvert.DeserializeObject<SwaggerAPIComponent>(jsonStr);
         }
         
 

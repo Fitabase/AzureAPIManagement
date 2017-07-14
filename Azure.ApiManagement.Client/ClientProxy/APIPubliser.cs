@@ -15,13 +15,13 @@ namespace Fitabase.Azure.ApiManagement.ClientProxy
     {
         private ManagementClient Client { get; set; }
         private string InputFile { get; set; }
-        private string OutputFile { get; set; }
+        private string OutputFolder { get; set; }
 
 
-        public APIPubliser(string inputFile, string outputFile)
+        public APIPubliser(string inputFile, string outputFolder)
         {
             this.InputFile = inputFile;
-            this.OutputFile = outputFile;
+            this.OutputFolder = outputFolder;
             Client = new ManagementClient();
         }
 
@@ -33,17 +33,20 @@ namespace Fitabase.Azure.ApiManagement.ClientProxy
         {
             if(InputFile == null)
             {
-                throw new ArgumentException("Filepath is required");
+                throw new ArgumentException("FilePath is required");
             }
-            var swagger = new SwaggerJsonFileReader().GetSwaggerFromFile(InputFile);
-            swagger.Host = Client.GetEndpoint();
-            var apiCollection = new SwaggerApiComposer(swagger).Compose();
+            var swagger = new JsonFileReader().GetSwaggerFromFile(InputFile);
+            PrintMessage.Debug(this.GetType().Name, Utility.SerializeToJson(swagger));
+            //swagger.Host = Client.GetEndpoint();
+            var api = new APIComposer(swagger).Compose();
+
+
+            List<APIOperation> list = api.Operations.ToList();
+            PrintMessage.Debug(this.GetType().Name, Utility.SerializeToJson(list.ElementAt(0).Responses));
             
-            foreach (API api in apiCollection)
-            {
-                Documents.Write(Documents.API_DOC, api);
-                Documents.Write(Documents.API_OPERATION_DOC, api.Operations);
-            }
+
+            //Documents.Write(OutputFolder + Documents.API_DOC, api);
+            //Documents.Write(OutputFolder + Documents.API_OPERATION_DOC, api.Operations);
         }
     }
 }

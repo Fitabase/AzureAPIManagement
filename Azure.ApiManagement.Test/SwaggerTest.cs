@@ -18,8 +18,8 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void GetSwaggerObject()
         {
-            var inputFile = @"C:\Repositories\AzureAPIManagement\Azure.ApiManagement.Test\SwaggerObject.json";
-            var outputFile = @"C:\Users\inter\Desktop\output.json";
+            var inputFile  = @"C:\Users\inter\Desktop\FitabaseAPI\bodyTrace.json";
+            var outputFile = @"C:\Users\inter\Desktop\FitabaseAPI\result";
             APIPubliser publiser = new APIPubliser(inputFile, outputFile);
             publiser.Publish();
             

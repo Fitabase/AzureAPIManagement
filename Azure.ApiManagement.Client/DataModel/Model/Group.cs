@@ -9,6 +9,10 @@ namespace Fitabase.Azure.ApiManagement.Model
 {
     public class Group : EntityBase
     {
+        public Group() : base("Group")
+        {
+        }
+
         protected override string UriIdFormat {  get { return "/groups/"; } }
 
         /// <summary>
