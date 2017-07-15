@@ -201,8 +201,11 @@ namespace Fitabase.Azure.ApiManagement
         public User CreateUser(User user)
         {
             Validator.ValidateUser(user);
-            string endpoint = String.Format("{0}/users/{1}", api_endpoint, user.Id);
-            return DoRequest<User>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(user));
+            var userId = user.GenerateIdSignature("user_");
+            string endpoint = String.Format("{0}/users/{1}", api_endpoint, userId);
+            var entity =  DoRequest<User>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(user));
+
+            return entity;
         }
         public User GetUser(string userId)
         {

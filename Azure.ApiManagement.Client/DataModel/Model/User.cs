@@ -12,31 +12,29 @@ namespace Fitabase.Azure.ApiManagement.Model
     {
         protected override string UriIdFormat { get { return "/users/"; } }
 
-        public User() : base("User") { }
+        //public User() { }
 
-        public User(string firstName, string lastName,
-                    string email, string password,
-                    UserState state = UserState.active, string note = "") : base("User")
-        {
-            PrintMessage.Debug("user: ", firstName);
-            PrintMessage.Debug("user: ", lastName);
-            if (String.IsNullOrWhiteSpace(firstName) || firstName.Length > 100)
-                throw new ArgumentException("Invalid firstname: " + firstName);
-            if (String.IsNullOrWhiteSpace(lastName) || lastName.Length > 100)
-                throw new ArgumentException("Invalid lastname: " + lastName);
-            if (String.IsNullOrWhiteSpace(email))
-                throw new ArgumentException("Invalid email: " + email);
-            if (String.IsNullOrWhiteSpace(password))
-                throw new ArgumentException("Invalid password: " + password);
+        //public User(string firstName, string lastName,
+        //            string email, string password,
+        //            UserState state = UserState.active, string note = "") : this()
+        //{
+        //    if (String.IsNullOrWhiteSpace(firstName) || firstName.Length > 100)
+        //        throw new ArgumentException("Invalid firstname: " + firstName);
+        //    if (String.IsNullOrWhiteSpace(lastName) || lastName.Length > 100)
+        //        throw new ArgumentException("Invalid lastname: " + lastName);
+        //    if (String.IsNullOrWhiteSpace(email))
+        //        throw new ArgumentException("Invalid email: " + email);
+        //    if (String.IsNullOrWhiteSpace(password))
+        //        throw new ArgumentException("Invalid password: " + password);
 
-            this.FirstName = firstName;
-            this.LastName = lastName;
-            this.Email = email;
-            this.Password = password;
-            this.State = state;
-            this.Note = note;
+        //    this.FirstName = firstName;
+        //    this.LastName = lastName;
+        //    this.Email = email;
+        //    this.Password = password;
+        //    this.State = state;
+        //    this.Note = note;
 
-        }
+        //}
         
         [JsonProperty("firstName")]
         public string FirstName { get; set; }

@@ -13,7 +13,7 @@ namespace Fitabase.Azure.ApiManagement.Model
         protected override string UriIdFormat { get { return "/products/"; } }
         
 
-        public Product(string name, string description) : base("Product")
+        public Product(string name, string description)
         {
             this.Name = name;
             this.Description = description;

@@ -34,24 +34,33 @@ namespace Azure.ApiManagement.Test
         public void CreateUser()
         {
             var preCount = Client.AllUsers().Count;
-            var firstName = "Derek10";
-            var lastName = "Nguyen10";
+            var firstName = "Derek2";
+            var lastName = "Nguyen";
             var email = String.Format("{0}{1}@test.com", firstName, lastName);
             var password = "P@ssWo3d";
-            PrintMessage.Debug("user: ", firstName);
-            PrintMessage.Debug("user: ", lastName);
-            var newUser = new User(firstName, lastName, email,  password);
-            //var user = Client.CreateUser(newUser);
-            //var postCount = Client.AllUsers().Count;
-            //Assert.IsNotNull(newUser);
-            //Assert.AreEqual(preCount + 1, postCount);
+            //var newUser = new User(firstName, lastName, email,  password);
+            var newUser = new User()
+            {
+                FirstName = firstName,
+                LastName = lastName,
+                Email = email,
+                Password = password
+            };
+
+            //PrintMessage.Debug(this.GetType().Name, Utility.SerializeToJson(newUser));
+            var user = Client.CreateUser(newUser);
+            var postCount = Client.AllUsers().Count;
+            Assert.AreEqual(preCount + 1, postCount);
+            Assert.IsNotNull(user);
+            Assert.IsNotNull(user.Id);
         }
 
         [TestMethod]
         public void GetUserCollection()
         {
             var userCollection = Client.AllUsers();
-            PrintMessage.Debug(this.GetType().Name, Utility.SerializeToJson(userCollection));
+            PrintMessage.Debug(this.GetType().Name, userCollection);
+            PrintMessage.Debug(this.GetType().Name, userCollection.Values.ElementAt(3).Id);
             Assert.IsNotNull(userCollection);
             Assert.AreEqual(userCollection.Count, userCollection.Values.Count);
         }
@@ -59,7 +68,7 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void GetUser()
         {
-            string userId = "1";
+            string userId = "user_dd1836806e864ba8acea1caaba13268d";
             var user = Client.GetUser(userId);
             PrintMessage.Debug("GetUser", Utility.SerializeToJson(user));
             PrintMessage.Debug("GetUser", Utility.SerializeToJson(user.Id));
@@ -137,7 +146,8 @@ namespace Azure.ApiManagement.Test
             
             var newAPI = new API(name, description, serviceUrl, path, protocols);
 
-             var api = Client.CreateAPI(newAPI);
+            var api = Client.CreateAPI(newAPI);
+            PrintMessage.Debug(this.GetType().Name, newAPI);
 
         }
 

@@ -8,7 +8,7 @@ namespace Fitabase.Azure.ApiManagement.Model
 {
     public class Certificate : EntityBase
     {
-        public Certificate() : base("Ceritificate")
+        public Certificate()
         {
         }
 

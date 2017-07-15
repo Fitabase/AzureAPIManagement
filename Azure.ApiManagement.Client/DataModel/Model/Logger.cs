@@ -8,7 +8,7 @@ namespace Fitabase.Azure.ApiManagement.Model
 {
     public class Logger : EntityBase
     {
-        public Logger() : base("Logger")
+        public Logger()
         {
         }
 

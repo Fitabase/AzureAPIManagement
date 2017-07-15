@@ -8,7 +8,7 @@ namespace Fitabase.Azure.ApiManagement.Model
 {
     public class Property : EntityBase
     {
-        public Property() : base("Property")
+        public Property()
         {
         }
 

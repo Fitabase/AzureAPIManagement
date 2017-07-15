@@ -9,7 +9,7 @@ namespace Fitabase.Azure.ApiManagement.Model
 {
     public class Group : EntityBase
     {
-        public Group() : base("Group")
+        public Group()
         {
         }
 

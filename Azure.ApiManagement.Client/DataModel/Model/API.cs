@@ -18,7 +18,7 @@ namespace Fitabase.Azure.ApiManagement.Model
                    string serviceUrl, string path, 
                    List<String> protocols, 
                    AuthenticationSettings authentication = null, 
-                   SubscriptionKeyParameterNames customNames = null) : base("API")
+                   SubscriptionKeyParameterNames customNames = null)
         {
             this.Name = name;
             this.Description = description;

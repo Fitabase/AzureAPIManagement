@@ -9,7 +9,7 @@ namespace Fitabase.Azure.ApiManagement.Model
 {
     public class Tenant : EntityBase
     {
-        public Tenant() : base("Tenant")
+        public Tenant()
         {
         }
 

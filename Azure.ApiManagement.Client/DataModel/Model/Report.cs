@@ -8,7 +8,7 @@ namespace Fitabase.Azure.ApiManagement.Model
 {
     public class Report : EntityBase
     {
-        public Report() : base("Report")
+        public Report()
         {
         }
 

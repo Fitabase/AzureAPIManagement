@@ -9,7 +9,7 @@ namespace Fitabase.Azure.ApiManagement.Model
     /// </summary>
     public class Subscription : EntityBase
     {
-        public Subscription() : base("Subscription")
+        public Subscription()
         {
         }
 
