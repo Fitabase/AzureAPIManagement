@@ -15,7 +15,7 @@ using Fitabase.Azure.ApiManagement.DataModel.Properties;
 namespace Azure.ApiManagement.Test
 {
     [TestClass]
-    public class Testuser
+    public class ManagementClientTests
     {
         protected ManagementClient Client { get; set; }
         
@@ -26,41 +26,33 @@ namespace Azure.ApiManagement.Test
             Client = new ManagementClient();
         }
 
+        private static void Print(object obj)
+        {
+            PrintMessage.Debug("TestClass", obj);
+        }
 
-
+          
         #region User TestCases
 
         [TestMethod]
         public void CreateUser()
         {
-            var preCount = Client.AllUsers().Count;
-            var firstName = "Derek2";
+            var preCount = Client.GetUsers().Count;
+            var firstName = "Derek";
             var lastName = "Nguyen";
-            var email = String.Format("{0}{1}@test.com", firstName, lastName);
+            var email = String.Format("{0}{1}@test.com", firstName, DateTimeOffset.Now.ToUnixTimeMilliseconds());
             var password = "P@ssWo3d";
-            //var newUser = new User(firstName, lastName, email,  password);
-            var newUser = new User()
-            {
-                FirstName = firstName,
-                LastName = lastName,
-                Email = email,
-                Password = password
-            };
-
-            //PrintMessage.Debug(this.GetType().Name, Utility.SerializeToJson(newUser));
-            var user = Client.CreateUser(newUser);
-            var postCount = Client.AllUsers().Count;
+            var newUser = new User(firstName, lastName, email,  password);
+            Client.CreateUser(newUser);
+            var postCount = Client.GetUsers().Count;
             Assert.AreEqual(preCount + 1, postCount);
-            Assert.IsNotNull(user);
-            Assert.IsNotNull(user.Id);
         }
 
         [TestMethod]
         public void GetUserCollection()
         {
-            var userCollection = Client.AllUsers();
+            var userCollection = Client.GetUsers();
             PrintMessage.Debug(this.GetType().Name, userCollection);
-            PrintMessage.Debug(this.GetType().Name, userCollection.Values.ElementAt(3).Id);
             Assert.IsNotNull(userCollection);
             Assert.AreEqual(userCollection.Count, userCollection.Values.Count);
         }
@@ -68,7 +60,7 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void GetUser()
         {
-            string userId = "user_dd1836806e864ba8acea1caaba13268d";
+            string userId = "66da331f7a1c49d98ac8a4ad136c7c64";
             var user = Client.GetUser(userId);
             PrintMessage.Debug("GetUser", Utility.SerializeToJson(user));
             PrintMessage.Debug("GetUser", Utility.SerializeToJson(user.Id));
@@ -80,7 +72,7 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void GetUserSubscriptions()
         {
-            var userId = "1";
+            var userId = "66da331f7a1c49d98ac8a4ad136c7c64";
             var collection = Client.GetUserSubscription(userId);
             PrintMessage.Debug(this.GetType().Name, Utility.SerializeToJson(collection));
         }
@@ -89,19 +81,19 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void DeleteUser()
         {
-            var preCount = Client.AllUsers().Count;
-            var userId = "";
-            var deletedUser = Client.DeleteUser(userId);
-            var postCount = Client.AllUsers().Count;
+            var preCount = Client.GetUsers().Count;
+            var userId = "user__1c83a712efdb41fe8b9ef0687d3e7b17";
+            Client.DeleteUser(userId);
+            var postCount = Client.GetUsers().Count;
             Assert.AreEqual(preCount - 1, postCount);
         }
         [TestMethod]
         public void DeleteUserWithSubscription()
         {
-            var preCount = Client.AllUsers().Count;
+            var preCount = Client.GetUsers().Count;
             var userId = "";
-            var deletedUser = Client.DeleteUser(userId);
-            var postCount = Client.AllUsers().Count;
+            Client.DeleteUser(userId);
+            var postCount = Client.GetUsers().Count;
             Assert.AreEqual(preCount - 1, postCount);
         }
 
@@ -117,7 +109,7 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void UpdateUser()
         {
-            var userId = "1";
+            var userId = "66da331f7a1c49d98ac8a4ad136c7c64";
             var lastName = "Fitabase";
 
             Hashtable parameters = new Hashtable();
@@ -128,34 +120,41 @@ namespace Azure.ApiManagement.Test
             var currUser = Client.GetUser(userId);
             Assert.AreEqual(currUser.LastName, lastName);
         }
+        
+        #endregion User TestCases
+
 
        
 
-        #endregion User TestCases
 
         #region API TestCases
 
         [TestMethod]
         public void CreateApi()
         {
-            var name = "Server Calculator";
+            var preCount = Client.GetAPIs().Count;
+            var name = "add Calculator";
             var description = "This is a calculator created in the server";
             var serviceUrl = "http://echoapi.cloudapp.net/calc";
-            var path = "/derek/calc";
-            var protocols = new List<String>() { "http", "https" };
+            var path = "/add/calc";
+            var protocols = new string[]{ "http", "https" };
             
             var newAPI = new API(name, description, serviceUrl, path, protocols);
-
             var api = Client.CreateAPI(newAPI);
-            PrintMessage.Debug(this.GetType().Name, newAPI);
-
+            
+            var postCount = Client.GetAPIs().Count;
+            Assert.IsNotNull(api.Id);
+            Assert.AreEqual(preCount + 1, postCount);
         }
+
+       
 
         [TestMethod]
         public void GetApi()
         {
-            string apiId = "65d17612d5074d8bbfde4026357a24da";
+            string apiId = "api_e64e0c2082124df581b2fba70c4de904";
             var api = Client.GetAPI(apiId);
+            Print(api);
             Assert.IsNotNull(api);
             Assert.AreEqual(api.Id, apiId);
         }
@@ -164,15 +163,25 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void ApiCollection()
         {
-            var apis = Client.AllAPIs();
+            var apis = Client.GetAPIs();
             Assert.IsNotNull(apis);
-            foreach(API api in apis.Values)
-            {
-                PrintMessage.Debug(this.GetType().Name, Utility.SerializeToJson(api));
-            }
+            Assert.IsTrue(apis.Count > 0);
         }
 
+        [TestMethod]
+        public void DeleteAPI()
+        {
+            var preCount = Client.GetAPIs().Count;
+            string apiId = "api_1342cede25b54c2e88a1ba34b26191f9";
+            Client.DeleteAPI(apiId);
+            var postCount = Client.GetAPIs().Count;
+            Assert.AreEqual(preCount - 1, postCount);
+    }
         #endregion APITestCases
+
+
+
+
 
         #region API OperationsTestCases
         [TestMethod]
@@ -201,20 +210,15 @@ namespace Azure.ApiManagement.Test
 
             var operation = new APIOperation(name, method, urlTemplate, parameters, request);
 
-            var entity = Client.CreateAPIOperation(operationId, operation);
+            Client.CreateAPIOperation(operationId, operation);
         }
-
-
-
         [TestMethod]
         public void GetAPIOperationByAPI()
         {
-            var apiId = "65d17612d5074d8bbfde4026357a24da";
+            var apiId = "5956a87a2f02d30b88dfad7b";
             EntityCollection<APIOperation> collection = Client.GetByAPI(apiId);
             Assert.IsNotNull(collection);
         }
-
-
         [TestMethod]
         public void DelteAPIOperation()
         {
@@ -230,27 +234,28 @@ namespace Azure.ApiManagement.Test
 
         #endregion API OperationsTestCases
 
-        #region ProductTestCases
+
+
+
+        #region Product TestCases
 
         [TestMethod]
         public void CreateProduct()
         {
-
+            var preCount = Client.GetProducts().Count;
             var pid = Guid.NewGuid().ToString("N");
-            var product = new Product("Server producta", "server description");
-            var p = Client.CreateProduct(product);
-
-            Assert.IsNotNull(p);
-            Assert.IsNotNull(p.Id);
-            Assert.AreEqual(p.Id, pid);
+            var product = new Product("ServerProduct1", "server description");
+            Client.CreateProduct(product);
+            var postCount = Client.GetProducts().Count;
+            Assert.AreEqual(preCount + 1, postCount);
         }
 
         [TestMethod]
         public void GetProduct()
         {
-            var productId = "29f79d2acfab453eac057ddf3656a31b";
+            var productId = "product_735904e546284cab8d47f0ea0c58a16e";
             var product = Client.GetProduct(productId);
-
+            Print(product);
             Assert.IsNotNull(product);
             Assert.AreEqual(productId, product.Id);
         }
@@ -258,16 +263,16 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void UpdateProduct()
         {
-            var productId = "5956a9b92f02d30b88dfad7d";
+            var productId = "product_735904e546284cab8d47f0ea0c58a16e";
             var currProduct = Client.GetProduct(productId);
-            var desc = "much better description";
-            currProduct.Description = desc;
+            var name = "other name";
+            currProduct.Name = name;
             Client.UpdateProduct(currProduct);
             var product = Client.GetProduct(productId);
 
             Assert.IsNotNull(product);
             Assert.AreEqual(productId, product.Id);
-            Assert.AreEqual(product.Description, desc);
+            Assert.AreEqual(product.Name, name);
 
 
         }
@@ -275,10 +280,10 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void DeletProduct()
         {
-            var productId = "Fitabase.Azure.ApiManagement.Model.Product";
-            var collection = Client.AllProducts();
+            var productId = "product_9ddcf499a9e540eab24bf6f3323d956b";
+            var collection = Client.GetProducts();
             Client.DeleteProduct(productId);
-            var currCollection = Client.AllProducts();
+            var currCollection = Client.GetProducts();
 
             Assert.AreEqual(collection.Count - 1, currCollection.Count);
 
@@ -287,7 +292,7 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void ProductCollection()
         {
-            var products = Client.AllProducts();
+            var products = Client.GetProducts();
             Assert.IsNotNull(products);
         }
 
@@ -312,7 +317,7 @@ namespace Azure.ApiManagement.Test
         public void AddProductApi()
         {
             var productId = "5956a9b92f02d30b88dfad7d";
-            var apiId = "65d17612d5074d8bbfde4026357a24da";
+            var apiId = "5956a87a2f02d30b88dfad7b";
             var preCount = Client.GetProductAPIs(productId).Count;
             Client.AddProductAPI(productId, apiId);
             var postCount = Client.GetProductAPIs(productId).Count;
@@ -323,7 +328,7 @@ namespace Azure.ApiManagement.Test
         public void DeleteProductApi()
         {
             var productId = "5956a9b92f02d30b88dfad7d";
-            var apiId = "65d17612d5074d8bbfde4026357a24da";
+            var apiId = "5956a87a2f02d30b88dfad7b";
             var preCount = Client.GetProductAPIs(productId).Count;
             Client.DeleteProductAPI(productId, apiId);
             var postCount = Client.GetProductAPIs(productId).Count;
@@ -343,7 +348,7 @@ namespace Azure.ApiManagement.Test
         public void AddProductGroup()
         {
             var productId = "5956a9b92f02d30b88dfad7d";
-            var groupId = "5870184f9898000087020002";
+            var groupId = "5870184f9898000087020001";
             var preCount = Client.GetProductGroups(productId).Count;
             Client.AddProductGroup(productId, groupId);
             var postCount = Client.GetProductGroups(productId).Count;
@@ -353,7 +358,7 @@ namespace Azure.ApiManagement.Test
         public void DeleteProductGroup()
         {
             var productId = "5956a9b92f02d30b88dfad7d";
-            var groupId = "5870184f9898000087020002";
+            var groupId = "5870184f9898000087020001";
             var preCount = Client.GetProductGroups(productId).Count;
             Client.DeleteProductGroup(productId, groupId);
             var postCount = Client.GetProductGroups(productId).Count;
@@ -361,16 +366,19 @@ namespace Azure.ApiManagement.Test
         }
 
 
-        #endregion ProductTestCases
+        #endregion Product TestCases
+
+
+
 
         #region Subscription TestCases
 
 
         [TestMethod]
-        public void SubscriptionCollection()
+        public void GetSubscriptionCollection()
         {
-            var collection = Client.AllSubscriptions();
-            PrintMessage.Debug(this.GetType().Name, Utility.SerializeToJson(collection));
+            var collection = Client.GetSubscriptions();
+            Print(collection);
             Assert.IsNotNull(collection);
         }
 

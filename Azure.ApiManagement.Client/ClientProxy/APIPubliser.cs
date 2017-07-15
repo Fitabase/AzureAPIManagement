@@ -44,7 +44,7 @@ namespace Fitabase.Azure.ApiManagement.ClientProxy
             List<APIOperation> list = api.Operations.ToList();
             PrintMessage.Debug(this.GetType().Name, Utility.SerializeToJson(list.ElementAt(0).Responses));
             
-
+            
             //Documents.Write(OutputFolder + Documents.API_DOC, api);
             //Documents.Write(OutputFolder + Documents.API_OPERATION_DOC, api.Operations);
         }

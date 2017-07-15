@@ -9,15 +9,8 @@ namespace Fitabase.Azure.ApiManagement.Model
 
     public enum ProductState
     {
-        /// <summary>
-        /// Non-published products are visible only to administrators.
-        /// </summary>
-        notPublished,
-
-        /// <summary>
-        /// Published products are discoverable by developers on the developer portal.
-        /// </summary>
-        published
+        notPublished,   // Non-published products are visible only to administrators.
+        published       // Published products are discoverable by developers on the developer portal.
     }
 
     public enum UserState

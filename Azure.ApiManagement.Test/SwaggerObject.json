@@ -1,11 +1,54 @@
 ﻿{
-  "name": "DerekAPI",
-  "description": "Derek first api",
-  "serviceUrl": "http://echoapi.cloudapp.net/calc",
-  "path": "calc",
-  "protocols": [ "http", "https" ],
-  "authenticationSettings": null,
-  "subscriptionKeyParameterNames": null,
-  "parameters": null,
-  "id": "/apis/5956a87a2f02d30b88dfad7b"
+  "value": [
+    {
+      "id": "/apis/5956a87a2f02d30b88dfad7b",
+      "name": "DerekAPI",
+      "apiRevision": "1",
+      "description": "Derek first api",
+      "serviceUrl": "http://echoapi.cloudapp.net/calc",
+      "path": "calc",
+      "protocols": [ "http", "https" ],
+      "authenticationSettings": null,
+      "subscriptionKeyParameterNames": null,
+      "isCurrent": true
+    },
+    {
+      "id": "/apis/5870184f9898000087040001",
+      "name": "Echo API",
+      "apiRevision": "1",
+      "description": null,
+      "serviceUrl": "http://echoapi.cloudapp.net/api",
+      "path": "echo",
+      "protocols": [ "https" ],
+      "authenticationSettings": null,
+      "subscriptionKeyParameterNames": null,
+      "isCurrent": true
+    },
+    {
+      "id": "/apis/api_e64e0c2082124df581b2fba70c4de904",
+      "name": "plus Calculator",
+      "apiRevision": "1",
+      "description": "This is a calculator created in the server",
+      "serviceUrl": "http://echoapi.cloudapp.net/calc",
+      "path": "plsu/calc",
+      "protocols": [ "http", "https" ],
+      "authenticationSettings": null,
+      "subscriptionKeyParameterNames": null,
+      "isCurrent": true
+    },
+    {
+      "id": "/apis/5967fa712f02d30c1c08e6d1",
+      "name": "Sync",
+      "apiRevision": "1",
+      "description": null,
+      "serviceUrl": "http://localhost:2598",
+      "path": "",
+      "protocols": [ "https" ],
+      "authenticationSettings": null,
+      "subscriptionKeyParameterNames": null,
+      "isCurrent": true
+    }
+  ],
+  "count": 4,
+  "nextLink": null
 }

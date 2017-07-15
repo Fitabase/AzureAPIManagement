@@ -12,8 +12,6 @@ namespace Fitabase.Azure.ApiManagement.Model
     {
         protected override string UriIdFormat => "/operations";
 
-
-
         
         public APIOperation(string name, 
                             RequestMethod method, string urlTemplate, 
@@ -30,170 +28,39 @@ namespace Fitabase.Azure.ApiManagement.Model
             this.Request = request;
         }
 
-
-        // Name of the operation
+        
         [JsonProperty("name")]
         public string Name { get; set; }
-
-        // A valid HTTP Operation Method
+        
         [JsonProperty("method")]
-        public string Method { get; set; }
+        public string Method { get; set; }          // A Valid HTTP Operation Method.
 
-        // Relative URL template identifying the target resource for this operation
         [JsonProperty("urlTemplate")]
-        public string UrlTemplate { get; set; }         
-
-        // Collection of URL template parameters
-        // E.g calc.com/sum?a=5&b=10
+        public string UrlTemplate { get; set; }     // Relative URL template identifying the target resource for this operation
+        
         [JsonProperty("templateParameters")]
-        public List<TemplateParameter> TemplateParameter { get; set; }
-
-        // Description of the operation. May include HTML formatting tags.
+        public List<TemplateParameter> TemplateParameter { get; set; }  // Collection of URL template parameters. E.g calc.com/sum?a=5&b=10
+        
         [JsonProperty("description")]
-        public string Description { get; set; }
-
-        // An entity containing request details
+        public string Description { get; set; }         // Description of the operation. May include HTML formatting tags.
+        
         [JsonProperty("request")]
-        public RequestContract Request { get; set; }
+        public RequestContract Request { get; set; }    // An entity containing request details
 
         [JsonProperty("responses")]
         public OperationResponse[] Responses { get; set; }
 
 
-        /// <summary>
-        /// Contain operation response
-        /// </summary>
-        public class OperationResponse
-        {
-
-            public OperationResponse(int statusCode, string description)
-            {
-                this.StatusCode = statusCode;
-                this.Description = description;
-            }
-
-
-            [JsonProperty("statusCode")]
-            public int StatusCode { get; set; }
-            
-            [JsonProperty("description")]
-            public string Description { get; set; }
-
-            [JsonProperty("representations")]
-            public List<Representation> Representations { get; set; }
-
-
-            /// <summary>
-            /// Operation response representation
-            /// </summary>
-            public class Representation
-            {
-                [JsonProperty("contentType")]
-                public string ContenType { get; set; }
-
-                [JsonProperty("sample")]
-                public string Sameple { get; set; }
-            }
-        }
     }
 
 
 
-    /// <summary>
-    /// This class containing request details
-    /// </summary>
-    public class RequestContract
-    {
-        [JsonProperty("description")]
-        public string Description { get; set; }
-
-        [JsonProperty("queryParameters")]
-        public List<QueryParameter> QueryParameters { get; set; }
-
-        [JsonProperty("headers")]
-        public List<RequestHeader> Headers { get; set; }
-    }
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public class RequestHeader
-    {
-        public RequestHeader(string name, ParameterType type, string defaultValue = null)
-        {
-            if (String.IsNullOrWhiteSpace(name))
-                throw new ArgumentException("RequestHeader name is required");
-            this.Name = name;
-            this.Type = TemplateParameterType.GetType(type);
-            this.DefaultValue = defaultValue;
-        }
-
-        [JsonProperty("name")]
-        public string Name { get; set; }
-        [JsonProperty("description")]
-        public string Description { get; set; }
-        [JsonProperty("type")]
-        public string Type { get; set; }
-        [JsonProperty("defaultValue")]
-        public string DefaultValue { get; set; }
-        [JsonProperty("required")]
-        public bool Required { get; set; }
-        [JsonProperty("values")]
-        public string[] Values { get; set; }
-    }
-
-    
-    /// <summary>
-    /// TODO not so sure what query parameter does...
-    /// </summary>
-    public class QueryParameter
-    {
-        public QueryParameter(string name, ParameterType type)
-        {
-            if (String.IsNullOrWhiteSpace(name))
-                throw new ArgumentException("QueryParameter name is required");
-            this.Name = name;
-            this.Type = TemplateParameterType.GetType(type);
-        }
-
-        [JsonProperty("name")]
-        public string Name { get; set; }
-        [JsonProperty("description")]
-        public string Description { get; set; }
-        [JsonProperty("type")]
-        public string Type { get; set; }
-        [JsonProperty("defaultValue")]
-        public string DefaultValue { get; set; }
-        [JsonProperty("values")]
-        public string[] Values { get; set; }
-    }
 
 
-    /// <summary>
-    /// This class represent a URL template parameter.
-    /// E.x calc.com/sum?a=5&b=10
-    /// </summary>
-    public class TemplateParameter
-    {
-        public TemplateParameter(string name, ParameterType type)
-        {
-            if (String.IsNullOrWhiteSpace(name))
-                throw new ArgumentException("TemplateParameter name is required");
-            this.Name = name;
-            this.Type = TemplateParameterType.GetType(type);
-        }
-        
-        [JsonProperty("name")]
-        public string Name { get; set; }
-        [JsonProperty("description")]
-        public string Description { get; set; }
-        [JsonProperty("type")]
-        public string Type { get; set; }
-        [JsonProperty("defaultValue")]
-        public string DefaultValue { get; set; }
-        [JsonProperty("values")]
-        public string[] Values { get; set; }
 
-    }
+
+
+
 }

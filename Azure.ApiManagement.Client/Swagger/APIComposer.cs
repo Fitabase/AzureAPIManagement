@@ -36,8 +36,8 @@ namespace Fitabase.Azure.ApiManagement.Swagger
             string description      = Swagger.Definitions.GetDefinition();
             string serviceUrl       = Swagger.Host;
             string path = null;
-            List<string> protocols  = Swagger.Schemes.ToList();
-            AuthenticationSettings authentication       = null;
+            string[] protocols  = Swagger.Schemes;
+            AuthenticationSettingsConstract authentication       = null;
             SubscriptionKeyParameterNames customNames   = null;
             
             API api = new API(name, description, serviceUrl, path,
@@ -54,15 +54,15 @@ namespace Fitabase.Azure.ApiManagement.Swagger
         /// </summary>
         /// <param name="responses"></param>
         /// <returns></returns>
-        private APIOperation.OperationResponse[] GetResponse(
+        private OperationResponse[] GetResponse(
             Dictionary<string, Response> responses)
         {
-            List<APIOperation.OperationResponse> list = new List<APIOperation.OperationResponse>();
+            List<OperationResponse> list = new List<OperationResponse>();
             foreach (KeyValuePair<string, Response> response in responses)
             {
                 var code = response.Key;
                 var description = response.Value.Description;
-                list.Add(new APIOperation.OperationResponse(Int32.Parse(code), description));
+                list.Add(new OperationResponse(Int32.Parse(code), description));
                     
             }
 

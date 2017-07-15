@@ -168,13 +168,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ClientProxy\APIPubliser.cs" />
+    <Compile Include="DataModel\Abstract\EntityIdGenerator.cs" />
     <Compile Include="DataModel\Error.cs" />
+    <Compile Include="DataModel\FormParameter.cs" />
+    <Compile Include="DataModel\Header.cs" />
+    <Compile Include="DataModel\OperationResponse.cs" />
     <Compile Include="DataModel\Properties\Documents.cs" />
     <Compile Include="DataModel\Properties\ParameterType.cs" />
-    <Compile Include="DataModel\Model\Certificate.cs" />
     <Compile Include="DataModel\Exceptions\InvalidEntityException.cs" />
-    <Compile Include="DataModel\Model\Enums.cs" />
-    <Compile Include="DataModel\Model\Logger.cs" />
+    <Compile Include="DataModel\Properties\Enums.cs" />
     <Compile Include="DataModel\Model\APIOperation.cs" />
     <Compile Include="DataModel\Model\Property.cs" />
     <Compile Include="DataModel\Model\Report.cs" />
@@ -183,6 +185,9 @@
     <Compile Include="DataModel\Model\Tenant.cs" />
     <Compile Include="DataModel\Model\User.cs" />
     <Compile Include="DataModel\Properties\RequestMethod.cs" />
+    <Compile Include="DataModel\QueryParameter.cs" />
+    <Compile Include="DataModel\Representation.cs" />
+    <Compile Include="DataModel\RequestContract.cs" />
     <Compile Include="DataModel\Result\EntityCollection.cs" />
     <Compile Include="DataModel\Model\Group.cs" />
     <Compile Include="DataModel\Model\API.cs" />
@@ -190,6 +195,7 @@
     <Compile Include="DataModel\Exceptions\HttpResponseException.cs" />
     <Compile Include="ClientProxy\ManagementClient.cs" />
     <Compile Include="DataModel\Model\Product.cs" />
+    <Compile Include="DataModel\TemplateParameter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Swagger\Contact.cs" />
     <Compile Include="Swagger\Definition.cs" />
