@@ -15,6 +15,6 @@ namespace Fitabase.Azure.ApiManagement.Model
                         .Append(Guid.NewGuid().ToString("N"))
                         .ToString();
         }
-
+        
     }
 }

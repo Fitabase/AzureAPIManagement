@@ -52,7 +52,7 @@ namespace Azure.ApiManagement.Test
         public void GetUserCollection()
         {
             var userCollection = Client.GetUsers();
-            PrintMessage.Debug(this, userCollection);
+            Print(userCollection);
             Assert.IsNotNull(userCollection);
             Assert.AreEqual(userCollection.Count, userCollection.Values.Count);
         }
@@ -77,6 +77,14 @@ namespace Azure.ApiManagement.Test
             PrintMessage.Debug(this.GetType().Name, Utility.SerializeToJson(collection));
         }
 
+        [TestMethod]
+        public void GetUserGroup()
+        {
+            var userId = "user_bef163ba98af433c917914dd4c208115";
+            var collection = Client.GetUserGroups(userId);
+            Print(collection);
+            Assert.IsNotNull(collection);
+        }
 
         [TestMethod]
         public void DeleteUser()
@@ -244,8 +252,9 @@ namespace Azure.ApiManagement.Test
         {
             var preCount = Client.GetProducts().Count;
             var pid = Guid.NewGuid().ToString("N");
-            var product = Product.Create("ServerProduct1", "server description");
-            Client.CreateProduct(product);
+            var product = Product.Create("Server product", "This product is created from the server");
+            Product entity = Client.CreateProduct(product);
+            Assert.IsNotNull(entity);
             var postCount = Client.GetProducts().Count;
             Assert.AreEqual(preCount + 1, postCount);
         }
@@ -373,6 +382,16 @@ namespace Azure.ApiManagement.Test
 
         #region Subscription TestCases
 
+        [TestMethod]
+        public void CreateSubscription()
+        {
+            string userId = "user_bef163ba98af433c917914dd4c208115";
+            string productId = "product_5cdf0c46784b4e98b326f426bb6c2c81";
+            string name = "server subscriptions";
+            Subscription subscription = Subscription.Create(userId, productId, name);
+            Subscription entity = Client.CreateSubscription(subscription);
+            Assert.IsNotNull(entity);
+        }
 
         [TestMethod]
         public void GetSubscriptionCollection()
@@ -410,15 +429,83 @@ namespace Azure.ApiManagement.Test
 
         #endregion Subscription TestCases
 
+
+
         #region GroupTestCases
 
+        [TestMethod]
+        public void CreateGroup()
+        {
+            var preCount = Client.GetGroups().Count;
+            var name = "server group 3";
+            var description = "this group is created from server";
+            Group group = Group.Create(name, description, GroupType.system);
+            var entity = Client.CreateGroup(group);
+            Assert.IsNotNull(entity);
+            var postCount = Client.GetGroups().Count;
+            Assert.AreEqual(preCount + 1, postCount);
+        }
+
+        [TestMethod]
+        public void GetGroup()
+        {
+            var groupId = "group_7ac29362a8c743aaa798b331cc87919e";
+            var group = Client.GetGroup(groupId);
+            Assert.IsNotNull(group);
+            Assert.AreEqual(groupId, group.Id);
+        }
+
+        [TestMethod]
+        public void DeleteGroup()
+        {
+            var preCount = Client.GetGroups().Count;
+            var groupId = "5963e39d2f02d312f01a7dcf";
+            Client.DeleteGroup(groupId);
+            var postCount = Client.GetGroups().Count;
+            Assert.AreEqual(preCount - 1, postCount);
+        }
 
         [TestMethod]
         public void GroupCollection()
         {
-            var collection = Client.AllGroups();
+            var collection = Client.GetGroups();
+            Print(collection);
             Assert.IsNotNull(collection);
         }
+
+        [TestMethod]
+        public void GetGroupUsers()
+        {
+            var groupId = "5870184f9898000087020002";
+            var collection = Client.GetGroupUsers(groupId);
+            Print(collection);
+        }
+
+
+        [TestMethod]
+        public void AddUserToGroup()
+        {
+            var userId = "user_bef163ba98af433c917914dd4c208115";
+            var groupId = "group_7ac29362a8c743aaa798b331cc87919e";
+            var preCount = Client.GetGroupUsers(groupId).Count;
+            Client.AddUserToGroup(groupId, userId);
+            var postCount = Client.GetGroupUsers(groupId).Count;
+            Assert.AreEqual(preCount + 1, postCount);
+        }
+
+
+
+        [TestMethod]
+        public void RemoveUserFromGroup()
+        {
+            var userId = "user_bef163ba98af433c917914dd4c208115";
+            var groupId = "group_7ac29362a8c743aaa798b331cc87919e";
+            var preCount = Client.GetGroupUsers(groupId).Count;
+            Client.RemoveUserFromGroup(groupId, userId);
+            var postCount = Client.GetGroupUsers(groupId).Count;
+            Assert.AreEqual(preCount - 1, postCount);
+        }
+
 
         #endregion GroupTestCases
 

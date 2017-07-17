@@ -8,6 +8,14 @@ using System.Threading.Tasks;
 
 namespace Fitabase.Azure.ApiManagement.Model
 {
+    public enum UserState
+    {
+        active,
+        blocked
+    }
+
+
+
     public class User : EntityBase
     {
         protected override string UriIdFormat { get { return "/users/"; } }
@@ -56,7 +64,7 @@ namespace Fitabase.Azure.ApiManagement.Model
         [JsonProperty("email")]
         public string Email { get; set; }
 
-        [JsonProperty("password")]
+        [JsonProperty("password", NullValueHandling = NullValueHandling.Ignore)]
         public string Password { get; set; }
 
         [JsonProperty("registrationDate", NullValueHandling = NullValueHandling.Ignore)]
@@ -69,7 +77,19 @@ namespace Fitabase.Azure.ApiManagement.Model
         [JsonProperty("note")]
         public string Note { get; set; }
 
+
+        [JsonProperty("identities")]
+        public UserIdentity[] Identities { get; set; }
+
         [JsonProperty("groups", NullValueHandling = NullValueHandling.Ignore)]
         public List<Group> Groups { get; set; }
+    }
+
+    public class UserIdentity
+    {
+        [JsonProperty("provider")]
+        public string Provider { get; set; }
+        [JsonProperty("id")]
+        public string Id { get; set; }
     }
 }

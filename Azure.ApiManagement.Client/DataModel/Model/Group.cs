@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,16 +8,29 @@ using System.Threading.Tasks;
 
 namespace Fitabase.Azure.ApiManagement.Model
 {
+    public enum GroupType
+    {
+        custom, system, external
+    }
     public class Group : EntityBase
     {
-        public static Group Create()
+        public static Group Create(string name, string description = "", 
+                                    GroupType type = GroupType.custom, string externalId = null)
         {
 
             try
             {
+                if (String.IsNullOrEmpty(name))
+                    throw new ArgumentException("group's name is required");
+                if (type == GroupType.system)
+                    throw new ArgumentException("group's type can't be set to system");
+
                 Group group = new Group();
                 group.Id = EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.GROUP);
-
+                group.Name = name;
+                group.Description = description;
+                group.Type = type;
+                group.ExternalId = externalId;
                 return group;
             }
             catch (ArgumentException ex)
@@ -50,8 +64,9 @@ namespace Fitabase.Azure.ApiManagement.Model
         /// <summary>
         /// The type of group, which is one of the following values: system, custom, or external. This property is read-only.
         /// </summary>
+        [JsonConverter(typeof(StringEnumConverter))]
         [JsonProperty("type")]
-        public string Type { get; set; }
+        public GroupType Type { get; set; }
 
         /// <summary>
         /// For external groups, this property contains the id of the group from the external identity provider,

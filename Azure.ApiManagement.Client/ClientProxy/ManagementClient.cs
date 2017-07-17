@@ -199,49 +199,86 @@ namespace Fitabase.Azure.ApiManagement
         /// Retrieves a redirection URL containing an authentication 
         /// token for signing a given user into the developer portal.
         /// </summary>
-        /// <param name="userId"></param>
-        /// <returns></returns>
         public SsoUrl GenerateSsoURL(string userId)
         {
             string endpoint = String.Format("{0}/users/{1}/generateSsoUrl", api_endpoint, userId);
             return DoRequest<SsoUrl>(endpoint, RequestMethod.POST);
         }
+
+        /// <summary>
+        /// Create a new user model
+        /// </summary>
         public void CreateUser(User user)
         {
             string endpoint = String.Format("{0}/users/{1}", api_endpoint, user.Id);
             DoRequest<User>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(user));
         }
+
+        /// <summary>
+        ///  Retrieve a specific user model of a given id
+        /// </summary>
         public User GetUser(string userId)
         {
             string endpoint = String.Format("{0}/users/{1}", api_endpoint, userId);
             return DoRequest<User>(endpoint, RequestMethod.GET);
         }
-        public EntityCollection<Subscription> GetUserSubscription(string userId)
-        {
-            string endpoint = String.Format("{0}/users/{1}/subscriptions", api_endpoint, userId);
-            return DoRequest<EntityCollection<Subscription>>(endpoint, RequestMethod.GET);
-        }
+
+     
+        /// <summary>
+        /// Delete a specific user model of a given id
+        /// </summary>
         public void DeleteUser(string userId)
         {
             string endpoint = String.Format("{0}/users/{1}", api_endpoint, userId);
             DoRequest<User>(endpoint, RequestMethod.DELETE);
         }
+
+        /// <summary>
+        /// Delete user's subscriptions
+        /// </summary>
         public void DeleteUserWithSubscriptions(string userId)
         {
             string endpoint = String.Format("{0}/users/{1}?deleteSubscriptions=true", api_endpoint, userId);
             DoRequest<User>(endpoint, RequestMethod.DELETE);
         }
+
+        /// <summary>
+        /// Retrieve all user models
+        /// </summary>
         public EntityCollection<User> GetUsers()
         {
             string endpoint = String.Format("{0}/users", api_endpoint);
             return DoRequest<EntityCollection<User>>(endpoint);
         }
+       
+        /// <summary>
+        /// Retrieve a list of subscriptions by the user
+        /// </summary>
+        public EntityCollection<Subscription> GetUserSubscription(string userId)
+        {
+            string endpoint = String.Format("{0}/users/{1}/subscriptions", api_endpoint, userId);
+            return DoRequest<EntityCollection<Subscription>>(endpoint, RequestMethod.GET);
+        }
+
+        /// <summary>
+        /// Retrieve a list of groups that the specific user belongs to
+        /// </summary>
+        public EntityCollection<Group> GetUserGroups(string userId)
+        {
+            string endpoint = String.Format("{0}/users/{1}/groups", api_endpoint, userId);
+            return DoRequest<EntityCollection<Group>>(endpoint, RequestMethod.GET);
+        }
+
+        /// <summary>
+        /// Update a specific user model
+        /// </summary>
         public User UpdateUser(string userId, Hashtable parameters)
         {
             string endpoint = String.Format("{0}/users/{1}", api_endpoint, userId);
             return DoRequest<User>(endpoint, RequestMethod.PATCH, Utility.SerializeToJson(parameters));
         }
     
+
 
         #endregion
 
@@ -425,21 +462,66 @@ namespace Fitabase.Azure.ApiManagement
 
 
         #region Group
+        
+        /// <summary>
+        /// Create a group
+        /// </summary>
         public Group CreateGroup(Group group)
         {
             string endpoint = String.Format("{0}/groups/{1}", api_endpoint, group.Id);
-            return DoRequest<Group>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(group));
+            DoRequest<Group>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(group));
+            return group;
         }
+
+        /// <summary>
+        /// Gets the details of the group specified by its identifier.
+        /// </summary>
         public Group GetGroup(string groupId)
         {
             string endpoint = String.Format("{0}/groups/{1}", api_endpoint, groupId);
             return DoRequest<Group>(endpoint, RequestMethod.GET);
         }
-        public EntityCollection<Group> AllGroups()
+
+        /// <summary>
+        /// Add a user to the specified group
+        /// </summary>
+        public void AddUserToGroup(string groupId, string userId)
+        {
+            string endpoint = String.Format("{0}/groups/{1}/users/{2}", api_endpoint, groupId, userId);
+            DoRequest<EntityCollection<User>>(endpoint, RequestMethod.PUT);
+        }
+
+        /// <summary>
+        /// Remove existing user from existing group.
+        /// </summary>
+        public void RemoveUserFromGroup(string groupId, string userId)
+        {
+
+            string endpoint = String.Format("{0}/groups/{1}/users/{2}", api_endpoint, groupId, userId);
+            DoRequest<EntityCollection<User>>(endpoint, RequestMethod.DELETE);
+        }
+
+        /// <summary>
+        /// Lists a collection of groups
+        /// </summary>
+        public EntityCollection<Group> GetGroups()
         {
             string endpoint = String.Format("{0}/groups", api_endpoint);
             return DoRequest<EntityCollection<Group>>(endpoint, RequestMethod.GET);
         }
+
+        /// <summary>
+        /// Lists a collection of the members of the group, specified by its identifier.
+        /// </summary>
+        public EntityCollection<User> GetGroupUsers(string groupId)
+        {
+            string endpoint = String.Format("{0}/groups/{1}/users", api_endpoint, groupId);
+            return DoRequest<EntityCollection<User>>(endpoint, RequestMethod.GET);
+        }
+
+        /// <summary>
+        /// Deletes specific group of the API Management
+        /// </summary>
         public Group DeleteGroup(string groupId)
         {
             string endpoint = String.Format("{0}/groups/{1}", api_endpoint, groupId);
@@ -459,6 +541,7 @@ namespace Fitabase.Azure.ApiManagement
             string endpoint = String.Format("{0}/subscriptions/{1}", api_endpoint, subscriptionId);
             return DoRequest<Subscription>(endpoint, RequestMethod.GET);
         }
+
         public EntityCollection<Subscription> GetSubscriptions()
         {
             string endpoint = String.Format("{0}/subscriptions", api_endpoint);

@@ -13,42 +13,4 @@ namespace Fitabase.Azure.ApiManagement.Model
         published       // Published products are discoverable by developers on the developer portal.
     }
 
-    public enum UserState
-    {
-        active,
-        blocked
-    }
-
-    public enum SubscriptionState
-    {
-        /// <summary>
-        /// subscription is active.
-        /// </summary>
-        active,
-
-        /// <summary>
-        ///  subscription is blocked, and the subscriber cannot call any APIs of the product.
-        /// </summary>
-        suspended,
-
-        /// <summary>
-        ///  subscription request has been made by the developer, but has not yet been approved or rejected.
-        /// </summary>
-        submitted,
-
-        /// <summary>
-        /// subscription request has been denied by an administrator.
-        /// </summary>
-        rejected,
-
-        /// <summary>
-        ///  subscription has been cancelled by the developer or administrator.
-        /// </summary>
-        cancelled,
-
-        /// <summary>
-        ///  subscription reached its expiration date and was deactivated.
-        /// </summary>
-        expired,
-    }
 }
