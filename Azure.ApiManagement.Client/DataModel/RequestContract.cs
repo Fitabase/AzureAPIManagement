@@ -23,6 +23,9 @@ namespace Fitabase.Azure.ApiManagement.Model
 
         [JsonProperty("headers")]
         public List<RequestHeader> Headers { get; set; }
+
+        [JsonProperty("representations")]
+        public Representation[] Representations { get; set; }
     }
 
 }

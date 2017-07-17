@@ -10,6 +10,7 @@ namespace Fitabase.Azure.ApiManagement.Model
     /// </summary>
     public class TemplateParameter
     {
+        
         public TemplateParameter(string name, ParameterType type)
         {
             if (String.IsNullOrWhiteSpace(name))

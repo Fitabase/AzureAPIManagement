@@ -23,7 +23,8 @@ namespace Fitabase.Azure.ApiManagement.Model
             {
                 if (String.IsNullOrWhiteSpace(name))
                     throw new ArgumentException("APIOperation name is required");
-
+                if (String.IsNullOrWhiteSpace(urlTemplate))
+                    throw new ArgumentException("APIOperation urlTemplate is required");
 
                 APIOperation api = new APIOperation();
                 api.Id = EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.APIOPERATION);
@@ -64,7 +65,7 @@ namespace Fitabase.Azure.ApiManagement.Model
         [JsonProperty("responses")]
         public OperationResponse[] Responses { get; set; }
 
-
+        
     }
 
 

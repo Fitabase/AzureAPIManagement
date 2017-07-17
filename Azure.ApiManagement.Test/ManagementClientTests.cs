@@ -192,11 +192,11 @@ namespace Azure.ApiManagement.Test
 
 
         #region API OperationsTestCases
+
         [TestMethod]
         public void CreateAPIOperation()
         {
-            var apiId = "65d17612d5074d8bbfde4026357a24da";
-            var operationId = Guid.NewGuid().ToString("N");
+            var apiId = "api_f98e6f1c4f674a35888aa1e8979e331e";
             var name = "Onemore API operation";
             var method = RequestMethod.POST;
             var urlTemplate = "/add/{c}/{d}";
@@ -218,24 +218,37 @@ namespace Azure.ApiManagement.Test
 
             var operation = APIOperation.Create(name, method, urlTemplate, parameters, request);
 
-            Client.CreateAPIOperation(operationId, operation);
+            Client.CreateAPIOperation(apiId, operation);
         }
+
         [TestMethod]
-        public void GetAPIOperationByAPI()
+        public void GetAPIOperation()
         {
             var apiId = "5956a87a2f02d30b88dfad7b";
-            EntityCollection<APIOperation> collection = Client.GetByAPI(apiId);
+            var operationId = "5956a9612f02d30b88dfad7c";
+            var operation = Client.GetAPIOperation(apiId, operationId);
+            Print(operation);
+            Assert.IsNotNull(operation);
+        }
+
+        [TestMethod]
+        public void GetOperationsByAPI()
+        {
+            var apiId = "api_f98e6f1c4f674a35888aa1e8979e331e";
+            EntityCollection<APIOperation> collection = Client.GetOperationsByAPI(apiId);
+            Print(collection);
             Assert.IsNotNull(collection);
         }
         [TestMethod]
+
         public void DelteAPIOperation()
         {
             var apiId = "65d17612d5074d8bbfde4026357a24da";
             var operationId = "d6be400efb924ea18c615cdcc486d278";
-            var precount = Client.GetByAPI(apiId).Count;
+            var precount = Client.GetOperationsByAPI(apiId).Count;
 
             APIOperation operation = Client.DeleteOperation(apiId, operationId);
-            var postCount = Client.GetByAPI(apiId).Count;
+            var postCount = Client.GetOperationsByAPI(apiId).Count;
             Assert.IsNotNull(operation);
             Assert.AreEqual(precount - 1, postCount);
         }
@@ -541,5 +554,7 @@ namespace Azure.ApiManagement.Test
 
 
 
+
+      
     }
 }

@@ -9,7 +9,6 @@ namespace Fitabase.Azure.ApiManagement.Model
 {
     public abstract class EntityBase
     {
-
         protected abstract string UriIdFormat { get; }
         private string _id;
         [JsonIgnore]

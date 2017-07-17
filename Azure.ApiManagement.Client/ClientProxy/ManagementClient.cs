@@ -191,7 +191,15 @@ namespace Fitabase.Azure.ApiManagement
 
         #endregion
 
-        
+
+
+
+
+
+
+        /*********************************************************/
+        /************************  USER  *************************/
+        /*********************************************************/
 
         #region USER
 
@@ -277,7 +285,7 @@ namespace Fitabase.Azure.ApiManagement
             string endpoint = String.Format("{0}/users/{1}", api_endpoint, userId);
             return DoRequest<User>(endpoint, RequestMethod.PATCH, Utility.SerializeToJson(parameters));
         }
-    
+
 
 
         #endregion
@@ -285,24 +293,45 @@ namespace Fitabase.Azure.ApiManagement
 
 
 
-        
+
+
+        /*********************************************************/
+        /*************************  API  *************************/
+        /*********************************************************/
+
         #region API
+
+        /// <summary>
+        /// Creates new API of the API Management service instance.
+        /// </summary>
         public API CreateAPI(API api)
         {
             string endpoint = String.Format("{0}/apis/{1}", api_endpoint, api.Id);
             DoRequest<API>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(api));
             return api;
         }
+
+        /// <summary>
+        /// Gets the details of the API specified by its identifier.
+        /// </summary>
         public API GetAPI(string apiId)
         {
             string endpoint = String.Format("{0}/apis/{1}", api_endpoint, apiId);
             return DoRequest<API>(endpoint, RequestMethod.GET);
         }
+
+        /// <summary>
+        /// Deletes the specified API of the API Management service instance.
+        /// </summary>
         public void DeleteAPI(string apiId)
         {
             string endpoint = String.Format("{0}/apis/{1}", api_endpoint, apiId);
             DoRequest<API>(endpoint, RequestMethod.DELETE);
         }
+
+        /// <summary>
+        /// Lists all APIs of the API Management service instance.
+        /// </summary>
         public EntityCollection<API> GetAPIs()
         {
             string endpoint = String.Format("{0}/apis", api_endpoint);
@@ -315,8 +344,17 @@ namespace Fitabase.Azure.ApiManagement
 
 
 
+
+        /*********************************************************/
+        /******************   API OPERATIONS  ********************/
+        /*********************************************************/
+
         #region API Operations
 
+
+        /// <summary>
+        /// Creates a new operation in the API
+        /// </summary>
         public APIOperation CreateAPIOperation(string apiId, APIOperation operation)
         {
             string endpoint = String.Format("{0}/apis/{1}/operations/{2}",
@@ -324,27 +362,53 @@ namespace Fitabase.Azure.ApiManagement
             DoRequest<APIOperation>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(operation));
             return operation;
         }
+
+        /// <summary>
+        /// Gets the details of the API Operation specified by its identifier.
+        /// </summary>
         public APIOperation GetAPIOperation(string apiId, string operationId)
         {
             string endpoint = String.Format("{0}/apis/{1}/operations/{2}",
                                                 api_endpoint, apiId, operationId);
             return DoRequest<APIOperation>(endpoint, RequestMethod.GET);
         }
-        public EntityCollection<APIOperation> GetByAPI(string apiId)
+
+        /// <summary>
+        /// Lists a collection of the operations for the specified API.
+        /// </summary>
+        public EntityCollection<APIOperation> GetOperationsByAPI(string apiId)
         {
             string endpoint = String.Format("{0}/apis/{1}/operations", api_endpoint, apiId);
             return DoRequest<EntityCollection<APIOperation>>(endpoint, RequestMethod.GET);
         }
+
+        /// <summary>
+        /// Deletes the specified operation in the API.
+        /// </summary>
         public APIOperation DeleteOperation(string apiId, string operationId)
         {
             string endpoint = String.Format("{0}/apis/{1}/operations/{2}",
                                                 api_endpoint, apiId, operationId);
             return DoRequest<APIOperation>(endpoint, RequestMethod.DELETE);
         }
+
+
         #endregion
 
 
+
+
+
+
+        /*********************************************************/
+        /**********************  PRODUCT  ************************/
+        /*********************************************************/
+
         #region Product
+            
+        /// <summary>
+        /// Create a product
+        /// </summary>
         public Product CreateProduct(Product product)
         {
             Validator.ValidateProduct(product);
@@ -352,21 +416,38 @@ namespace Fitabase.Azure.ApiManagement
             DoRequest<Product>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(product));
             return product;
         }
+
+        /// <summary>
+        /// Gets the details of the product specified by its identifier.
+        /// </summary>
         public Product GetProduct(string productId)
         {
             string endpoint = String.Format("{0}/products/{1}", api_endpoint, productId);
             return DoRequest<Product>(endpoint, RequestMethod.GET);
         }
+
+        /// <summary>
+        /// Update a product
+        /// </summary>
         public void UpdateProduct(Product product)
         {
             string endpoint = String.Format("{0}/products/{1}", api_endpoint, product.Id);
             DoRequest<Product>(endpoint, RequestMethod.PATCH, Utility.SerializeToJson(product));
         }
+
+        /// <summary>
+        /// Delete a product
+        /// </summary>
+        /// <param name="productId"></param>
         public void DeleteProduct(string productId)
         {
             string endpoint = String.Format("{0}/products/{1}?deleteSubscriptions=true", api_endpoint, productId);
             DoRequest<Product>(endpoint, RequestMethod.DELETE);
         }
+        
+        /// <summary>
+        /// Lists a collection of products in the specified service instance.
+        /// </summary>
         public EntityCollection<Product> GetProducts()
         {
             string endpoint = String.Format("{0}/products", api_endpoint);
@@ -461,8 +542,15 @@ namespace Fitabase.Azure.ApiManagement
         #endregion
 
 
+
+
+
+        /*********************************************************/
+        /**********************  GROUP  **************************/
+        /*********************************************************/
+
         #region Group
-        
+
         /// <summary>
         /// Create a group
         /// </summary>
@@ -530,6 +618,13 @@ namespace Fitabase.Azure.ApiManagement
         #endregion
 
 
+
+
+
+
+        /*********************************************************/
+        /**********************  SUBSCRIPTION  *******************/
+        /*********************************************************/
 
 
         #region Subscription
@@ -602,5 +697,7 @@ namespace Fitabase.Azure.ApiManagement
         #endregion
 
 
+
+        
     }
 }
