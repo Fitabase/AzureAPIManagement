@@ -530,24 +530,56 @@ namespace Fitabase.Azure.ApiManagement
         #endregion
 
 
+
+
         #region Subscription
+
+        /// <summary>
+        /// Creates or updates the subscription of specified user to the specified product.
+        /// </summary>
         public Subscription CreateSubscription(Subscription subscription)
         {
             string endpoint = String.Format("{0}/subscriptions/{1}", api_endpoint, subscription.Id);
-            return DoRequest<Subscription>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(subscription));
+            DoRequest<Subscription>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(subscription));
+            return subscription;
         }
+
+        /// <summary>
+        /// Gets the specified Subscription entity.
+        /// </summary>
         public Subscription GetSubscription(string subscriptionId)
         {
             string endpoint = String.Format("{0}/subscriptions/{1}", api_endpoint, subscriptionId);
             return DoRequest<Subscription>(endpoint, RequestMethod.GET);
         }
 
+        /// <summary>
+        /// Deletes the specified subscription.
+        /// </summary>
+        public void DeleteSubscription(string subscriptionId)
+        {
+            string endpoint = String.Format("{0}/subscriptions/{1}", api_endpoint, subscriptionId);
+            DoRequest<Subscription>(endpoint, RequestMethod.DELETE);
+        }
+
+        /// <summary>
+        /// Updates the details of a subscription specificied by its identifier.
+        /// </summary>
+        public void UpdateSubscription(string subscriptionId, UpdateSubscription updateSubscription)
+        {
+            string endpoint = String.Format("{0}/subscriptions/{1}", api_endpoint, subscriptionId);
+            DoRequest<Subscription>(endpoint, RequestMethod.PATCH, Utility.SerializeToJson(updateSubscription.GetUpdateProperties()));
+        }
+
+        /// <summary>
+        /// Lists all subscriptions of the API Management service instance.
+        /// </summary>
         public EntityCollection<Subscription> GetSubscriptions()
         {
             string endpoint = String.Format("{0}/subscriptions", api_endpoint);
             return DoRequest<EntityCollection<Subscription>>(endpoint, RequestMethod.GET);
         }
-
+        
         /// <summary>
         /// Gernerate subscription primary key
         /// </summary>

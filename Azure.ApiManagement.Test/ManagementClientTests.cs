@@ -385,12 +385,42 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void CreateSubscription()
         {
+            var c1 = Client.GetSubscriptions().Count;
             string userId = "user_bef163ba98af433c917914dd4c208115";
-            string productId = "product_5cdf0c46784b4e98b326f426bb6c2c81";
+            string productId = "5870184f9898000087060002";
             string name = "server subscriptions";
-            Subscription subscription = Subscription.Create(userId, productId, name);
+            var now = DateTime.Now;
+            SubscriptionDateSettings dateSettings = new SubscriptionDateSettings(now.AddDays(1), now.AddMonths(2));
+            Subscription subscription = Subscription.Create(userId, productId, name, dateSettings, SubscriptionState.active);
             Subscription entity = Client.CreateSubscription(subscription);
             Assert.IsNotNull(entity);
+            var c2 = Client.GetSubscriptions().Count;
+            Assert.AreEqual(c1 + 1, c2);
+        }
+
+        [TestMethod]
+        public void DeleteSubscription()
+        {
+            var c1 = Client.GetSubscriptions().Count;
+            var subscriptionId = "subscription_c0ddc8fd75934e1eb2325ff507908140";
+            Client.DeleteSubscription(subscriptionId);
+            var c2 = Client.GetSubscriptions().Count;
+            Assert.AreEqual(c1 - 1, c2);
+        }
+
+        [TestMethod]
+        public void UpdateSubscription()
+        {
+            var subscriptionId  = "subscription_72208da5700b45e8a016605ccdc78aa1";
+            var entity_v1 = Client.GetSubscription(subscriptionId);
+
+            UpdateSubscription updateSubscription = new UpdateSubscription(subscriptionId);
+            DateTime now = DateTime.Now;
+            updateSubscription.ExpirationDate = now.AddMonths(20);
+            Client.UpdateSubscription(subscriptionId, updateSubscription);
+            var entity_v2 = Client.GetSubscription(subscriptionId);
+            
+            Assert.AreNotEqual(entity_v1.ExpirationDate, entity_v2.ExpirationDate);
         }
 
         [TestMethod]
@@ -404,7 +434,7 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void GetSubscription()
         {
-            var subscriptionId = "5870184f9898000087070001";
+            var subscriptionId = "subscription_801c5e5a9a9d4e9fba47b1561d1e19f6";
             var subscription = Client.GetSubscription(subscriptionId);
             PrintMessage.Debug(this.GetType().Name, Utility.SerializeToJson(subscription));
             Assert.IsNotNull(subscription);

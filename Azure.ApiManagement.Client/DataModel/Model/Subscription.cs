@@ -1,17 +1,64 @@
 ﻿using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using System.Collections;
 
 namespace Fitabase.Azure.ApiManagement.Model
 {
-    /// <summary>
-    /// 
-    /// </summary>
+
+    public class SubscriptionDateSettings
+    {
+        public SubscriptionDateSettings(DateTime startDate, DateTime expirationDate)
+        {
+            this.StartDate = startDate;
+            this.ExpirationDate = expirationDate;
+        }
+        public DateTime? StartDate { get; set; }
+        public DateTime? ExpirationDate { get; set; }    
+    }
+    
+
+    public class UpdateSubscription
+    {
+        public UpdateSubscription(string subscriptionId)
+        {
+            this.Id = subscriptionId;
+            
+        }
+
+        public Hashtable GetUpdateProperties()
+        {
+            if (String.IsNullOrWhiteSpace(Id))
+                throw new ArgumentException("subscription id is required");
+
+            Hashtable parameters = new Hashtable();
+            if(!String.IsNullOrWhiteSpace(this.UserId))
+            {
+                parameters.Add("userId", "/users/" + this.UserId);
+            }
+            if (!String.IsNullOrWhiteSpace(this.ProductId))
+            {
+                parameters.Add("productId", "/products/" + this.ProductId);
+            }
+            if (this.ExpirationDate != null)
+            {
+                parameters.Add("expirationDate", this.ExpirationDate);
+            }
+            return parameters;
+        }
+
+        public string Id { get; set; }
+        public string UserId { get; set; }
+        public string ProductId { get; set; }
+        public DateTime? ExpirationDate { get; set; }
+    }
+
     public class Subscription : EntityBase
     {
         public static Subscription Create(string userId, string productId, string name,
-                                           string primaryKey = null, string secondaryKey = null,
-                                           SubscriptionState state = SubscriptionState.submitted)
+                                           SubscriptionDateSettings dateSettings = null,
+                                           SubscriptionState state = SubscriptionState.submitted,
+                                           string primaryKey = null, string secondaryKey = null)
         {
             try
             {
@@ -26,12 +73,17 @@ namespace Fitabase.Azure.ApiManagement.Model
 
                 Subscription subscription = new Subscription();
                 subscription.Id = EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.SUBSCRIPTION);
-                subscription.UserId = userId;
-                subscription.ProductId = productId;
+                subscription.UserId = "/users/" + userId;
+                subscription.ProductId = "/products/" + productId;
                 subscription.Name = name;
                 subscription.PrimaryKey = primaryKey;
                 subscription.SecondaryKey = secondaryKey;
                 subscription.State = state;
+                subscription.StartDate = dateSettings.StartDate;
+                subscription.ExpirationDate = dateSettings.ExpirationDate;
+
+                PrintMessage.Debug("subscription", subscription.StartDate.ToString());
+                PrintMessage.Debug("subscription", subscription.ExpirationDate.ToString());
 
                 return subscription;
             }
