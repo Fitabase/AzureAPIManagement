@@ -9,8 +9,21 @@ namespace Fitabase.Azure.ApiManagement.Model
     /// </summary>
     public class Subscription : EntityBase
     {
-        public Subscription()
+        public static Subscription Create()
         {
+
+            try
+            {
+                Subscription subscription = new Subscription();
+                subscription.Id = EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.SUBSCRIPTION);
+
+                return subscription;
+            }
+            catch (ArgumentException ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return null;
+            }
         }
 
         protected override string UriIdFormat { get { return "/subscriptions/"; } }

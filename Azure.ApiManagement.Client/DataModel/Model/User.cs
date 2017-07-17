@@ -11,28 +11,39 @@ namespace Fitabase.Azure.ApiManagement.Model
     public class User : EntityBase
     {
         protected override string UriIdFormat { get { return "/users/"; } }
-
-        public User() { }
-
-        public User(string firstName, string lastName,
+        
+        public static User Create(string firstName, string lastName,
                     string email, string password,
-                    UserState state = UserState.active, string note = "") : this()
+                    UserState state = UserState.active, string note = "")
         {
-            if (String.IsNullOrWhiteSpace(firstName) || firstName.Length > 100)
-                throw new ArgumentException("Invalid firstname: " + firstName);
-            if (String.IsNullOrWhiteSpace(lastName) || lastName.Length > 100)
-                throw new ArgumentException("Invalid lastname: " + lastName);
-            if (String.IsNullOrWhiteSpace(email))
-                throw new ArgumentException("Invalid email: " + email);
-            if (String.IsNullOrWhiteSpace(password))
-                throw new ArgumentException("Invalid password: " + password);
+            try
+            {
 
-            this.FirstName = firstName;
-            this.LastName = lastName;
-            this.Email = email;
-            this.Password = password;
-            this.State = state;
-            this.Note = note;
+                if (String.IsNullOrWhiteSpace(firstName) || firstName.Length > 100)
+                    throw new ArgumentException("Invalid firstname: " + firstName);
+                if (String.IsNullOrWhiteSpace(lastName) || lastName.Length > 100)
+                    throw new ArgumentException("Invalid lastname: " + lastName);
+                if (String.IsNullOrWhiteSpace(email))
+                    throw new ArgumentException("Invalid email: " + email);
+                if (String.IsNullOrWhiteSpace(password))
+                    throw new ArgumentException("Invalid password: " + password);
+
+                User user = new User();
+                user.Id = EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.USER);
+                user.FirstName = firstName;
+                user.LastName = lastName;
+                user.Email = email;
+                user.Password = password;
+                user.State = state;
+                user.Note = note;
+                return user;
+
+            }
+            catch (ArgumentException ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return null;
+            }
 
         }
 

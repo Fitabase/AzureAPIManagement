@@ -13,19 +13,33 @@ namespace Fitabase.Azure.ApiManagement.Model
         protected override string UriIdFormat => "/operations";
 
         
-        public APIOperation(string name, 
+        public static APIOperation Create(string name, 
                             RequestMethod method, string urlTemplate, 
                             List<TemplateParameter> parameters,
                             RequestContract request)
         {
-            if (String.IsNullOrWhiteSpace(name))
-                throw new ArgumentException("APIOperation name is required");
-            
-            this.Name = name;
-            this.Method = method.ToString();
-            this.UrlTemplate = urlTemplate;
-            this.TemplateParameter = parameters;
-            this.Request = request;
+
+            try
+            {
+                if (String.IsNullOrWhiteSpace(name))
+                    throw new ArgumentException("APIOperation name is required");
+
+
+                APIOperation api = new APIOperation();
+                api.Id = EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.APIOPERATION);
+                api.Name = name;
+                api.Method = method.ToString();
+                api.UrlTemplate = urlTemplate;
+                api.TemplateParameter = parameters;
+                api.Request = request;
+
+                return api;
+
+            } catch(ArgumentException ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return null;
+            }
         }
 
         

@@ -16,19 +16,38 @@ namespace Fitabase.Azure.ApiManagement.Model
 
         //public API() : base("api") { }
 
-        public API(string name, string description, 
+        public static API Create(string name, string description, 
                    string serviceUrl, string path, 
                    string[] protocols, 
                    AuthenticationSettingsConstract authentication = null, 
-                   SubscriptionKeyParameterNames customNames = null) //: this()
+                   SubscriptionKeyParameterNames customNames = null)
         {
-            this.Name = name;
-            this.Description = description;
-            this.ServiceUrl = serviceUrl;
-            this.Path = path;
-            this.Protocols = protocols;
-            this.Authentication = authentication;
-            this.CustomNames = customNames;
+            try
+            {
+                if (String.IsNullOrWhiteSpace(name))
+                    throw new ArgumentException("API name is required");
+                if (String.IsNullOrWhiteSpace(serviceUrl))
+                    throw new ArgumentException("API service url is required");
+                if (String.IsNullOrWhiteSpace(path))
+                    throw new ArgumentException("API path is required");
+
+                API api = new API();
+                api.Id = EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.API);
+                api.Name = name;
+                api.Description = description;
+                api.ServiceUrl = serviceUrl;
+                api.Path = path;
+                api.Protocols = protocols;
+                api.Authentication = authentication;
+                api.CustomNames = customNames;
+
+                return api;
+
+            } catch(ArgumentException ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return null;
+            }
         }
 
         

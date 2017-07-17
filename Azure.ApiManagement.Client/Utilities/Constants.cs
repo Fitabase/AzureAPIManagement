@@ -9,20 +9,24 @@ namespace Fitabase.Azure.ApiManagement
 {
     internal static class Constants
     {
-      
+        internal static class IdPrefixTemplate
+        {
+            internal static readonly string API          = "api";
+            internal static readonly string APIOPERATION = "apioperation";
+            internal static readonly string GROUP        = "group";
+            internal static readonly string PRODUCT      = "product";
+            internal static readonly string PROPERTY     = "property";
+            internal static readonly string REPORT       = "report";
+            internal static readonly string SUBSCRIPTION = "subscription";
+            internal static readonly string TENANT       = "tenant";
+            internal static readonly string USER         = "user";
+        }
 
 
         internal static readonly string FITABSE_TOKEN = "FitabaseToken";
         //internal static readonly string FITABASE_API_VERSION = "Fitabase-API-Version";
 
         
-        internal static class Request
-        {
-            internal static readonly string PRODUCT_REQUEST = "/products";
-            internal static readonly string API_REQUEST = "/apis";
-        }
-
-
 
         internal static class ApiManagement
         {

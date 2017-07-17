@@ -42,7 +42,7 @@ namespace Azure.ApiManagement.Test
             var lastName = "Nguyen";
             var email = String.Format("{0}{1}@test.com", firstName, DateTimeOffset.Now.ToUnixTimeMilliseconds());
             var password = "P@ssWo3d";
-            var newUser = new User(firstName, lastName, email,  password);
+            var newUser = User.Create(firstName, lastName, email,  password);
             Client.CreateUser(newUser);
             var postCount = Client.GetUsers().Count;
             Assert.AreEqual(preCount + 1, postCount);
@@ -52,7 +52,7 @@ namespace Azure.ApiManagement.Test
         public void GetUserCollection()
         {
             var userCollection = Client.GetUsers();
-            PrintMessage.Debug(this.GetType().Name, userCollection);
+            PrintMessage.Debug(this, userCollection);
             Assert.IsNotNull(userCollection);
             Assert.AreEqual(userCollection.Count, userCollection.Values.Count);
         }
@@ -139,7 +139,7 @@ namespace Azure.ApiManagement.Test
             var path = "/add/calc";
             var protocols = new string[]{ "http", "https" };
             
-            var newAPI = new API(name, description, serviceUrl, path, protocols);
+            var newAPI = API.Create(name, description, serviceUrl, path, protocols);
             var api = Client.CreateAPI(newAPI);
             
             var postCount = Client.GetAPIs().Count;
@@ -208,7 +208,7 @@ namespace Azure.ApiManagement.Test
                                            new QueryParameter("queryParameter1", ParameterType.NUMBER)
                                         };
 
-            var operation = new APIOperation(name, method, urlTemplate, parameters, request);
+            var operation = APIOperation.Create(name, method, urlTemplate, parameters, request);
 
             Client.CreateAPIOperation(operationId, operation);
         }
@@ -244,7 +244,7 @@ namespace Azure.ApiManagement.Test
         {
             var preCount = Client.GetProducts().Count;
             var pid = Guid.NewGuid().ToString("N");
-            var product = new Product("ServerProduct1", "server description");
+            var product = Product.Create("ServerProduct1", "server description");
             Client.CreateProduct(product);
             var postCount = Client.GetProducts().Count;
             Assert.AreEqual(preCount + 1, postCount);

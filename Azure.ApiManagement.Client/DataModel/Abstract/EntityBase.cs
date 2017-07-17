@@ -11,19 +11,6 @@ namespace Fitabase.Azure.ApiManagement.Model
     {
 
         protected abstract string UriIdFormat { get; }
-
-        //public EntityBase() { }
-
-
-        //public EntityBase(string prefixId)
-        //{
-        //    if (String.IsNullOrEmpty(Id) && String.IsNullOrEmpty(_id))
-        //    {
-        //        this.Id = EntityIdGenerator.GenerateIdSignature(prefixId);
-        //    }
-        //}
-
-
         private string _id;
         [JsonIgnore]
         public string Id

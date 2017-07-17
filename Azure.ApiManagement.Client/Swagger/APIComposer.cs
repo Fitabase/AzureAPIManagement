@@ -40,7 +40,7 @@ namespace Fitabase.Azure.ApiManagement.Swagger
             AuthenticationSettingsConstract authentication       = null;
             SubscriptionKeyParameterNames customNames   = null;
             
-            API api = new API(name, description, serviceUrl, path,
+            API api = API.Create(name, description, serviceUrl, path,
                                protocols, authentication, customNames);
             api.Operations = GetOperations(Swagger.Paths);      // Inject api operations
 
@@ -129,7 +129,7 @@ namespace Fitabase.Azure.ApiManagement.Swagger
             }
 
 
-            return new APIOperation(operationName, method, urlTemplate, parameters, request);
+            return APIOperation.Create(operationName, method, urlTemplate, parameters, request);
         }
     }
 }

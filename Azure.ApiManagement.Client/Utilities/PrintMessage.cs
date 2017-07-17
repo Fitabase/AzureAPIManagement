@@ -2,7 +2,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -24,6 +26,11 @@ namespace Fitabase.Azure.ApiManagement
                                     DEBUG, Counter++, className, str));
         }
 
+        public static void Debug(object obj, string str)
+        {
+            Debug(obj.GetType().Name, str);
+        }
+
         public static void Debug(string className, EntityBase obj)
         {
             Debug(className, Utility.SerializeToJson(obj));
@@ -32,6 +39,10 @@ namespace Fitabase.Azure.ApiManagement
         {
             Debug(className, Utility.SerializeToJson(obj));
         }
-        
+
+        public static void Debug(object className, object obj)
+        {
+            Debug(obj.GetType().Name, Utility.SerializeToJson(obj));
+        }
     }
 }

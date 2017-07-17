@@ -17,6 +17,7 @@ namespace Fitabase.Azure.ApiManagement
     public class ManagementClient
     {
         //static readonly string user_agent = "Fitabase/v1";
+        private static readonly string FileContext = @"C:\Repositories\AzureAPIManagement\Azure.ApiManagement.Test\APIMKeys.json";
         public static readonly int RatesReqTimeout = 25;
         public static readonly int TransactionReqTimeOut = 25;
         static readonly Encoding encoding = Encoding.UTF8;
@@ -35,10 +36,15 @@ namespace Fitabase.Azure.ApiManagement
 
         public int TimeoutSeconds { get; set; }
 
-
         public ManagementClient()
         {
-            Init();
+            Init(FileContext);
+            TimeoutSeconds = 25;
+        }
+
+        public ManagementClient(string filePath)
+        {
+            Init(filePath);
             TimeoutSeconds = 25;
         }
 
@@ -48,7 +54,7 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         /// <param name="filePath"></param>
         /// <returns></returns>
-        private void Init(string filePath = @"C:\Repositories\AzureAPIManagement\Azure.ApiManagement.Test\APIMKeys.json")
+        private void Init(string filePath)
         {
             string apiKeysContent;
             try
@@ -132,7 +138,7 @@ namespace Fitabase.Azure.ApiManagement
         public virtual T DoRequest<T>(string endpoint, RequestMethod method = RequestMethod.GET, string body = null)
         {
             var json = DoRequest(endpoint, method.ToString(), body);
-            PrintMessage.Debug(this.GetType().Name, "1: " + json);
+            PrintMessage.Debug(this, json);
             //var jsonDeserialized = Utility.DeserializeToJson<T>(json);
             var jsonDeserialized = JsonConvert.DeserializeObject<T>(json); // Utility.DeserializeToJson<T>(json);
             return jsonDeserialized;
@@ -202,8 +208,7 @@ namespace Fitabase.Azure.ApiManagement
         }
         public void CreateUser(User user)
         {
-            var userId = EntityIdGenerator.GenerateIdSignature("user");
-            string endpoint = String.Format("{0}/users/{1}", api_endpoint, userId);
+            string endpoint = String.Format("{0}/users/{1}", api_endpoint, user.Id);
             DoRequest<User>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(user));
         }
         public User GetUser(string userId)
@@ -247,10 +252,8 @@ namespace Fitabase.Azure.ApiManagement
         #region API
         public API CreateAPI(API api)
         {
-            var id = EntityIdGenerator.GenerateIdSignature("api");
-            string endpoint = String.Format("{0}/apis/{1}", api_endpoint, id);
+            string endpoint = String.Format("{0}/apis/{1}", api_endpoint, api.Id);
             DoRequest<API>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(api));
-            api.Id = id;
             return api;
         }
         public API GetAPI(string apiId)
@@ -277,12 +280,12 @@ namespace Fitabase.Azure.ApiManagement
 
         #region API Operations
 
-        public void CreateAPIOperation(string apiId, APIOperation operation)
+        public APIOperation CreateAPIOperation(string apiId, APIOperation operation)
         {
-            var operationId = EntityIdGenerator.GenerateIdSignature("apioperation");
             string endpoint = String.Format("{0}/apis/{1}/operations/{2}",
                                                 api_endpoint, apiId, operation.Id);
             DoRequest<APIOperation>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(operation));
+            return operation;
         }
         public APIOperation GetAPIOperation(string apiId, string operationId)
         {
@@ -305,12 +308,12 @@ namespace Fitabase.Azure.ApiManagement
 
 
         #region Product
-        public void CreateProduct(Product product)
+        public Product CreateProduct(Product product)
         {
             Validator.ValidateProduct(product);
-            var productId = EntityIdGenerator.GenerateIdSignature("product");
-            string endpoint = String.Format("{0}/products/{1}", api_endpoint, productId);
+            string endpoint = String.Format("{0}/products/{1}", api_endpoint, product.Id);
             DoRequest<Product>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(product));
+            return product;
         }
         public Product GetProduct(string productId)
         {

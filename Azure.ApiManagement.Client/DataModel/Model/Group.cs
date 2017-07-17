@@ -9,8 +9,21 @@ namespace Fitabase.Azure.ApiManagement.Model
 {
     public class Group : EntityBase
     {
-        public Group()
+        public static Group Create()
         {
+
+            try
+            {
+                Group group = new Group();
+                group.Id = EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.GROUP);
+
+                return group;
+            }
+            catch (ArgumentException ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return null;
+            }
         }
 
         protected override string UriIdFormat {  get { return "/groups/"; } }
