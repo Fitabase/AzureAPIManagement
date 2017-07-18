@@ -37,16 +37,21 @@ namespace Fitabase.Azure.ApiManagement.ClientProxy
             }
             var swagger = new JsonFileReader().GetSwaggerFromFile(InputFile);
             PrintMessage.Debug(this.GetType().Name, Utility.SerializeToJson(swagger));
-            //swagger.Host = Client.GetEndpoint();
+            swagger.Host = Client.GetEndpoint();
             var api = new APIComposer(swagger).Compose();
 
 
-            List<APIOperation> list = api.Operations.ToList();
-            PrintMessage.Debug(this.GetType().Name, Utility.SerializeToJson(list.ElementAt(0).Responses));
-            
-            
-            //Documents.Write(OutputFolder + Documents.API_DOC, api);
-            //Documents.Write(OutputFolder + Documents.API_OPERATION_DOC, api.Operations);
+            //List<APIOperation> list = api.Operations.ToList();
+            //PrintMessage.Debug(this.GetType().Name, Utility.SerializeToJson(api));
+            //PrintMessage.Debug(this.GetType().Name, Utility.SerializeToJson(api.Operations));
+
+            Client.CreateAPI(api);
+            foreach(APIOperation operation in api.Operations)
+            {
+                Client.CreateAPIOperation(api.Id, operation);
+            }
+            Documents.Write(OutputFolder + Documents.API_DOC, api);
+            Documents.Write(OutputFolder + Documents.API_OPERATION_DOC, api.Operations);
         }
     }
 }

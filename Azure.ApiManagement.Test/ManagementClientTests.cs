@@ -18,7 +18,11 @@ namespace Azure.ApiManagement.Test
     public class ManagementClientTests
     {
         protected ManagementClient Client { get; set; }
-        
+
+        public static string API_DOC = @"C:\Users\inter\Desktop\FitabaseAPI\Azure\api.json";
+        public static string API_OPERATION_DOC = @"C:\Users\inter\Desktop\FitabaseAPI\Azure\apioperation.json";
+
+
 
         [TestInitialize]
         public void SetUp()
@@ -30,7 +34,7 @@ namespace Azure.ApiManagement.Test
         {
             PrintMessage.Debug("TestClass", obj);
         }
-
+        
           
         #region User TestCases
 
@@ -160,8 +164,9 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void GetApi()
         {
-            string apiId = "api_e64e0c2082124df581b2fba70c4de904";
+            string apiId = "api_05247cffcf9d4817adc81663625c18a1";
             var api = Client.GetAPI(apiId);
+            Documents.Write(API_DOC, api);
             Print(api);
             Assert.IsNotNull(api);
             Assert.AreEqual(api.Id, apiId);
@@ -180,7 +185,7 @@ namespace Azure.ApiManagement.Test
         public void DeleteAPI()
         {
             var preCount = Client.GetAPIs().Count;
-            string apiId = "api_1342cede25b54c2e88a1ba34b26191f9";
+            string apiId = "api_05247cffcf9d4817adc81663625c18a1";
             Client.DeleteAPI(apiId);
             var postCount = Client.GetAPIs().Count;
             Assert.AreEqual(preCount - 1, postCount);

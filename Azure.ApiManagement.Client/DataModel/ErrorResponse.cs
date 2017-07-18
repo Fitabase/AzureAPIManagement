@@ -5,10 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SmallStepsLabs.Azure.ApiManagement.DataModel
+namespace Fitabase.Azure.ApiManagement.Model
 {
     [JsonObject(MemberSerialization.OptIn)]
-    internal class Error
+    internal class ErrorResponse
     {
         [JsonProperty(PropertyName = "code")]
         public string Code { get; set; }
@@ -21,5 +21,22 @@ namespace SmallStepsLabs.Azure.ApiManagement.DataModel
 
         [JsonProperty(PropertyName = "message")]
         public string Message { get; set; }
+
+        [JsonProperty("details")]
+        public DetailError[] Details { get; set; }
+    }
+
+    internal class DetailError
+    {
+
+        [JsonProperty(PropertyName = "code")]
+        public string Code { get; set; }
+        
+        [JsonProperty(PropertyName = "target")]
+        public string Target { get; set; }
+
+        [JsonProperty(PropertyName = "message")]
+        public string Message { get; set; }
+
     }
 }

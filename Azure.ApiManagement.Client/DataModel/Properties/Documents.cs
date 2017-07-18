@@ -21,19 +21,24 @@ namespace Fitabase.Azure.ApiManagement.DataModel.Properties
 
         public static void Write(string outputFile, Object obj)
         {
-            using (StreamWriter file = File.CreateText(outputFile))
+            using (FileStream fileStream = new FileStream(outputFile, FileMode.Append, FileAccess.Write))
             {
-                string header = "";
-                if(obj is ICollection)
+
+                using (StreamWriter streamWriter = new StreamWriter(fileStream))
                 {
-                    header = obj.GetType().GetGenericArguments().Single().ToString();
-                } else
-                {
-                    header = obj.GetType().ToString();
+                    string header = "";
+                    if (obj is ICollection)
+                    {
+                        header = obj.GetType().GetGenericArguments().Single().ToString();
+                    }
+                    else
+                    {
+                        header = obj.GetType().ToString();
+                    }
+                    streamWriter.WriteLine(header + " JSON:\t\t\t\t\t" + DateTime.Now);
+                    string json = JsonConvert.SerializeObject(obj, Formatting.Indented);
+                    streamWriter.WriteLine(json + "\n\n\n");
                 }
-                file.WriteLine(header + " JSON");
-                string json = JsonConvert.SerializeObject(obj, Formatting.Indented);
-                file.WriteLine(json);
             }
         }
     }

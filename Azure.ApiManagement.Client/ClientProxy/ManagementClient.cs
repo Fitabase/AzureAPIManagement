@@ -27,6 +27,10 @@ namespace Fitabase.Azure.ApiManagement
         static string accessToken;
         static string apiVersion;
 
+        public static Stack ErrorStack;
+
+
+
         public string GetEndpoint()
         {
             return api_endpoint;
@@ -40,12 +44,20 @@ namespace Fitabase.Azure.ApiManagement
         {
             Init(FileContext);
             TimeoutSeconds = 25;
+            if(ErrorStack == null)
+            {
+                ErrorStack = new Stack();
+            }
         }
 
         public ManagementClient(string filePath)
         {
             Init(filePath);
             TimeoutSeconds = 25;
+            if (ErrorStack == null)
+            {
+                ErrorStack = new Stack();
+            }
         }
 
 
@@ -138,7 +150,11 @@ namespace Fitabase.Azure.ApiManagement
         public virtual T DoRequest<T>(string endpoint, RequestMethod method = RequestMethod.GET, string body = null)
         {
             var json = DoRequest(endpoint, method.ToString(), body);
-            PrintMessage.Debug(this, json);
+            if(String.IsNullOrWhiteSpace(json))
+            {
+                return default(T);
+            }
+            //PrintMessage.Debug(this, json);
             //var jsonDeserialized = Utility.DeserializeToJson<T>(json);
             var jsonDeserialized = JsonConvert.DeserializeObject<T>(json); // Utility.DeserializeToJson<T>(json);
             return jsonDeserialized;
@@ -170,21 +186,28 @@ namespace Fitabase.Azure.ApiManagement
             }
             catch (WebException wexc)
             {
-                if (wexc.Response != null)
-                {
-                    string json_error = GetResponseAsString(wexc.Response);
-                    HttpStatusCode status_code = HttpStatusCode.BadRequest;
-                    HttpWebResponse resp = wexc.Response as HttpWebResponse;
-                    
-                    if (resp != null)
-                        status_code = resp.StatusCode;
+                //if (wexc.Response != null)
+                //{
+                //    string json_error = GetResponseAsString(wexc.Response);
+                //    HttpStatusCode status_code = HttpStatusCode.BadRequest;
+                //    HttpWebResponse resp = wexc.Response as HttpWebResponse;
 
-                    if ((int)status_code <= 500)
-                    {
-                        throw new Exception(json_error, wexc);
-                    }
-                }
-                throw;
+                //    if (resp != null)
+                //        status_code = resp.StatusCode;
+
+                //    if ((int)status_code <= 500)
+                //    {
+                //        throw new Exception(json_error, wexc);
+                //    }
+                //}
+                string json_error = GetResponseAsString(wexc.Response);
+                HttpWebResponse resp = wexc.Response as HttpWebResponse;
+                //PrintMessage.Debug("ManagementClient.JsonError", GetResponseAsString(wexc.Response));
+                //PrintMessage.Debug("ManagementClient.Exception:", JsonConvert.SerializeObject(resp));
+                //throw;
+                ErrorResponse error = JsonConvert.DeserializeObject<ErrorResponse>(json_error);
+
+                ErrorStack.Push(error);
             }
             return result;
         }

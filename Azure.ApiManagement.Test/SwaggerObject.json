@@ -1,44 +1,13 @@
 ﻿{
-  "name": "/add?a={a}&b={b}",
-  "method": "POST",
-  "urlTemplate": "/add/{a}/{b}",
-  "templateParameters": [
-    {
-      "name": "a",
-      "description": "this is the first part of the sum",
-      "type": "number",
-      "defaultValue": null,
-      "required": true,
-      "values": [ "33", "4" ]
-    },
-    {
-      "name": "b",
-      "description": "this is the other",
-      "type": "integer",
-      "defaultValue": null,
-      "required": true,
-      "values": []
-    }
-  ],
-  "description": "",
-  "request": {
-    "description": "this is the body, none is required.",
-    "queryParameters": [],
-    "headers": [],
-    "representations": []
-  },
-  "responses": [
-    {
-      "statusCode": 200,
-      "description": null,
-      "representations": [
-        {
-          "contentType": "text/xml",
-          "sample": "<foo>hi</foo>"
-        }
-      ],
-      "headers": []
-    }
-  ],
-  "id": "/apis/5956a87a2f02d30b88dfad7b/operations/5956a9612f02d30b88dfad7c"
+  "error": {
+    "code": "ValidationError",
+    "message": "One or more fields contain incorrect values:",
+    "details": [
+      {
+        "code": "ValidationError",
+        "target": "aid",
+        "message": "API not found"
+      }
+    ]
+  }
 }

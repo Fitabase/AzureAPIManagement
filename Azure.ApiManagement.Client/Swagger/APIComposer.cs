@@ -35,16 +35,14 @@ namespace Fitabase.Azure.ApiManagement.Swagger
             string name             = Swagger.Info.Title;               
             string description      = Swagger.Definitions.GetDefinition();
             string serviceUrl       = Swagger.Host;
-            string path = null;
+            string path             = "Swagger/Path";
             string[] protocols  = Swagger.Schemes;
-            AuthenticationSettingsConstract authentication       = null;
-            SubscriptionKeyParameterNames customNames   = null;
+            AuthenticationSettingsConstract authentication   = null;
+            SubscriptionKeyParameterNames customNames        = null;
             
             API api = API.Create(name, description, serviceUrl, path,
                                protocols, authentication, customNames);
             api.Operations = GetOperations(Swagger.Paths);      // Inject api operations
-
-
             return api;
         }
 

@@ -22,7 +22,14 @@ namespace Azure.ApiManagement.Test
             var outputFile = @"C:\Users\inter\Desktop\FitabaseAPI\result";
             APIPubliser publiser = new APIPubliser(inputFile, outputFile);
             publiser.Publish();
-            
+            var errorStack = ManagementClient.ErrorStack;
+            if(errorStack != null)
+            {
+                foreach(var error in errorStack)
+                {
+                    PrintMessage.Debug(this.GetType().Name, error);
+                }
+            }
         }
 
     }
