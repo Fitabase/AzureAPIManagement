@@ -161,7 +161,7 @@ namespace Fitabase.Azure.ApiManagement
         }
 
 
-        public virtual string DoRequest(string endpoint, string method, string body)
+        public virtual string DoRequest(string endpoint, string method, string body) 
         {
             string result = null;
 
@@ -186,28 +186,21 @@ namespace Fitabase.Azure.ApiManagement
             }
             catch (WebException wexc)
             {
-                //if (wexc.Response != null)
-                //{
-                //    string json_error = GetResponseAsString(wexc.Response);
-                //    HttpStatusCode status_code = HttpStatusCode.BadRequest;
-                //    HttpWebResponse resp = wexc.Response as HttpWebResponse;
+                if (wexc.Response != null)
+                {
+                    string json_error = GetResponseAsString(wexc.Response);
+                    HttpStatusCode status_code = HttpStatusCode.BadRequest;
+                    HttpWebResponse resp = wexc.Response as HttpWebResponse;
 
-                //    if (resp != null)
-                //        status_code = resp.StatusCode;
+                    if (resp != null)
+                        status_code = resp.StatusCode;
 
-                //    if ((int)status_code <= 500)
-                //    {
-                //        throw new Exception(json_error, wexc);
-                //    }
-                //}
-                string json_error = GetResponseAsString(wexc.Response);
-                HttpWebResponse resp = wexc.Response as HttpWebResponse;
-                //PrintMessage.Debug("ManagementClient.JsonError", GetResponseAsString(wexc.Response));
-                //PrintMessage.Debug("ManagementClient.Exception:", JsonConvert.SerializeObject(resp));
-                //throw;
-                ErrorResponse error = JsonConvert.DeserializeObject<ErrorResponse>(json_error);
-
-                ErrorStack.Push(error);
+                    if ((int)status_code <= 500)
+                    {
+                        throw new HttpResponseException(json_error, wexc, status_code);
+                    }
+                }
+                throw;
             }
             return result;
         }
@@ -239,10 +232,11 @@ namespace Fitabase.Azure.ApiManagement
         /// <summary>
         /// Create a new user model
         /// </summary>
-        public void CreateUser(User user)
+        public User CreateUser(User user)
         {
             string endpoint = String.Format("{0}/users/{1}", api_endpoint, user.Id);
             DoRequest<User>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(user));
+            return user;
         }
 
         /// <summary>
@@ -624,7 +618,7 @@ namespace Fitabase.Azure.ApiManagement
         /// <summary>
         /// Lists a collection of the members of the group, specified by its identifier.
         /// </summary>
-        public EntityCollection<User> GetGroupUsers(string groupId)
+        public EntityCollection<User> GetUsersInGroup(string groupId)
         {
             string endpoint = String.Format("{0}/groups/{1}/users", api_endpoint, groupId);
             return DoRequest<EntityCollection<User>>(endpoint, RequestMethod.GET);

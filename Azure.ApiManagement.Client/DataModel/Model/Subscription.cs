@@ -29,7 +29,7 @@ namespace Fitabase.Azure.ApiManagement.Model
         public Hashtable GetUpdateProperties()
         {
             if (String.IsNullOrWhiteSpace(Id))
-                throw new ArgumentException("subscription id is required");
+                throw new InvalidEntityException("subscription id is required");
 
             Hashtable parameters = new Hashtable();
             if(!String.IsNullOrWhiteSpace(this.UserId))
@@ -60,38 +60,30 @@ namespace Fitabase.Azure.ApiManagement.Model
                                            SubscriptionState state = SubscriptionState.submitted,
                                            string primaryKey = null, string secondaryKey = null)
         {
-            try
-            {
-                if (String.IsNullOrWhiteSpace(userId) 
-                    && userId.StartsWith(Constants.IdPrefixTemplate.USER))
-                    throw new ArgumentException("subscription's userId is required");
-                if (String.IsNullOrWhiteSpace(productId)
-                    && userId.StartsWith(Constants.IdPrefixTemplate.PRODUCT))
-                    throw new ArgumentException("subscription's product is required");
-                if (String.IsNullOrWhiteSpace(name))
-                    throw new ArgumentException("subscription's name is required");
+            if (String.IsNullOrWhiteSpace(userId) 
+                && userId.StartsWith(Constants.IdPrefixTemplate.USER))
+                throw new InvalidEntityException("subscription's userId is required");
+            if (String.IsNullOrWhiteSpace(productId)
+                && userId.StartsWith(Constants.IdPrefixTemplate.PRODUCT))
+                throw new InvalidEntityException("subscription's product is required");
+            if (String.IsNullOrWhiteSpace(name))
+                throw new InvalidEntityException("subscription's name is required");
 
-                Subscription subscription = new Subscription();
-                subscription.Id = EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.SUBSCRIPTION);
-                subscription.UserId = "/users/" + userId;
-                subscription.ProductId = "/products/" + productId;
-                subscription.Name = name;
-                subscription.PrimaryKey = primaryKey;
-                subscription.SecondaryKey = secondaryKey;
-                subscription.State = state;
-                subscription.StartDate = dateSettings.StartDate;
-                subscription.ExpirationDate = dateSettings.ExpirationDate;
+            Subscription subscription = new Subscription();
+            subscription.Id = EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.SUBSCRIPTION);
+            subscription.UserId = "/users/" + userId;
+            subscription.ProductId = "/products/" + productId;
+            subscription.Name = name;
+            subscription.PrimaryKey = primaryKey;
+            subscription.SecondaryKey = secondaryKey;
+            subscription.State = state;
+            subscription.StartDate = dateSettings.StartDate;
+            subscription.ExpirationDate = dateSettings.ExpirationDate;
 
-                PrintMessage.Debug("subscription", subscription.StartDate.ToString());
-                PrintMessage.Debug("subscription", subscription.ExpirationDate.ToString());
+            PrintMessage.Debug("subscription", subscription.StartDate.ToString());
+            PrintMessage.Debug("subscription", subscription.ExpirationDate.ToString());
 
-                return subscription;
-            }
-            catch (ArgumentException ex)
-            {
-                Console.WriteLine(ex.ToString());
-                return null;
-            }
+            return subscription;
         }
 
         protected override string UriIdFormat { get { return "/subscriptions/"; } }

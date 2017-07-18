@@ -19,25 +19,19 @@ namespace Fitabase.Azure.ApiManagement.Model
                         bool apporvalRequired = false,
                         int? subscriptionsLimit = null)
         {
+            if (String.IsNullOrWhiteSpace(name))
+                throw new InvalidEntityException("Product's name is required");
 
-            try
-            {
-                Product product = new Product();
-                product.Id = EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.PRODUCT);
-                product.Name = name;
-                product.Description = description;
-                product.Terms = terms;
-                product.State = state;
-                product.SubscriptionRequired = subscriptionRequired;
-                product.ApprovalRequired = apporvalRequired;
-                product.SubscriptionsLimit = subscriptionsLimit;
-                return product;
-            }
-            catch (ArgumentException ex)
-            {
-                Console.WriteLine(ex.ToString());
-                return null;
-            }
+            Product product = new Product();
+            product.Id = EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.PRODUCT);
+            product.Name = name;
+            product.Description = description;
+            product.Terms = terms;
+            product.State = state;
+            product.SubscriptionRequired = subscriptionRequired;
+            product.ApprovalRequired = apporvalRequired;
+            product.SubscriptionsLimit = subscriptionsLimit;
+            return product;
 
         }
 

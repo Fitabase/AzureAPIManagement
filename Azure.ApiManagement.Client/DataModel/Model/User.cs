@@ -15,6 +15,15 @@ namespace Fitabase.Azure.ApiManagement.Model
     }
 
 
+    public class UserIdentity
+    {
+        [JsonProperty("provider")]
+        public string Provider { get; set; }
+        [JsonProperty("id")]
+        public string Id { get; set; }
+    }
+
+
 
     public class User : EntityBase
     {
@@ -24,34 +33,24 @@ namespace Fitabase.Azure.ApiManagement.Model
                     string email, string password,
                     UserState state = UserState.active, string note = "")
         {
-            try
-            {
+            if (String.IsNullOrWhiteSpace(firstName) || firstName.Length > 100)
+                throw new InvalidEntityException("Invalid firstname: " + firstName);
+            if (String.IsNullOrWhiteSpace(lastName) || lastName.Length > 100)
+                throw new InvalidEntityException("Invalid lastname: " + lastName);
+            if (String.IsNullOrWhiteSpace(email))
+                throw new InvalidEntityException("Invalid email: " + email);
+            if (String.IsNullOrWhiteSpace(password))
+                throw new InvalidEntityException("Invalid password: " + password);
 
-                if (String.IsNullOrWhiteSpace(firstName) || firstName.Length > 100)
-                    throw new ArgumentException("Invalid firstname: " + firstName);
-                if (String.IsNullOrWhiteSpace(lastName) || lastName.Length > 100)
-                    throw new ArgumentException("Invalid lastname: " + lastName);
-                if (String.IsNullOrWhiteSpace(email))
-                    throw new ArgumentException("Invalid email: " + email);
-                if (String.IsNullOrWhiteSpace(password))
-                    throw new ArgumentException("Invalid password: " + password);
-
-                User user = new User();
-                user.Id = EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.USER);
-                user.FirstName = firstName;
-                user.LastName = lastName;
-                user.Email = email;
-                user.Password = password;
-                user.State = state;
-                user.Note = note;
-                return user;
-
-            }
-            catch (ArgumentException ex)
-            {
-                Console.WriteLine(ex.ToString());
-                return null;
-            }
+            User user = new User();
+            user.Id = EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.USER);
+            user.FirstName = firstName;
+            user.LastName = lastName;
+            user.Email = email;
+            user.Password = password;
+            user.State = state;
+            user.Note = note;
+            return user;
 
         }
 
@@ -85,11 +84,4 @@ namespace Fitabase.Azure.ApiManagement.Model
         public List<Group> Groups { get; set; }
     }
 
-    public class UserIdentity
-    {
-        [JsonProperty("provider")]
-        public string Provider { get; set; }
-        [JsonProperty("id")]
-        public string Id { get; set; }
-    }
 }

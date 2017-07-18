@@ -14,40 +14,31 @@ namespace Fitabase.Azure.ApiManagement.Model
     {
         protected override string UriIdFormat {  get { return "/apis/"; } }
 
-        //public API() : base("api") { }
-
+        
         public static API Create(string name, string description, 
                    string serviceUrl, string path, 
                    string[] protocols, 
                    AuthenticationSettingsConstract authentication = null, 
-                   SubscriptionKeyParameterNames customNames = null)
+                   SubscriptionKeyParameterNames customNames = null) 
         {
-            try
-            {
-                if (String.IsNullOrWhiteSpace(name))
-                    throw new ArgumentException("API name is required");
-                if (String.IsNullOrWhiteSpace(serviceUrl))
-                    throw new ArgumentException("API service url is required");
-                if (String.IsNullOrWhiteSpace(path))
-                    throw new ArgumentException("API path is required");
+            if (String.IsNullOrWhiteSpace(name))
+                throw new InvalidEntityException("API name is required");
+            if (String.IsNullOrWhiteSpace(serviceUrl))
+                throw new InvalidEntityException("API service url is required");
+            if (String.IsNullOrWhiteSpace(path))
+                throw new InvalidEntityException("API path is required");
 
-                API api = new API();
-                api.Id = EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.API);
-                api.Name = name;
-                api.Description = description;
-                api.ServiceUrl = serviceUrl;
-                api.Path = path;
-                api.Protocols = protocols;
-                api.Authentication = authentication;
-                api.CustomNames = customNames;
+            API api = new API();
+            api.Id = EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.API);
+            api.Name = name;
+            api.Description = description;
+            api.ServiceUrl = serviceUrl;
+            api.Path = path;
+            api.Protocols = protocols;
+            api.Authentication = authentication;
+            api.CustomNames = customNames;
 
-                return api;
-
-            } catch(ArgumentException ex)
-            {
-                Console.WriteLine(ex.ToString());
-                return null;
-            }
+            return api;
         }
 
         

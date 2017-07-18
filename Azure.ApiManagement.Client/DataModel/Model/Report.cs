@@ -10,17 +10,9 @@ namespace Fitabase.Azure.ApiManagement.Model
     {
         public static Report Create()
         {
-            try
-            {
-                Report report = new Report();
-                report.Id = EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.REPORT);
-                return report;
-            }
-            catch (ArgumentException ex)
-            {
-                Console.WriteLine(ex.ToString());
-                return null;
-            }
+            Report report = new Report();
+            report.Id = EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.REPORT);
+            return report;
         }
 
         protected override string UriIdFormat { get { return "/reports/"; } }

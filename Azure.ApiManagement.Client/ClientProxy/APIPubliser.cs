@@ -36,7 +36,7 @@ namespace Fitabase.Azure.ApiManagement.ClientProxy
                 throw new ArgumentException("FilePath is required");
             }
             var swagger = new JsonFileReader().GetSwaggerFromFile(InputFile);
-            PrintMessage.Debug(this.GetType().Name, Utility.SerializeToJson(swagger));
+            //PrintMessage.Debug(this.GetType().Name, Utility.SerializeToJson(swagger));
             swagger.Host = Client.GetEndpoint();
             var api = new APIComposer(swagger).Compose();
 

@@ -17,27 +17,18 @@ namespace Fitabase.Azure.ApiManagement.Model
         public static Group Create(string name, string description = "", 
                                     GroupType type = GroupType.custom, string externalId = null)
         {
+            if (String.IsNullOrEmpty(name))
+                throw new InvalidEntityException("group's name is required");
+            if (type == GroupType.system)
+                throw new InvalidEntityException("group's type can't be set to system");
 
-            try
-            {
-                if (String.IsNullOrEmpty(name))
-                    throw new ArgumentException("group's name is required");
-                if (type == GroupType.system)
-                    throw new ArgumentException("group's type can't be set to system");
-
-                Group group = new Group();
-                group.Id = EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.GROUP);
-                group.Name = name;
-                group.Description = description;
-                group.Type = type;
-                group.ExternalId = externalId;
-                return group;
-            }
-            catch (ArgumentException ex)
-            {
-                Console.WriteLine(ex.ToString());
-                return null;
-            }
+            Group group = new Group();
+            group.Id = EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.GROUP);
+            group.Name = name;
+            group.Description = description;
+            group.Type = type;
+            group.ExternalId = externalId;
+            return group;
         }
 
         protected override string UriIdFormat {  get { return "/groups/"; } }

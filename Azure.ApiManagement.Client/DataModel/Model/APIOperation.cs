@@ -18,29 +18,20 @@ namespace Fitabase.Azure.ApiManagement.Model
                             List<TemplateParameter> parameters,
                             RequestContract request)
         {
+            if (String.IsNullOrWhiteSpace(name))
+                throw new InvalidEntityException("APIOperation name is required");
+            if (String.IsNullOrWhiteSpace(urlTemplate))
+                throw new InvalidEntityException("APIOperation urlTemplate is required");
 
-            try
-            {
-                if (String.IsNullOrWhiteSpace(name))
-                    throw new ArgumentException("APIOperation name is required");
-                if (String.IsNullOrWhiteSpace(urlTemplate))
-                    throw new ArgumentException("APIOperation urlTemplate is required");
+            APIOperation api = new APIOperation();
+            api.Id = EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.APIOPERATION);
+            api.Name = name;
+            api.Method = method.ToString();
+            api.UrlTemplate = urlTemplate;
+            api.TemplateParameter = parameters;
+            api.Request = request;
 
-                APIOperation api = new APIOperation();
-                api.Id = EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.APIOPERATION);
-                api.Name = name;
-                api.Method = method.ToString();
-                api.UrlTemplate = urlTemplate;
-                api.TemplateParameter = parameters;
-                api.Request = request;
-
-                return api;
-
-            } catch(ArgumentException ex)
-            {
-                Console.WriteLine(ex.ToString());
-                return null;
-            }
+            return api;
         }
 
         

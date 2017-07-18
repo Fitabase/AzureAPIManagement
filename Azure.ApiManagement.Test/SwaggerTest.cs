@@ -1,14 +1,8 @@
 ﻿using Fitabase.Azure.ApiManagement;
 using Fitabase.Azure.ApiManagement.ClientProxy;
 using Fitabase.Azure.ApiManagement.Model;
-using Fitabase.Azure.ApiManagement.Swagger;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Azure.ApiManagement.Test
 {
@@ -20,16 +14,20 @@ namespace Azure.ApiManagement.Test
         {
             var inputFile  = @"C:\Users\inter\Desktop\FitabaseAPI\bodyTrace.json";
             var outputFile = @"C:\Users\inter\Desktop\FitabaseAPI\result";
-            APIPubliser publiser = new APIPubliser(inputFile, outputFile);
-            publiser.Publish();
-            var errorStack = ManagementClient.ErrorStack;
-            if(errorStack != null)
+            try
             {
-                foreach(var error in errorStack)
-                {
-                    PrintMessage.Debug(this.GetType().Name, error);
-                }
+                APIPubliser publiser = new APIPubliser(inputFile, outputFile);
+                publiser.Publish();
             }
+            catch (HttpResponseException ex)
+            {
+                PrintMessage.Debug(this, ex.StatusCode);
+                PrintMessage.Debug(this, ex.ErrorResponse);
+            } catch(InvalidEntityException ex) 
+                {
+                PrintMessage.Debug(this, ex.Message);
+            }
+
         }
 
     }

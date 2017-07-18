@@ -5,9 +5,14 @@
     "details": [
       {
         "code": "ValidationError",
-        "target": "aid",
-        "message": "API not found"
+        "message": "API with specified name already exists",
+        "target": "name"
       }
     ]
-  }
+  },
+  "code": null,
+  "param": null,
+  "type": null,
+  "message": null,
+  "details": null
 }

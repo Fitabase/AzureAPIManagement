@@ -169,7 +169,6 @@
   <ItemGroup>
     <Compile Include="ClientProxy\APIPubliser.cs" />
     <Compile Include="DataModel\Abstract\EntityIdGenerator.cs" />
-    <Compile Include="DataModel\ErrorResponse.cs" />
     <Compile Include="DataModel\FormParameter.cs" />
     <Compile Include="DataModel\Header.cs" />
     <Compile Include="DataModel\OperationResponse.cs" />
