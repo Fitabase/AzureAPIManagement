@@ -297,10 +297,10 @@ namespace Fitabase.Azure.ApiManagement
         /// <summary>
         /// Update a specific user model
         /// </summary>
-        public User UpdateUser(string userId, Hashtable parameters)
+        public User UpdateUser(UpdateUser updateUser)
         {
-            string endpoint = String.Format("{0}/users/{1}", api_endpoint, userId);
-            return DoRequest<User>(endpoint, RequestMethod.PATCH, Utility.SerializeToJson(parameters));
+            string endpoint = String.Format("{0}/users/{1}", api_endpoint, updateUser.Id);
+            return DoRequest<User>(endpoint, RequestMethod.PATCH, JsonConvert.SerializeObject(updateUser.GetUpdateProperties()));
         }
 
 
@@ -446,10 +446,10 @@ namespace Fitabase.Azure.ApiManagement
         /// <summary>
         /// Update a product
         /// </summary>
-        public void UpdateProduct(Product product)
+        public void UpdateProduct(UpdateProduct updateProduct)
         {
-            string endpoint = String.Format("{0}/products/{1}", api_endpoint, product.Id);
-            DoRequest<Product>(endpoint, RequestMethod.PATCH, Utility.SerializeToJson(product));
+            string endpoint = String.Format("{0}/products/{1}", api_endpoint, updateProduct.Id);
+            DoRequest<Product>(endpoint, RequestMethod.PATCH, JsonConvert.SerializeObject(updateProduct.GetUpdateProperties()));
         }
 
         /// <summary>
@@ -461,6 +461,7 @@ namespace Fitabase.Azure.ApiManagement
             string endpoint = String.Format("{0}/products/{1}?deleteSubscriptions=true", api_endpoint, productId);
             DoRequest<Product>(endpoint, RequestMethod.DELETE);
         }
+        
         
         /// <summary>
         /// Lists a collection of products in the specified service instance.

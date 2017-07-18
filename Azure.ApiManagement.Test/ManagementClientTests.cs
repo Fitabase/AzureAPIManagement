@@ -123,15 +123,15 @@ namespace Azure.ApiManagement.Test
         public void UpdateUser()
         {
             string userId = "66da331f7a1c49d98ac8a4ad136c7c64";
-            string lastName = "Fitabase";
+            
+            UpdateUser updateUser = new UpdateUser(userId);
+            updateUser.FirstName = "NewName";
+            updateUser.Email = "updateEmail@gmail.com";
 
-            Hashtable parameters = new Hashtable();
-            parameters.Add("lastName", lastName);
-
-            Client.UpdateUser(userId, parameters);
+            Client.UpdateUser(updateUser);
 
             User currUser = Client.GetUser(userId);
-            Assert.AreEqual(currUser.LastName, lastName);
+            Assert.AreEqual(currUser.FirstName, updateUser.FirstName);
         }
         
         #endregion User TestCases
@@ -148,10 +148,10 @@ namespace Azure.ApiManagement.Test
         public void CreateApi()
         {
             int count_v1 = Client.GetAPIs().Count;
-            string name = "add Calculator";
+            string name = "Calculator";
             string description = "This is a calculator created in the server";
             string serviceUrl = "http://echoapi.cloudapp.net/calc";
-            string path = "/add/calc";
+            string path = "/bodytrace";
             string[] protocols = new string[]{ "http", "https" };
             
             API newAPI = API.Create(name, description, serviceUrl, path, protocols);
@@ -292,28 +292,44 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void GetProduct()
         {
-            string productId = "product_735904e546284cab8d47f0ea0c58a16e";
+            string productId = "29f79d2acfab453eac057ddf3656a31b";
             Product product = Client.GetProduct(productId);
             Assert.IsNotNull(product);
             Assert.AreEqual(productId, product.Id);
             Print(product);
         }
 
+        //[TestMethod]
+        //public void PublishProduct()
+        //{
+        //    string productId = "5870184f9898000087060001";
+        //    ProductState state = ProductState.notPublished;
+        //    Client.UpdateProductState(productId, state);
+        //    Product product = Client.GetProduct(productId);
+        //    Assert.AreEqual(product.State, state);
+
+
+        //    //foreach (Product product in collection.Values)
+        //    //{
+        //    //    Print(product.State.ToString() + " " + product.Id);
+        //    //}
+        //}
+
         [TestMethod]
         public void UpdateProduct()
         {
-            string productId = "product_735904e546284cab8d47f0ea0c58a16e";
-            Product currProduct = Client.GetProduct(productId);
-            string name = "other name";
-            currProduct.Name = name;
-            Client.UpdateProduct(currProduct);
+            string productId = "product_5cdf0c46784b4e98b326f426bb6c2c81";
+
+            UpdateProduct updateProduct = new UpdateProduct(productId);
+            updateProduct.State = ProductState.published;
+            updateProduct.Name = "updated name";
+            updateProduct.Description = "This is updated description";
+
+            Client.UpdateProduct(updateProduct);
             Product product = Client.GetProduct(productId);
 
-            Assert.IsNotNull(product);
-            Assert.AreEqual(productId, product.Id);
-            Assert.AreEqual(product.Name, name);
-
-
+            Assert.AreEqual(product.State, updateProduct.State);
+            Assert.AreEqual(product.Description, updateProduct.Description);
         }
 
         [TestMethod]
@@ -447,7 +463,8 @@ namespace Azure.ApiManagement.Test
 
             UpdateSubscription updateSubscription = new UpdateSubscription(subscriptionId);
             DateTime now = DateTime.Now;
-            updateSubscription.ExpirationDate = now.AddMonths(20);
+            updateSubscription.ExpirationDate = now.AddMonths(23);
+            Print(JsonConvert.SerializeObject(updateSubscription));
             Client.UpdateSubscription(subscriptionId, updateSubscription);
             Subscription entity_v2 = Client.GetSubscription(subscriptionId);
             

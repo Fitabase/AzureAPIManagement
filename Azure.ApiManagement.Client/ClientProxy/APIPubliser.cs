@@ -17,18 +17,23 @@ namespace Fitabase.Azure.ApiManagement.ClientProxy
         private string InputFile { get; set; }
         private string OutputFolder { get; set; }
 
+        private Configuration Configuration { get; set; }
 
-        public APIPubliser(string inputFile, string outputFolder)
+        public APIPubliser(string inputFile, string outputFolder, 
+                            Configuration configuration = null)
         {
+            if (configuration == null)
+                configuration = new Configuration();
+
             this.InputFile = inputFile;
             this.OutputFolder = outputFolder;
-            Client = new ManagementClient();
+            this.Configuration = configuration;
+            this.Client = new ManagementClient();
+            this.Configuration = configuration;
         }
 
 
-        /// <summary>
-        /// Publish the api
-        /// </summary>
+        
         public void Publish()
         {
             if(InputFile == null)
@@ -36,22 +41,25 @@ namespace Fitabase.Azure.ApiManagement.ClientProxy
                 throw new ArgumentException("FilePath is required");
             }
             var swagger = new JsonFileReader().GetSwaggerFromFile(InputFile);
-            //PrintMessage.Debug(this.GetType().Name, Utility.SerializeToJson(swagger));
             swagger.Host = Client.GetEndpoint();
             var api = new APIComposer(swagger).Compose();
 
-
-            //List<APIOperation> list = api.Operations.ToList();
-            //PrintMessage.Debug(this.GetType().Name, Utility.SerializeToJson(api));
-            //PrintMessage.Debug(this.GetType().Name, Utility.SerializeToJson(api.Operations));
-
+            
             Client.CreateAPI(api);
             foreach(APIOperation operation in api.Operations)
             {
                 Client.CreateAPIOperation(api.Id, operation);
             }
-            Documents.Write(OutputFolder + Documents.API_DOC, api);
-            Documents.Write(OutputFolder + Documents.API_OPERATION_DOC, api.Operations);
+            WriteToFile(OutputFolder + Documents.API_DOC, api);
+            WriteToFile(OutputFolder + Documents.API_OPERATION_DOC, api.Operations);
+        }
+
+        private void WriteToFile(string ouputFile, object obj)
+        {
+            if(Configuration.WriteToFile)
+            {
+                Documents.Write(ouputFile, obj);
+            }
         }
     }
 }

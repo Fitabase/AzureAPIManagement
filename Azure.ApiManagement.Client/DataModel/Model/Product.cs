@@ -5,9 +5,50 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Collections;
 
 namespace Fitabase.Azure.ApiManagement.Model
 {
+
+    public class UpdateProduct : UpdateEntityBase
+    {
+        public UpdateProduct(string id) : base(id) {}
+
+        public override Hashtable GetUpdateProperties()
+        {
+            Hashtable parameters = new Hashtable();
+
+            if (!String.IsNullOrWhiteSpace(Name))
+                parameters.Add("name", Name);
+            if (!String.IsNullOrWhiteSpace(Description))
+                parameters.Add("description", Description);
+            if (!String.IsNullOrWhiteSpace(Terms))
+                parameters.Add("terms", Terms);
+            if (SubscriptionRequired != null)
+                parameters.Add("subscriptionRequired", SubscriptionRequired);
+            if (ApprovalRequired != null)
+                parameters.Add("approvalRequired", ApprovalRequired);
+            if (SubscriptionsLimit != null)
+                parameters.Add("subscriptionLimit", SubscriptionsLimit);
+            if (State != null)
+                parameters.Add("state", State);
+
+            return parameters;
+        }
+
+
+        
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public string Terms { get; set; }                       
+        public bool? SubscriptionRequired { get; set; }         
+        public bool? ApprovalRequired { get; set; }            
+        public int? SubscriptionsLimit { get; set; }           
+        public ProductState? State { get; set; }                
+
+       
+    }
+
     public class Product : EntityBase
     {
         protected override string UriIdFormat { get { return "/products/"; } }

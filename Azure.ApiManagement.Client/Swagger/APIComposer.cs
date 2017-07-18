@@ -19,7 +19,7 @@ namespace Fitabase.Azure.ApiManagement.Swagger
         {
             if (swagger == null)
             {
-                throw new ArgumentException("SwaggerObject is required");
+                throw new SwaggerComponentException("SwaggerObject is required");
             }
 
             this.Swagger = swagger;
@@ -35,7 +35,8 @@ namespace Fitabase.Azure.ApiManagement.Swagger
             string name             = Swagger.Info.Title;               
             string description      = Swagger.Definitions.GetDefinition();
             string serviceUrl       = Swagger.Host;
-            string path             = "Swagger/Path";
+            string path = Swagger.Info.Title;
+            
             string[] protocols  = Swagger.Schemes;
             AuthenticationSettingsConstract authentication   = null;
             SubscriptionKeyParameterNames customNames        = null;

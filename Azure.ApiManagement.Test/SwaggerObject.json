@@ -1,18 +1,11 @@
 ﻿{
-  "error": {
-    "code": "ValidationError",
-    "message": "One or more fields contain incorrect values:",
-    "details": [
-      {
-        "code": "ValidationError",
-        "message": "API with specified name already exists",
-        "target": "name"
-      }
-    ]
-  },
-  "code": null,
-  "param": null,
-  "type": null,
-  "message": null,
-  "details": null
+  "name": "Server product",
+  "description": "This product is created from the server",
+  "terms": null,
+  "subscriptionRequired": true,
+  "approvalRequired": false,
+  "subscriptionsLimit": null,
+  "state": "published",
+  "groups": null,
+  "id": "/products/product_5cdf0c46784b4e98b326f426bb6c2c81"
 }

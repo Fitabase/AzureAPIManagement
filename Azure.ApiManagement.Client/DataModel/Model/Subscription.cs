@@ -18,38 +18,35 @@ namespace Fitabase.Azure.ApiManagement.Model
     }
     
 
-    public class UpdateSubscription
+    public class UpdateSubscription : UpdateEntityBase
     {
-        public UpdateSubscription(string subscriptionId)
+        public UpdateSubscription(string subscriptionId) : base(subscriptionId)
         {
-            this.Id = subscriptionId;
             
         }
 
-        public Hashtable GetUpdateProperties()
+        public override Hashtable GetUpdateProperties()
         {
-            if (String.IsNullOrWhiteSpace(Id))
-                throw new InvalidEntityException("subscription id is required");
-
             Hashtable parameters = new Hashtable();
             if(!String.IsNullOrWhiteSpace(this.UserId))
-            {
                 parameters.Add("userId", "/users/" + this.UserId);
-            }
+
             if (!String.IsNullOrWhiteSpace(this.ProductId))
-            {
                 parameters.Add("productId", "/products/" + this.ProductId);
-            }
+            
             if (this.ExpirationDate != null)
-            {
                 parameters.Add("expirationDate", this.ExpirationDate);
-            }
+
             return parameters;
         }
 
-        public string Id { get; set; }
+        [JsonProperty("userId", NullValueHandling = NullValueHandling.Ignore)]
         public string UserId { get; set; }
+
+        [JsonProperty("productId", NullValueHandling = NullValueHandling.Ignore)]
         public string ProductId { get; set; }
+
+        [JsonProperty("expirationDate", NullValueHandling = NullValueHandling.Ignore)]
         public DateTime? ExpirationDate { get; set; }
     }
 

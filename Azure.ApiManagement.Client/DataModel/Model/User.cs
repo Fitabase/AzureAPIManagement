@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Collections;
 
 namespace Fitabase.Azure.ApiManagement.Model
 {
@@ -12,6 +13,32 @@ namespace Fitabase.Azure.ApiManagement.Model
     {
         active,
         blocked
+    }
+
+    public class UpdateUser : UpdateEntityBase
+    {
+        public UpdateUser(string id) : base(id)
+        {
+        }
+
+        public override Hashtable GetUpdateProperties()
+        {
+            Hashtable parameters = new Hashtable();
+            if (!String.IsNullOrWhiteSpace(FirstName))
+                parameters.Add("firstName", FirstName);
+            if (!String.IsNullOrWhiteSpace(LastName))
+                parameters.Add("lastName", LastName);
+            if (!String.IsNullOrWhiteSpace(Email))
+                parameters.Add("email", Email);
+            if (!String.IsNullOrWhiteSpace(Password))
+                parameters.Add("password", Password);
+            return parameters;
+        }
+
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Email { get; set; }
+        public string Password { get; set; }
     }
 
 
@@ -75,8 +102,7 @@ namespace Fitabase.Azure.ApiManagement.Model
 
         [JsonProperty("note")]
         public string Note { get; set; }
-
-
+        
         [JsonProperty("identities")]
         public UserIdentity[] Identities { get; set; }
 

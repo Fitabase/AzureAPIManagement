@@ -33,7 +33,7 @@ namespace Fitabase.Azure.ApiManagement.Model
             api.Name = name;
             api.Description = description;
             api.ServiceUrl = serviceUrl;
-            api.Path = path;
+            api.Path = path.ToLower();
             api.Protocols = protocols;
             api.Authentication = authentication;
             api.CustomNames = customNames;
