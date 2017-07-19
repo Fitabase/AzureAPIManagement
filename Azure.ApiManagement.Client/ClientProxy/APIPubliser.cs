@@ -11,6 +11,9 @@ using System.Threading.Tasks;
 
 namespace Fitabase.Azure.ApiManagement.ClientProxy
 {
+    /// <summary>
+    /// This class
+    /// </summary>
     public class APIPubliser
     {
         private ManagementClient Client { get; set; }
@@ -40,9 +43,9 @@ namespace Fitabase.Azure.ApiManagement.ClientProxy
             {
                 throw new ArgumentException("FilePath is required");
             }
-            var swagger = new JsonFileReader().GetSwaggerFromFile(InputFile);
+            SwaggerAPIComponent swagger = new JsonFileReader(InputFile).GetSwaggerComponents();
             swagger.Host = Client.GetEndpoint();
-            var api = new APIComposer(swagger).Compose();
+            API api = new APIComposer(swagger).Compose();
 
             
             Client.CreateAPI(api);

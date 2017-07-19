@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace Fitabase.Azure.ApiManagement.Model
 {
-    public class SwaggerComponentException : Exception
+    public class SwaggerResourceException : Exception
     {
-        public SwaggerComponentException(string message) : base(message) { }
+        public SwaggerResourceException(string message) : base(message) { }
     }
 }

@@ -19,7 +19,7 @@ namespace Fitabase.Azure.ApiManagement.Swagger
         {
             if (swagger == null)
             {
-                throw new SwaggerComponentException("SwaggerObject is required");
+                throw new SwaggerResourceException("SwaggerObject is required");
             }
 
             this.Swagger = swagger;

@@ -1,6 +1,7 @@
 ﻿using Fitabase.Azure.ApiManagement;
 using Fitabase.Azure.ApiManagement.ClientProxy;
 using Fitabase.Azure.ApiManagement.Model;
+using Fitabase.Azure.ApiManagement.Swagger;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 
@@ -28,6 +29,14 @@ namespace Azure.ApiManagement.Test
                 PrintMessage.Debug(this, ex.Message);
             }
 
+        }
+
+        [TestMethod]
+        public void SwaggerReader()
+        {
+            string resourcePath = @"localhost:2598/swagger/docs/BodyTrace";
+            AbstractSwaggerReader reader = new UrlContentReader(resourcePath);
+            reader.GetSwaggerComponents();
         }
 
     }
