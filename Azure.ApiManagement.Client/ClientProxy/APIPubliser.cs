@@ -1,6 +1,7 @@
 ﻿using Fitabase.Azure.ApiManagement.DataModel.Properties;
 using Fitabase.Azure.ApiManagement.Model;
 using Fitabase.Azure.ApiManagement.Swagger;
+using Fitabase.Azure.ApiManagement.Swagger.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -17,19 +18,10 @@ namespace Fitabase.Azure.ApiManagement.ClientProxy
     public class APIPubliser
     {
         private ManagementClient Client { get; set; }
-        private string InputFile { get; set; }
-        private string OutputFolder { get; set; }
+        private APIConfiguration Configuration { get; set; }
 
-        private Configuration Configuration { get; set; }
-
-        public APIPubliser(string inputFile, string outputFolder, 
-                            Configuration configuration = null)
+        public APIPubliser(APIConfiguration configuration)
         {
-            if (configuration == null)
-                configuration = new Configuration();
-
-            this.InputFile = inputFile;
-            this.OutputFolder = outputFolder;
             this.Configuration = configuration;
             this.Client = new ManagementClient();
             this.Configuration = configuration;
@@ -37,24 +29,31 @@ namespace Fitabase.Azure.ApiManagement.ClientProxy
 
 
         
+        /// <summary>
+        /// 
+        /// </summary>
         public void Publish()
         {
-            if(InputFile == null)
-            {
-                throw new ArgumentException("FilePath is required");
-            }
-            SwaggerAPIComponent swagger = new JsonFileReader(InputFile).GetSwaggerComponents();
-            swagger.Host = Client.GetEndpoint();
+            if (Configuration == null)
+                throw new InvalidEntityException("Missing API Configuration");
+
+            // Get Swagger Components
+            SwaggerObject swagger = this.Configuration.SwaggerReader.GetSwaggerComponents();
+
+            PrintMessage.Debug(this, swagger);
+
+
+            // Get API entity from Swagger
             API api = new APIComposer(swagger).Compose();
 
-            
-            Client.CreateAPI(api);
-            foreach(APIOperation operation in api.Operations)
-            {
-                Client.CreateAPIOperation(api.Id, operation);
-            }
-            WriteToFile(OutputFolder + Documents.API_DOC, api);
-            WriteToFile(OutputFolder + Documents.API_OPERATION_DOC, api.Operations);
+
+            //Client.CreateAPI(api);
+            //foreach(APIOperation operation in api.Operations)
+            //{
+            //    Client.CreateAPIOperation(api.Id, operation);
+            //}
+            //WriteToFile(Configuration.OutputFolder + Documents.API_DOC, api);
+            //WriteToFile(Configuration.OutputFolder + Documents.API_OPERATION_DOC, api.Operations);
         }
 
         private void WriteToFile(string ouputFile, object obj)

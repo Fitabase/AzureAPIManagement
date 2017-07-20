@@ -4,11 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Fitabase.Azure.ApiManagement.Swagger
+namespace Fitabase.Azure.ApiManagement.Swagger.Models
 {
-    /// <summary>
-    /// Allows sharing examples for operation responses
-    /// </summary>
     public class Example
     {
     }

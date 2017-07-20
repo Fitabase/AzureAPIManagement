@@ -1,5 +1,6 @@
 ﻿using Fitabase.Azure.ApiManagement.DataModel.Properties;
 using Fitabase.Azure.ApiManagement.Model;
+using Fitabase.Azure.ApiManagement.Swagger.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,9 +14,9 @@ namespace Fitabase.Azure.ApiManagement.Swagger
     /// </summary>
     class APIComposer
     {
-        public SwaggerAPIComponent Swagger;
+        public SwaggerObject Swagger;
 
-        public APIComposer(SwaggerAPIComponent swagger)
+        public APIComposer(SwaggerObject swagger)
         {
             if (swagger == null)
             {
@@ -32,8 +33,9 @@ namespace Fitabase.Azure.ApiManagement.Swagger
         /// <returns></returns>
         public API Compose()
         {
-            string name             = Swagger.Info.Title;               
-            string description      = Swagger.Definitions.GetDefinition();
+            // TODO update description
+            string name             = Swagger.Info.Title;
+            string description = null;//Swagger.Definitions.GetDefinition();
             string serviceUrl       = Swagger.Host;
             string path = Swagger.Info.Title;
             

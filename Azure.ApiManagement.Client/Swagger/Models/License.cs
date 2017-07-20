@@ -1,11 +1,5 @@
 ﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Fitabase.Azure.ApiManagement.Swagger
+namespace Fitabase.Azure.ApiManagement.Swagger.Models
 {
 
     /// <summary>
@@ -14,10 +8,10 @@ namespace Fitabase.Azure.ApiManagement.Swagger
     public class License
     {
         [JsonProperty("name")]
-        public string Name { get; set; }
+        public string Name { get; set; }        // The license name used for the API.
 
         [JsonProperty("url")]
-        public string Url { get; set; }
+        public string Url { get; set; }         // string	A URL to the license used for the API
     }
 
 

@@ -1,11 +1,7 @@
 ﻿using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Fitabase.Azure.ApiManagement.Swagger
+namespace Fitabase.Azure.ApiManagement.Swagger.Models
 {
 
     /// <summary>
@@ -16,8 +12,8 @@ namespace Fitabase.Azure.ApiManagement.Swagger
         [JsonProperty("tags")]
         public string[] Tags { get; set; }              // A list of tags for API documentation control.
 
-        //[JsonProperty("summary")]
-        //public string Summary { get; set; }             // A short summary of what the operation does.
+        [JsonProperty("summary")]
+        public string Summary { get; set; }             // A short summary of what the operation does.
 
         //[JsonProperty("description")]
         //public string Description { get; set; }         // 	A verbose explanation of the operation behavior.
@@ -46,8 +42,8 @@ namespace Fitabase.Azure.ApiManagement.Swagger
         [JsonProperty("deprecated")]
         public bool Deprecated { get; set; }            // 	Declares this operation to be deprecated.
 
-        [JsonProperty("security")]
-        public Security Security { get; set; }          // A declaration of which security schemes are applied for this operation. 
+        //[JsonProperty("security")]
+        //public Security Security { get; set; }          // A declaration of which security schemes are applied for this operation. 
     }
 
 

@@ -1,4 +1,5 @@
 ﻿using Fitabase.Azure.ApiManagement.Model;
+using Fitabase.Azure.ApiManagement.Swagger.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -26,17 +27,18 @@ namespace Fitabase.Azure.ApiManagement.Swagger
         /// Get Swagger Components from input resource
         /// </summary>
         /// <returns>SwaggerAPIComponent</returns>
-        public SwaggerAPIComponent GetSwaggerComponents()
+        public SwaggerObject GetSwaggerComponents()
         {
             string json = this.GetSwaggerJson();
             if(String.IsNullOrWhiteSpace(json))
             {
                 throw new SwaggerResourceException("Swagger Json is required");
             }
-            PrintMessage.Debug(this, json);
-            return JsonConvert.DeserializeObject<SwaggerAPIComponent>(json);
+            return JsonConvert.DeserializeObject<SwaggerObject>(json);
         }
         
+
+
         /// <summary>
         /// Retrieve swagger json from resource
         /// </summary>

@@ -2,22 +2,41 @@
 using Fitabase.Azure.ApiManagement.ClientProxy;
 using Fitabase.Azure.ApiManagement.Model;
 using Fitabase.Azure.ApiManagement.Swagger;
+using Fitabase.Azure.ApiManagement.Swagger.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
+using System.Linq;
 
 namespace Azure.ApiManagement.Test
 {
     [TestClass]
     public class SwaggerTest
     {
-        [TestMethod]
-        public void GetSwaggerObject()
+
+        private string ResourcePath;
+
+
+
+        [TestInitialize]
+        public void Init()
         {
-            var inputFile  = @"C:\Users\inter\Desktop\FitabaseAPI\bodyTrace.json";
-            var outputFile = @"C:\Users\inter\Desktop\FitabaseAPI\result";
+            //Resource_Path = @"http://localhost:2598/swagger/docs/BodyTrace";
+            ResourcePath = @"C:\Repositories\AzureAPIManagement\Azure.ApiManagement.Test\SwaggerObject.json";
+        }
+
+
+
+        [TestMethod]
+        public void PublishSwaggerAPI()
+        {
+            //var inputFile  = @"C:\Users\inter\Desktop\FitabaseAPI\bodyTrace.json";
+            //var outputFile = @"C:\Users\inter\Desktop\FitabaseAPI\result";
+
+            AbstractSwaggerReader swaggerReader = new SwaggerUrlReader(ResourcePath);
+            APIConfiguration configuration = new APIConfiguration(swaggerReader);
             try
             {
-                APIPubliser publiser = new APIPubliser(inputFile, outputFile);
+                APIPubliser publiser = new APIPubliser(configuration);
                 publiser.Publish();
             }
             catch (HttpResponseException ex)
@@ -32,10 +51,18 @@ namespace Azure.ApiManagement.Test
         }
 
         [TestMethod]
+        public void SwaggerObject()
+        {
+            //AbstractSwaggerReader reader = new SwaggerUrlReader(Resource_Path);
+            AbstractSwaggerReader reader = new SwaggerFileReader(ResourcePath);
+            SwaggerObject swagger = reader.GetSwaggerComponents();
+            PrintMessage.Debug(this, swagger);
+        }
+
+        [TestMethod]
         public void SwaggerReader()
         {
-            string resourcePath = @"localhost:2598/swagger/docs/BodyTrace";
-            AbstractSwaggerReader reader = new UrlContentReader(resourcePath);
+            AbstractSwaggerReader reader = new SwaggerUrlReader(ResourcePath);
             reader.GetSwaggerComponents();
         }
 

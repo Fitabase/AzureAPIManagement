@@ -1,11 +1,5 @@
 ﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Fitabase.Azure.ApiManagement.Swagger
+namespace Fitabase.Azure.ApiManagement.Swagger.Models
 {
 
     /// <summary>
@@ -21,10 +15,10 @@ namespace Fitabase.Azure.ApiManagement.Swagger
         [JsonProperty("name")]
         public string Name { get; set; }                // The name of the tag.
 
-        [JsonProperty("Description")]
+        [JsonProperty("description", NullValueHandling = NullValueHandling.Ignore)]
         public string Description { get; set; }         // 	A short description for the tag.
 
-        [JsonProperty("externalDocs")]
-        public ExternalDocs ExternalDocs { get; set; }  // Additional external documentation for this tag.
+        [JsonProperty("externalDocs", NullValueHandling = NullValueHandling.Ignore)]
+        public ExternalDoc ExternalDocs { get; set; }  // Additional external documentation for this tag.
     }
 }

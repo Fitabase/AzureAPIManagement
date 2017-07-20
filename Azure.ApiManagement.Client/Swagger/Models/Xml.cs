@@ -1,11 +1,5 @@
 ﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Fitabase.Azure.ApiManagement.Swagger
+namespace Fitabase.Azure.ApiManagement.Swagger.Models
 {
 
 
@@ -18,19 +12,19 @@ namespace Fitabase.Azure.ApiManagement.Swagger
     /// </summary>
     public class XML
     {
-        [JsonProperty("name")]
+        [JsonProperty("name", NullValueHandling = NullValueHandling.Ignore)]
         public string Name { get; set; }    // 	Replaces the name of the element/attribute used for the described schema property.
 
-        [JsonProperty("namespace")]
+        [JsonProperty("namespace", NullValueHandling = NullValueHandling.Ignore)]
         public string Namespace { get; set; }   // The URL of the namespace definition. Value SHOULD be in the form of a URL.
 
-        [JsonProperty("prefix")]
+        [JsonProperty("prefix", NullValueHandling = NullValueHandling.Ignore)]
         public string Prefix { get; set; }      // The prefix to be used for the name.
 
-        [JsonProperty("attribute")]
-        public bool Attribute { get; set; }     // Declares whether the property definition translates to an attribute instead of an element.
+        [JsonProperty("attribute", NullValueHandling = NullValueHandling.Ignore)]
+        public bool? Attribute { get; set; }     // Declares whether the property definition translates to an attribute instead of an element.
 
-        [JsonProperty("wrapped")]
-        public bool Wrapped { get; set; }       // MAY be used only for an array definition. 
+        [JsonProperty("wrapped", NullValueHandling = NullValueHandling.Ignore)]
+        public bool? Wrapped { get; set; }       // MAY be used only for an array definition. 
     }
 }

@@ -1,11 +1,5 @@
 ﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Fitabase.Azure.ApiManagement.Swagger
+namespace Fitabase.Azure.ApiManagement.Swagger.Models
 {
 
     /// <summary>
@@ -16,15 +10,20 @@ namespace Fitabase.Azure.ApiManagement.Swagger
     {
         [JsonProperty("version")]
         public string Version { get; set; }         // Provides the version of the application API
+
         [JsonProperty("title")]
         public string Title { get; set; }           // The title of the application.
-        [JsonProperty("description")]
+
+        [JsonProperty("description", NullValueHandling = NullValueHandling.Ignore)]
         public string Description { get; set; }     // A short description of the application. 
-        [JsonProperty("termsOfService")]
+
+        [JsonProperty("termsOfService", NullValueHandling = NullValueHandling.Ignore)]
         public string TermsOfService { get; set; }  // The Terms of Service for the API.
-        [JsonProperty("Contact")]
+
+        [JsonProperty("Contact", NullValueHandling = NullValueHandling.Ignore)]
         public Contact Contact { get; set; }        // The contact information for the exposed API.
-        [JsonProperty("License")]
+
+        [JsonProperty("License", NullValueHandling = NullValueHandling.Ignore)]
         public License License { get; set; }        // The license information for the exposed API
 
     }

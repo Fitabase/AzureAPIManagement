@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace Fitabase.Azure.ApiManagement.Swagger
 {
-    public class JsonFileReader : AbstractSwaggerReader
+    public class SwaggerFileReader : AbstractSwaggerReader
     {
-        public JsonFileReader(string resourcePath) : base(resourcePath)
+        public SwaggerFileReader(string resourcePath) : base(resourcePath)
         {
         }
 

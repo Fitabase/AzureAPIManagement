@@ -1,36 +1,26 @@
 ﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Fitabase.Azure.ApiManagement.Swagger
-{
-
-    public class Headers {
-        Dictionary<string, Header> Header;
-    }
+namespace Fitabase.Azure.ApiManagement.Swagger.Models
+{ 
 
     public class Header
     {
         [JsonProperty("description")]
-        public string Description { get; set; } // A short description of the header
+        public string Description { get; set; }         // A short description of the header
 
         [JsonProperty("type")]
-        public string Type { get; set; }        // The type of the parameter.
+        public string Type { get; set; }                // The type of the parameter.
 
         [JsonProperty("format")]
-        public string Format { get; set; }      // 	The extending format for the previously mentioned type.
+        public string Format { get; set; }              // 	The extending format for the previously mentioned type.
 
         [JsonProperty("items")]
-        public Item Item { get; set; }              // Describes the type of items in the array.
+        public Item Item { get; set; }                  // Describes the type of items in the array.
 
         [JsonProperty("collectionFormat")]
         public string CollectionFormat { get; set; }    // 	Determines the format of the array if type array is used. 
 
         [JsonProperty("default")]
-        public string Default { get; set; }         // 	Declares the value of the parameter that the server will use if none is provided
+        public string Default { get; set; }             // 	Declares the value of the parameter that the server will use if none is provided
 
         [JsonProperty("maximum")]
         public int Maximum { get; set; }

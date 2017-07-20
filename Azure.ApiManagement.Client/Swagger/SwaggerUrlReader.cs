@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace Fitabase.Azure.ApiManagement.Swagger
 {
-    public class UrlContentReader : AbstractSwaggerReader
+    public class SwaggerUrlReader : AbstractSwaggerReader
     {
-        public UrlContentReader(string resourcePath) : base(resourcePath)
+        public SwaggerUrlReader(string resourcePath) : base(resourcePath)
         {
         }
         
@@ -21,17 +21,16 @@ namespace Fitabase.Azure.ApiManagement.Swagger
             {
                 throw new SwaggerResourceException("Invalid URL");
             }
+            
             string json = null;
             try
             {
-                using (WebClient client = new WebClient())
-                {
-                    json = client.DownloadString(ResourcePath);
-                }
-            } catch(Exception)
+                WebClient client = new WebClient();
+                json = client.DownloadString(this.ResourcePath);
+            } catch(Exception ex)
             {
+                throw new SwaggerResourceException(ex.Message);
             }
-
             return json;
         }
 

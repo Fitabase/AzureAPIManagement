@@ -1,11 +1,9 @@
 ﻿using Newtonsoft.Json;
-
-namespace Fitabase.Azure.ApiManagement.Swagger
+namespace Fitabase.Azure.ApiManagement.Swagger.Models
 {
 
     /// <summary>
-    /// An object to hold responses that can be used across operations. 
-    /// This property does not define global responses for all operations.
+    /// Describes a single response from an API Operation.
     /// </summary>
     public class Response
     {
@@ -16,7 +14,7 @@ namespace Fitabase.Azure.ApiManagement.Swagger
         public Schema Schema { get; set; }
 
         [JsonProperty("headers")]
-        public Header Headers { get; set; }
+        public Header Headers { get; set; }         // A list of headers that are sent with the response.
 
         [JsonProperty("examples")]
         public Example Examples { get; set; }

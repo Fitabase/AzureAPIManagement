@@ -37,6 +37,7 @@ namespace Fitabase.Azure.ApiManagement.Model
             api.Protocols = protocols;
             api.Authentication = authentication;
             api.CustomNames = customNames;
+            api.ApiRevision = "1";
 
             return api;
         }

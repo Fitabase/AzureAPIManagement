@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Fitabase.Azure.ApiManagement.Swagger
+namespace Fitabase.Azure.ApiManagement.Swagger.Models
 {
 
     /// <summary>
@@ -15,13 +15,12 @@ namespace Fitabase.Azure.ApiManagement.Swagger
     {
         [JsonProperty("name")]
         public string Name { get; set; }        // The license name used for the API.
-
-
-        [JsonProperty("url")]
+        
+        [JsonProperty("url", NullValueHandling = NullValueHandling.Ignore)]
         public string Url { get; set; }         // A URL to the license used for the API. MUST be in the format of a URL.
 
 
-        [JsonProperty("email")]
+        [JsonProperty("email", NullValueHandling = NullValueHandling.Ignore)]
         public string Email { get; set; }
     }
 

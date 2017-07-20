@@ -1,13 +1,19 @@
 ﻿using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Fitabase.Azure.ApiManagement.Swagger
+namespace Fitabase.Azure.ApiManagement.Swagger.Models
 {
+    public class SchemaDictionary
+    {
+        public string Name { get; set; }
+        public Schema Schema { get; set; }
 
+        public SchemaDictionary(string name, Schema schema)
+        {
+            this.Name = name;
+            this.Schema = schema;
+        }
+    }
 
     /// <summary>
     /// The Schema Object allows the definition of input and output data types. 
@@ -18,20 +24,40 @@ namespace Fitabase.Azure.ApiManagement.Swagger
     /// </summary>
     public class Schema
     {
-        [JsonProperty("type")]
+        [JsonProperty("type", NullValueHandling = NullValueHandling.Ignore)]
         public string Type { get; set; }
 
-        [JsonProperty("discriminator")]
+        [JsonProperty("properties", NullValueHandling=NullValueHandling.Ignore)]
+        public Dictionary<string, Property> Properties { get; set; }
+
+        [JsonProperty("required", NullValueHandling = NullValueHandling.Ignore)]
+        public string[] Required { get; set; }
+
+        [JsonProperty("discriminator", NullValueHandling = NullValueHandling.Ignore)]
         public string Discriminator { get; set; }       // 	Adds support for polymorphism
 
-        [JsonProperty("readOnly")]
-        public bool ReadOnly { get; set; }              // Relevant only for Schema "properties" definitions.
+        [JsonProperty("readOnly", NullValueHandling = NullValueHandling.Ignore)]
+        public bool? ReadOnly { get; set; }              // Relevant only for Schema "properties" definitions.
 
-        [JsonProperty("externalDocs")]
-        public ExternalDocs ExternalDocs { get; set; }  // Additional external documentation for this schema.
+        [JsonProperty("externalDocs", NullValueHandling = NullValueHandling.Ignore)]
+        public ExternalDoc ExternalDocs { get; set; }  // Additional external documentation for this schema.
 
-        [JsonProperty("xml")]
+        [JsonProperty("xml", NullValueHandling = NullValueHandling.Ignore)]
         public XML Xml { get; set; }                    // This MAY be used only on properties schemas.
+        
+
+        public HashSet<PropertyDictionary> GetProperyDictionary()
+        {
+            HashSet<PropertyDictionary> set = new HashSet<PropertyDictionary>();
+            foreach (KeyValuePair<string, Property> entry in Properties)
+            {
+                set.Add(new PropertyDictionary(entry.Key, entry.Value));
+            }
+            return set;
+        }
+
     }
+    
+
 
 }
