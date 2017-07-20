@@ -9,6 +9,9 @@ namespace Fitabase.Azure.ApiManagement.Swagger.Models
     public class Item
     {
 
+        [JsonProperty("$ref", NullValueHandling = NullValueHandling.Ignore)]
+        public string Ref { get; set; }
+
         [JsonProperty("type", NullValueHandling = NullValueHandling.Ignore)]
         public string Type { get; set; }        // The type of the parameter.
 
@@ -59,6 +62,9 @@ namespace Fitabase.Azure.ApiManagement.Swagger.Models
 
         [JsonProperty("multipleOf", NullValueHandling = NullValueHandling.Ignore)]
         public string MultipleOf { get; set; }
+
+        [JsonProperty("enum", NullValueHandling = NullValueHandling.Ignore)]
+        public string[] Enum { get; set; }
     }
 
 

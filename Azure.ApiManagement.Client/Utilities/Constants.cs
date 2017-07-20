@@ -9,6 +9,10 @@ namespace Fitabase.Azure.ApiManagement
 {
     internal static class Constants
     {
+        internal static readonly string HTTP = "http://";
+        internal static readonly string HTTPS = "https://";
+
+
         internal static class IdPrefixTemplate
         {
             internal static readonly string API          = "api";

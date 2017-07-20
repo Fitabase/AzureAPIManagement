@@ -38,16 +38,17 @@ namespace Fitabase.Azure.ApiManagement.ClientProxy
                 throw new InvalidEntityException("Missing API Configuration");
 
             // Get Swagger Components
-            SwaggerObject swagger = this.Configuration.SwaggerReader.GetSwaggerComponents();
+            SwaggerObject swagger = this.Configuration.SwaggerReader.GetSwaggerObject();
 
-            PrintMessage.Debug(this, swagger);
+            //PrintMessage.Debug(this, swagger);
 
 
             // Get API entity from Swagger
             API api = new APIComposer(swagger).Compose();
+            //PrintMessage.Debug(this, api);
+            Client.CreateAPI(api);
 
 
-            //Client.CreateAPI(api);
             //foreach(APIOperation operation in api.Operations)
             //{
             //    Client.CreateAPIOperation(api.Id, operation);

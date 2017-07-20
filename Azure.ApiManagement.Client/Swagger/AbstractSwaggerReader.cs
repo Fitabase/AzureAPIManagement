@@ -27,12 +27,12 @@ namespace Fitabase.Azure.ApiManagement.Swagger
         /// Get Swagger Components from input resource
         /// </summary>
         /// <returns>SwaggerAPIComponent</returns>
-        public SwaggerObject GetSwaggerComponents()
+        public SwaggerObject GetSwaggerObject()
         {
             string json = this.GetSwaggerJson();
             if(String.IsNullOrWhiteSpace(json))
             {
-                throw new SwaggerResourceException("Swagger Json is required");
+                throw new SwaggerResourceException("Missing json content");
             }
             return JsonConvert.DeserializeObject<SwaggerObject>(json);
         }

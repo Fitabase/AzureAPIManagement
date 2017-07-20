@@ -5,6 +5,7 @@ using Fitabase.Azure.ApiManagement.Swagger;
 using Fitabase.Azure.ApiManagement.Swagger.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Azure.ApiManagement.Test
@@ -13,15 +14,15 @@ namespace Azure.ApiManagement.Test
     public class SwaggerTest
     {
 
-        private string ResourcePath;
-
+        private string FilePath;
+        private string UrlPath;
 
 
         [TestInitialize]
         public void Init()
         {
-            //Resource_Path = @"http://localhost:2598/swagger/docs/BodyTrace";
-            ResourcePath = @"C:\Repositories\AzureAPIManagement\Azure.ApiManagement.Test\SwaggerObject.json";
+            UrlPath = @"http://localhost:2598/swagger/docs/BodyTrace";
+            FilePath = @"C:\Repositories\AzureAPIManagement\Azure.ApiManagement.Test\SwaggerObject.json";
         }
 
 
@@ -29,41 +30,59 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void PublishSwaggerAPI()
         {
-            //var inputFile  = @"C:\Users\inter\Desktop\FitabaseAPI\bodyTrace.json";
-            //var outputFile = @"C:\Users\inter\Desktop\FitabaseAPI\result";
-
-            AbstractSwaggerReader swaggerReader = new SwaggerUrlReader(ResourcePath);
-            APIConfiguration configuration = new APIConfiguration(swaggerReader);
             try
             {
+                AbstractSwaggerReader swaggerReader = new SwaggerUrlReader(UrlPath);
+                APIConfiguration configuration = new APIConfiguration(swaggerReader);
                 APIPubliser publiser = new APIPubliser(configuration);
                 publiser.Publish();
             }
             catch (HttpResponseException ex)
             {
                 PrintMessage.Debug(this, ex.StatusCode);
+                PrintMessage.Debug(this, ex.ErrorResponse.ErrorData.ValidationDetails.ElementAt(0).Message);
                 PrintMessage.Debug(this, ex.ErrorResponse);
-            } catch(InvalidEntityException ex) 
-                {
+            }
+            catch (InvalidEntityException ex) 
+            {
                 PrintMessage.Debug(this, ex.Message);
             }
-
+            catch(SwaggerResourceException ex)
+            {
+                PrintMessage.Debug(this, ex.Message);
+            }
         }
+
+
+
 
         [TestMethod]
-        public void SwaggerObject()
+        public void GetSwaggerFromUrl()
         {
-            //AbstractSwaggerReader reader = new SwaggerUrlReader(Resource_Path);
-            AbstractSwaggerReader reader = new SwaggerFileReader(ResourcePath);
-            SwaggerObject swagger = reader.GetSwaggerComponents();
+            SwaggerObject swagger = new SwaggerUrlReader(UrlPath).GetSwaggerObject();
             PrintMessage.Debug(this, swagger);
         }
+
+
+
+        [TestMethod]
+        public void GetSwaggerFromFile()
+        {
+            SwaggerObject swagger = new SwaggerFileReader(FilePath).GetSwaggerObject();
+            //PrintMessage.Debug(this, swagger);
+
+            // Return specific api path
+            string query = "/user/login";
+            var path = swagger.Paths.Where(x => x.Key == query);
+            PrintMessage.Debug(this, path);
+        }
+
 
         [TestMethod]
         public void SwaggerReader()
         {
-            AbstractSwaggerReader reader = new SwaggerUrlReader(ResourcePath);
-            reader.GetSwaggerComponents();
+            AbstractSwaggerReader reader = new SwaggerUrlReader(FilePath);
+            reader.GetSwaggerObject();
         }
 
     }

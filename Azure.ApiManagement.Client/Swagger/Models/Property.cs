@@ -8,18 +8,7 @@ using System.Threading.Tasks;
 namespace Fitabase.Azure.ApiManagement.Swagger.Models
 {
 
-    public class PropertyDictionary
-    {
-        public string Name { get; set; }
-        public Property Property { get; set; }
-
-        public PropertyDictionary(string Name, Property property)
-        {
-            this.Name = Name;
-            this.Property = Property;
-        }
-    }
-
+  
     public class Property
     {
         [JsonProperty("$ref", NullValueHandling = NullValueHandling.Ignore)]

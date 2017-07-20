@@ -203,7 +203,6 @@
     <Compile Include="Swagger\Models\Example.cs" />
     <Compile Include="Swagger\Models\ExternalDoc.cs" />
     <Compile Include="Swagger\Models\Header.cs" />
-    <Compile Include="Swagger\Models\Headers.cs" />
     <Compile Include="Swagger\Models\Info.cs" />
     <Compile Include="Swagger\AbstractSwaggerReader.cs" />
     <Compile Include="Swagger\APIComposer.cs" />
@@ -214,8 +213,8 @@
     <Compile Include="Swagger\Models\PathData.cs" />
     <Compile Include="Swagger\Models\Property.cs" />
     <Compile Include="Swagger\Models\Response.cs" />
-    <Compile Include="Swagger\Models\Responses.cs" />
     <Compile Include="Swagger\Models\Schema.cs" />
+    <Compile Include="Swagger\Models\Security.cs" />
     <Compile Include="Swagger\Models\SecurityDefinitions.cs" />
     <Compile Include="Swagger\SwaggerFileReader.cs" />
     <Compile Include="Swagger\Models\SwaggerObject.cs" />

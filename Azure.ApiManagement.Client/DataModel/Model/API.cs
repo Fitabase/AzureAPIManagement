@@ -15,32 +15,48 @@ namespace Fitabase.Azure.ApiManagement.Model
         protected override string UriIdFormat {  get { return "/apis/"; } }
 
         
-        public static API Create(string name, string description, 
+        public static API Create(string name,  
                    string serviceUrl, string path, 
-                   string[] protocols, 
+                   string[] protocols, string description = "",
                    AuthenticationSettingsConstract authentication = null, 
                    SubscriptionKeyParameterNames customNames = null) 
         {
             if (String.IsNullOrWhiteSpace(name))
-                throw new InvalidEntityException("API name is required");
+                throw new InvalidEntityException("API's name is required");
             if (String.IsNullOrWhiteSpace(serviceUrl))
-                throw new InvalidEntityException("API service url is required");
+                throw new InvalidEntityException("API's service url is required");
             if (String.IsNullOrWhiteSpace(path))
-                throw new InvalidEntityException("API path is required");
+                throw new InvalidEntityException("API's path is required");
+            if (protocols == null || protocols.Length == 0)
+                throw new InvalidEntityException("API's protocol is missing");
 
             API api = new API();
             api.Id = EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.API);
             api.Name = name;
             api.Description = description;
-            api.ServiceUrl = serviceUrl;
+            api.ServiceUrl = api.GetServiceUrlFormat(serviceUrl);
             api.Path = path.ToLower();
             api.Protocols = protocols;
             api.Authentication = authentication;
             api.CustomNames = customNames;
             api.ApiRevision = "1";
-
             return api;
         }
+
+        public string GetServiceUrlFormat(string url)
+        {
+            string formatUrl;
+            if(url.StartsWith(Constants.HTTP) || url.StartsWith(Constants.HTTPS)) {
+                formatUrl = url;
+            }
+            else
+            {
+                formatUrl = Constants.HTTPS + url;
+            }
+            return formatUrl;
+                
+                   
+        } 
 
         
         [JsonProperty("name")]

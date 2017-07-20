@@ -2,18 +2,7 @@
 using System.Collections.Generic;
 
 namespace Fitabase.Azure.ApiManagement.Swagger.Models
-{
-    public class SchemaDictionary
-    {
-        public string Name { get; set; }
-        public Schema Schema { get; set; }
-
-        public SchemaDictionary(string name, Schema schema)
-        {
-            this.Name = name;
-            this.Schema = schema;
-        }
-    }
+{ 
 
     /// <summary>
     /// The Schema Object allows the definition of input and output data types. 
@@ -24,6 +13,9 @@ namespace Fitabase.Azure.ApiManagement.Swagger.Models
     /// </summary>
     public class Schema
     {
+        [JsonProperty("$ref", NullValueHandling=NullValueHandling.Ignore)]
+        public string Ref { get; set; }
+
         [JsonProperty("type", NullValueHandling = NullValueHandling.Ignore)]
         public string Type { get; set; }
 
@@ -45,16 +37,11 @@ namespace Fitabase.Azure.ApiManagement.Swagger.Models
         [JsonProperty("xml", NullValueHandling = NullValueHandling.Ignore)]
         public XML Xml { get; set; }                    // This MAY be used only on properties schemas.
         
+        [JsonProperty("items", NullValueHandling = NullValueHandling.Ignore)]
+        public List<Item> Items { get; set; }
 
-        public HashSet<PropertyDictionary> GetProperyDictionary()
-        {
-            HashSet<PropertyDictionary> set = new HashSet<PropertyDictionary>();
-            foreach (KeyValuePair<string, Property> entry in Properties)
-            {
-                set.Add(new PropertyDictionary(entry.Key, entry.Value));
-            }
-            return set;
-        }
+        [JsonProperty("additionalProperties", NullValueHandling = NullValueHandling.Ignore)]
+        public Property AdditionalProperties { get; set; }
 
     }
     

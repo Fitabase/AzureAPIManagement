@@ -8,6 +8,8 @@ namespace Fitabase.Azure.ApiManagement.Swagger.Models
     /// </summary>
     public class Info
     {
+
+        
         [JsonProperty("version")]
         public string Version { get; set; }         // Provides the version of the application API
 

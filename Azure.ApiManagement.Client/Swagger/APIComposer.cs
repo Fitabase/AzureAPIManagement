@@ -28,23 +28,21 @@ namespace Fitabase.Azure.ApiManagement.Swagger
         
 
         /// <summary>
-        /// Compose a SwaggerObject to a API 
+        /// Compose a SwaggerObject to a API entity 
         /// </summary>
         /// <returns></returns>
         public API Compose()
         {
-            // TODO update description
-            string name             = Swagger.Info.Title;
-            string description = null;//Swagger.Definitions.GetDefinition();
+            string name             = Swagger.Info.Title + Swagger.BasePath;
+            string path             = Swagger.BasePath + "/" + Swagger.Info.Title;
+            string description      = Swagger.Info.Description;
             string serviceUrl       = Swagger.Host;
-            string path = Swagger.Info.Title;
             
             string[] protocols  = Swagger.Schemes;
             AuthenticationSettingsConstract authentication   = null;
             SubscriptionKeyParameterNames customNames        = null;
             
-            API api = API.Create(name, description, serviceUrl, path,
-                               protocols, authentication, customNames);
+            API api = API.Create(name, serviceUrl, path, protocols, description, authentication, customNames);
             api.Operations = GetOperations(Swagger.Paths);      // Inject api operations
             return api;
         }

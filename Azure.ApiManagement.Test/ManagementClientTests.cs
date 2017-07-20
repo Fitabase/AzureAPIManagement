@@ -148,15 +148,14 @@ namespace Azure.ApiManagement.Test
         public void CreateApi()
         {
             int count_v1 = Client.GetAPIs().Count;
-            string name = "Calculator";
-            string description = "This is a calculator created in the server";
-            string serviceUrl = "http://echoapi.cloudapp.net/calc";
-            string path = "/bodytrace";
-            string[] protocols = new string[]{ "http", "https" };
+            string name = "Server BodyTrace";
+            string description = "An example to create apis from service";
+            string serviceUrl = "unittestsfitabase.management.azure-api.net/v1";
+            string path = "/server1";
+            string[] protocols = null; //new string[]{ "http", "https" };
             
-            API newAPI = API.Create(name, description, serviceUrl, path, protocols);
+            API newAPI = API.Create(name, serviceUrl, path, protocols, description);
             API api = Client.CreateAPI(newAPI);
-            
             int count_v2 = Client.GetAPIs().Count;
             Assert.IsNotNull(api.Id);
             Assert.AreEqual(count_v1 + 1, count_v2);
@@ -181,6 +180,7 @@ namespace Azure.ApiManagement.Test
             EntityCollection<API> apis = Client.GetAPIs();
             Assert.IsNotNull(apis);
             Assert.IsTrue(apis.Count > 0);
+            Print(apis);
         }
 
         [TestMethod]

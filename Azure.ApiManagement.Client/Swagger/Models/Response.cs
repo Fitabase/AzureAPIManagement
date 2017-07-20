@@ -1,4 +1,6 @@
 ﻿using Newtonsoft.Json;
+using System.Collections.Generic;
+
 namespace Fitabase.Azure.ApiManagement.Swagger.Models
 {
 
@@ -7,16 +9,17 @@ namespace Fitabase.Azure.ApiManagement.Swagger.Models
     /// </summary>
     public class Response
     {
-        [JsonProperty("description")]
+        [JsonProperty("description", NullValueHandling = NullValueHandling.Ignore)]
         public string Description { get; set; }
 
-        [JsonProperty("schema")]
+        [JsonProperty("schema", NullValueHandling = NullValueHandling.Ignore)]
         public Schema Schema { get; set; }
 
-        [JsonProperty("headers")]
-        public Header Headers { get; set; }         // A list of headers that are sent with the response.
+        [JsonProperty("headers", NullValueHandling = NullValueHandling.Ignore)]
+        public Dictionary<string, Header> Headers { get; set; }         // A list of headers that are sent with the response.
+        
 
-        [JsonProperty("examples")]
+        [JsonProperty("examples", NullValueHandling = NullValueHandling.Ignore)]
         public Example Examples { get; set; }
     }
 }

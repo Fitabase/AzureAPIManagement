@@ -19,7 +19,7 @@ namespace Fitabase.Azure.ApiManagement.Swagger
         {
             if(!IsUrlFormat(this.ResourcePath))
             {
-                throw new SwaggerResourceException("Invalid URL");
+                throw new SwaggerResourceException("Invalid URL Format");
             }
             
             string json = null;
