@@ -1,10 +1,8 @@
 ﻿using Fitabase.Azure.ApiManagement.DataModel.Properties;
+using Fitabase.Azure.ApiManagement.Model.Exceptions;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fitabase.Azure.ApiManagement.Model
 {   
@@ -15,8 +13,8 @@ namespace Fitabase.Azure.ApiManagement.Model
         
         public static APIOperation Create(string name, 
                             RequestMethod method, string urlTemplate, 
-                            List<TemplateParameter> parameters,
-                            RequestContract request)
+                            ParameterContract[] parameters,
+                            RequestContract request, ResponseContract[] responses)
         {
             if (String.IsNullOrWhiteSpace(name))
                 throw new InvalidEntityException("APIOperation name is required");
@@ -30,6 +28,7 @@ namespace Fitabase.Azure.ApiManagement.Model
             api.UrlTemplate = urlTemplate;
             api.TemplateParameter = parameters;
             api.Request = request;
+            api.Responses = responses;
 
             return api;
         }
@@ -45,7 +44,7 @@ namespace Fitabase.Azure.ApiManagement.Model
         public string UrlTemplate { get; set; }     // Relative URL template identifying the target resource for this operation
         
         [JsonProperty("templateParameters")]
-        public List<TemplateParameter> TemplateParameter { get; set; }  // Collection of URL template parameters. E.g calc.com/sum?a=5&b=10
+        public ParameterContract[] TemplateParameter { get; set; }  // Collection of URL template parameters. E.g calc.com/sum?a=5&b=10
         
         [JsonProperty("description")]
         public string Description { get; set; }         // Description of the operation. May include HTML formatting tags.
@@ -54,7 +53,7 @@ namespace Fitabase.Azure.ApiManagement.Model
         public RequestContract Request { get; set; }    // An entity containing request details
 
         [JsonProperty("responses")]
-        public OperationResponse[] Responses { get; set; }
+        public ResponseContract[] Responses { get; set; }
 
         
     }

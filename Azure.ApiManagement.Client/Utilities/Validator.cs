@@ -1,9 +1,6 @@
 ﻿using Fitabase.Azure.ApiManagement.Model;
+using Fitabase.Azure.ApiManagement.Model.Exceptions;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fitabase.Azure.ApiManagement
 {
@@ -36,6 +33,10 @@ namespace Fitabase.Azure.ApiManagement
 
             if (String.IsNullOrEmpty(user.Email) && user.Email.Length > 254)
                 throw new InvalidEntityException("User configuration is not valid. 'Email' is required and must not exceed 254 characters.");
+
+            
         }
+        
     }
+    
 }

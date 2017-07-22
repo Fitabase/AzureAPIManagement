@@ -35,7 +35,16 @@ namespace Azure.ApiManagement.Test
             PrintMessage.Debug("TestClass", obj);
         }
         
-          
+       
+
+        [TestMethod]
+        public void GetSchema()
+        {
+            string schemaId = "597265b42f02d31290052f88";
+            Client.GetSchema(schemaId);
+        }
+        
+
         #region User TestCases
 
         [TestMethod]
@@ -148,11 +157,11 @@ namespace Azure.ApiManagement.Test
         public void CreateApi()
         {
             int count_v1 = Client.GetAPIs().Count;
-            string name = "Server BodyTrace";
+            string name = "Server API";
             string description = "An example to create apis from service";
-            string serviceUrl = "unittestsfitabase.management.azure-api.net/v1";
-            string path = "/server1";
-            string[] protocols = null; //new string[]{ "http", "https" };
+            string serviceUrl = "server.com";
+            string path = "/v1";
+            string[] protocols = new string[]{ "http", "https" };
             
             API newAPI = API.Create(name, serviceUrl, path, protocols, description);
             API api = Client.CreateAPI(newAPI);
@@ -203,30 +212,37 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void CreateAPIOperation()
         {
-            string apiId = "api_f98e6f1c4f674a35888aa1e8979e331e";
-
+            string apiId = "api_2fece789626a4b11a71e040c6ba63b8f";
             int count_v1 = Client.GetOperationsByAPI(apiId).Count;
 
-            string name = "Onemore API operation";
-            RequestMethod method = RequestMethod.POST;
-            string urlTemplate = "/add/{c}/{d}";
-            List<TemplateParameter> parameters = new List<TemplateParameter>()
+            string name = "Server API operation";
+            RequestMethod method = RequestMethod.GET;
+            string urlTemplate = "/Get/a/{a}/b/{b}";
+
+            ParameterContract[] parameters =
             {
-                new TemplateParameter("c", ParameterType.NUMBER),
-                new TemplateParameter("d", ParameterType.NUMBER)
+                ParameterContract.Create("a", ParameterType.NUMBER.ToString()),
+                ParameterContract.Create("b", ParameterType.NUMBER.ToString())
             };
 
 
             RequestContract request = new RequestContract();
-
-            request.Headers = new List<RequestHeader>() {
-                                            new RequestHeader("Ocp-Apim-Subscription-Key", ParameterType.STRING)
+            request.Headers = new ParameterContract[] {
+                                            ParameterContract.Create("Ocp-Apim-Subscription-Key", ParameterType.STRING.ToString())
                                         };
-            request.QueryParameters = new List<QueryParameter>() {
-                                           new QueryParameter("queryParameter1", ParameterType.NUMBER)
+            request.QueryParameters = new ParameterContract[] {
+                                            ParameterContract.Create("filter", ParameterType.STRING.ToString())
                                         };
 
-            APIOperation operation = APIOperation.Create(name, method, urlTemplate, parameters, request);
+
+            ResponseContract[] responses = {
+                   ResponseContract.Create(200, "good 200", new RepresentationContract[]{
+                       RepresentationContract.Create("application/json", "schemaId", "typeName", "sample data", GetFormParameters())
+                   }),
+                   ResponseContract.Create(201, "not much better", null),
+            };
+            APIOperation operation = APIOperation.Create(name, method, urlTemplate, parameters, request, responses);
+           
 
             APIOperation entity = Client.CreateAPIOperation(apiId, operation);
             Assert.IsNotNull(entity);
@@ -237,11 +253,37 @@ namespace Azure.ApiManagement.Test
             Assert.AreEqual(count_v1 + 1, count_v2);
         }
 
+        private ParameterContract[] GetFormParameters()
+        {
+            return new ParameterContract[]{
+                            ParameterContract.Create("accountId", "long"),
+                            ParameterContract.Create("profileId", "long")
+                       };
+
+        }
+        
+
+
+        //[TestMethod]
+        //public void Create()
+        //{
+        //    string apiId = "api_f8c105c775dd4123b201cf11adacede3";
+        //    string ResourcePath = @"C:\Repositories\AzureAPIManagement\Azure.ApiManagement.Test\SwaggerObject.json";
+        //    String json = File.ReadAllText(ResourcePath);
+        //    APIOperation operation = JsonConvert.DeserializeObject<APIOperation>(json);
+        //    operation.Id = "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz";
+        //    Print(operation);
+        //    APIOperation entity = Client.CreateAPIOperation(apiId, operation);
+        //    Assert.IsNotNull(entity);
+        //    Assert.IsNotNull(entity.Id);
+        //}
+
+
         [TestMethod]
         public void GetAPIOperation()
         {
-            string apiId = "5956a87a2f02d30b88dfad7b";
-            string operationId = "5956a9612f02d30b88dfad7c";
+            string apiId = "597265b42f02d30ff48b3264";
+            string operationId = "597265b42f02d31290052f89";
             APIOperation operation = Client.GetAPIOperation(apiId, operationId);
             Print(operation);
             Assert.IsNotNull(operation);

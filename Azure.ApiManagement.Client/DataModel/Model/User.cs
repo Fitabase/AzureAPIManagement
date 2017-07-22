@@ -2,10 +2,8 @@
 using Newtonsoft.Json.Converters;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Collections;
+using Fitabase.Azure.ApiManagement.Model.Exceptions;
 
 namespace Fitabase.Azure.ApiManagement.Model
 {
@@ -60,12 +58,13 @@ namespace Fitabase.Azure.ApiManagement.Model
                     string email, string password,
                     UserState state = UserState.active, string note = "")
         {
-            if (String.IsNullOrWhiteSpace(firstName) || firstName.Length > 100)
-                throw new InvalidEntityException("Invalid firstname: " + firstName);
-            if (String.IsNullOrWhiteSpace(lastName) || lastName.Length > 100)
-                throw new InvalidEntityException("Invalid lastname: " + lastName);
-            if (String.IsNullOrWhiteSpace(email))
-                throw new InvalidEntityException("Invalid email: " + email);
+
+            if (String.IsNullOrEmpty(firstName) && firstName.Length > 100)
+                throw new InvalidEntityException("User configuration is not valid. 'FirstName' is required and must not exceed 100 characters.");
+            if (String.IsNullOrEmpty(lastName) && lastName.Length > 100)
+                throw new InvalidEntityException("User configuration is not valid. 'LastName' is required and must not exceed 100 characters.");
+            if (String.IsNullOrEmpty(email) && email.Length > 254)
+                throw new InvalidEntityException("User configuration is not valid. 'Email' is required and must not exceed 254 characters.");
             if (String.IsNullOrWhiteSpace(password))
                 throw new InvalidEntityException("Invalid password: " + password);
 

@@ -1,11 +1,5 @@
-﻿using Fitabase.Azure.ApiManagement.Model;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
+﻿using Fitabase.Azure.ApiManagement.Model.Exceptions;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fitabase.Azure.ApiManagement.Swagger
 {

@@ -8,6 +8,9 @@ namespace Azure.ApiManagement.Test
     [TestClass]
     public class DataModelTests
     {
+
+
+
         [TestMethod]
         public void DeserilizeProducts()
         {

@@ -18,5 +18,7 @@ namespace Fitabase.Azure.ApiManagement.Model
         {
             return type.ToString().ToLower();
         }
+
+        
     }
 }

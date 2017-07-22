@@ -2,9 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
-using System.Runtime.Serialization;
 
-namespace Fitabase.Azure.ApiManagement.Model
+namespace Fitabase.Azure.ApiManagement.Model.Exceptions
 {
     /// <summary>
     /// Represents the result of an failed service operation

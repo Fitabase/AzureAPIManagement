@@ -9,9 +9,18 @@ namespace Fitabase.Azure.ApiManagement.Model
     /// </summary>
     public class RequestContract
     {
-        public RequestContract()
+      
+        public static RequestContract Create(string description = null, 
+                                            ParameterContract[] queryParameters = null, 
+                                            ParameterContract[] headers = null, 
+                                            RepresentationContract[] represenations = null)
         {
-
+            RequestContract e = new RequestContract();
+            e.Description = description;
+            e.QueryParameters = queryParameters;
+            e.Headers = headers;
+            e.Representations = represenations;
+            return e;
         }
 
 
@@ -19,13 +28,13 @@ namespace Fitabase.Azure.ApiManagement.Model
         public string Description { get; set; }         // Operation request description.
 
         [JsonProperty("queryParameters")]
-        public List<QueryParameter> QueryParameters { get; set; }   // Collection of operation request query parameters.
+        public ParameterContract[] QueryParameters { get; set; }   // Collection of operation request query parameters.
 
         [JsonProperty("headers")]
-        public List<RequestHeader> Headers { get; set; }
+        public ParameterContract[] Headers { get; set; }            // Collection of operation request headers
 
         [JsonProperty("representations")]
-        public Representation[] Representations { get; set; }
+        public RepresentationContract[] Representations { get; set; }   // Collection of operation request representations.
     }
 
 }

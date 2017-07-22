@@ -72,8 +72,6 @@
     <None Include="APIMKeys.json" />
     <None Include="app.config" />
     <None Include="packages.config" />
-    <None Include="SwaggerPath.json" />
-    <None Include="SwaggerResult.json" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

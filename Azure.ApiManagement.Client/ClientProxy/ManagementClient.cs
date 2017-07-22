@@ -1,16 +1,13 @@
 ﻿using Fitabase.Azure.ApiManagement.DataModel.Properties;
 using Fitabase.Azure.ApiManagement.Model;
+using Fitabase.Azure.ApiManagement.Model.Exceptions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.IO;
 using System.Net;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Fitabase.Azure.ApiManagement
 {
@@ -154,7 +151,7 @@ namespace Fitabase.Azure.ApiManagement
             {
                 return default(T);
             }
-            //PrintMessage.Debug(this, json);
+            PrintMessage.Debug(this, json);
             //var jsonDeserialized = Utility.DeserializeToJson<T>(json);
             var jsonDeserialized = JsonConvert.DeserializeObject<T>(json); // Utility.DeserializeToJson<T>(json);
             return jsonDeserialized;
@@ -207,7 +204,13 @@ namespace Fitabase.Azure.ApiManagement
 
         #endregion
 
+        
+        public void GetSchema(string schemaId)
+        {
+            string endpoint = String.Format("{0}/schema/{1}", api_endpoint, schemaId);
+            DoRequest<User>(endpoint, RequestMethod.GET);
 
+        }
 
 
 
@@ -378,6 +381,10 @@ namespace Fitabase.Azure.ApiManagement
                                                 api_endpoint, apiId, operation.Id);
             DoRequest<APIOperation>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(operation));
             return operation;
+        }
+        public APIOperation CreateAPIOperation(API api, APIOperation operation)
+        {
+            return CreateAPIOperation(api.Id, operation);
         }
 
         /// <summary>

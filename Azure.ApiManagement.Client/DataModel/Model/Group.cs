@@ -1,10 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using Fitabase.Azure.ApiManagement.Model.Exceptions;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fitabase.Azure.ApiManagement.Model
 {

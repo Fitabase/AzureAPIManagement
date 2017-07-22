@@ -34,8 +34,8 @@ namespace Fitabase.Azure.ApiManagement.Swagger.Models
         [JsonProperty("head", NullValueHandling = NullValueHandling.Ignore)]
         public OperationMethod Head { get; set; }   // A definition of a HEAD operation on this path.
 
-        [JsonProperty("parameters", NullValueHandling = NullValueHandling.Ignore)]
-        public Parameter[] Parameters { get; set; } // A list of parameters that are applicable for all the operations described under this path
+        //[JsonProperty("parameters", NullValueHandling = NullValueHandling.Ignore)]
+        //public Parameter[] Parameters { get; set; } // A list of parameters that are applicable for all the operations described under this path
     }
 
 }
