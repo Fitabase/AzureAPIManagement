@@ -723,6 +723,39 @@ namespace Fitabase.Azure.ApiManagement
 
 
 
-        
+
+
+        /*********************************************************/
+        /**********************  LOGGERs  ************************/
+        /*********************************************************/
+        #region Loggers
+
+        public Logger CreateLogger(Logger logger)
+        {
+            string endpoint = String.Format("{0}/loggers/{1}", api_endpoint, logger.Id);
+            DoRequest<Logger>(endpoint, RequestMethod.PUT, JsonConvert.SerializeObject(logger));
+            return logger;
+        }
+
+        public EntityCollection<Logger> GetLoggers()
+        {
+            string endpoint = String.Format("{0}/loggers", api_endpoint);
+            return DoRequest<EntityCollection<Logger>>(endpoint);
+        }
+
+        public Logger GetLogger(string loggerId)
+        {
+            string endpoint = String.Format("{0}/loggers/{1}", api_endpoint, loggerId);
+            return DoRequest<Logger>(endpoint, RequestMethod.GET);
+        }
+
+        public void DeleteLogger(string loggerId)
+        {
+            string endpoint = String.Format("{0}/loggers/{1}", api_endpoint, loggerId);
+            DoRequest<Logger>(endpoint, RequestMethod.DELETE);
+        }
+
+        #endregion
+
     }
 }

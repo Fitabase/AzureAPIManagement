@@ -24,6 +24,7 @@ namespace Fitabase.Azure.ApiManagement
             internal static readonly string SUBSCRIPTION = "subscription";
             internal static readonly string TENANT       = "tenant";
             internal static readonly string USER         = "user";
+            internal static readonly string Logger       = "logger";
         }
 
 

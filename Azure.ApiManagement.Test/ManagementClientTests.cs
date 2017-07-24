@@ -639,7 +639,26 @@ namespace Azure.ApiManagement.Test
 
 
 
+        #region Logger TestCases
 
-      
+        [TestMethod]
+        public void CreateLogger()
+        {
+            string loggerType = "azureEventHub";
+            string name = "ServerLogger_v1";
+            string description = "This logger is created in server";
+            object credentials = null;
+            Logger logger = Logger.Create(loggerType, name, description, credentials);
+            Logger entity = Client.CreateLogger(logger);
+        }
+
+        [TestMethod]
+        public void GetLoggers()
+        {
+            EntityCollection<Logger> loggers = Client.GetLoggers();
+        }
+
+#endregion
+
     }
 }
