@@ -7,6 +7,7 @@ using System;
 using System.Collections;
 using System.IO;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 
 namespace Fitabase.Azure.ApiManagement
@@ -157,6 +158,26 @@ namespace Fitabase.Azure.ApiManagement
             return jsonDeserialized;
         }
 
+        public virtual T GetById<T>(string endpoint, string ID)
+        {
+            string[] splits = ID.Split('_');
+            string entitySignatureName = (splits.Length > 1) ? splits[0] : "entity";
+            T entity;
+            try
+            {
+                return entity = DoRequest<T>(String.Format("{0}/{1}", endpoint, ID));
+            } catch(HttpResponseException)
+            {
+                string message = String.Format("Unable to find the {0} with ID = {1}", entitySignatureName, ID);
+                var resp = new HttpResponseMessage(HttpStatusCode.NotFound)
+                {
+                    Content = new StringContent(message),
+                    ReasonPhrase = message
+                };
+
+                throw new HttpResponseException(resp);
+            }
+        }
 
         public virtual string DoRequest(string endpoint, string method, string body) 
         {
@@ -202,16 +223,8 @@ namespace Fitabase.Azure.ApiManagement
             return result;
         }
 
+
         #endregion
-
-        
-        public void GetSchema(string schemaId)
-        {
-            string endpoint = String.Format("{0}/schema/{1}", api_endpoint, schemaId);
-            DoRequest<User>(endpoint, RequestMethod.GET);
-
-        }
-
 
 
 
@@ -247,8 +260,8 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         public User GetUser(string userId)
         {
-            string endpoint = String.Format("{0}/users/{1}", api_endpoint, userId);
-            return DoRequest<User>(endpoint, RequestMethod.GET);
+            string endpoint = String.Format("{0}/users", api_endpoint);
+            return GetById<User>(endpoint, userId);
         }
 
      
@@ -336,8 +349,8 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         public API GetAPI(string apiId)
         {
-            string endpoint = String.Format("{0}/apis/{1}", api_endpoint, apiId);
-            return DoRequest<API>(endpoint, RequestMethod.GET);
+            string endpoint = String.Format("{0}/apis", api_endpoint);
+            return GetById<API>(endpoint, apiId);
         }
 
         /// <summary>
@@ -392,9 +405,9 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         public APIOperation GetAPIOperation(string apiId, string operationId)
         {
-            string endpoint = String.Format("{0}/apis/{1}/operations/{2}",
-                                                api_endpoint, apiId, operationId);
-            return DoRequest<APIOperation>(endpoint, RequestMethod.GET);
+            string endpoint = String.Format("{0}/apis/{1}/operations", api_endpoint, apiId);
+            return GetById<APIOperation>(endpoint, operationId);
+            
         }
 
         /// <summary>
@@ -446,8 +459,8 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         public Product GetProduct(string productId)
         {
-            string endpoint = String.Format("{0}/products/{1}", api_endpoint, productId);
-            return DoRequest<Product>(endpoint, RequestMethod.GET);
+            string endpoint = String.Format("{0}/products", api_endpoint);
+            return GetById<Product>(endpoint, productId);
         }
 
         /// <summary>
@@ -591,8 +604,8 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         public Group GetGroup(string groupId)
         {
-            string endpoint = String.Format("{0}/groups/{1}", api_endpoint, groupId);
-            return DoRequest<Group>(endpoint, RequestMethod.GET);
+            string endpoint = String.Format("{0}/groups", api_endpoint);
+            return GetById<Group>(endpoint, groupId);
         }
 
         /// <summary>
@@ -669,8 +682,8 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         public Subscription GetSubscription(string subscriptionId)
         {
-            string endpoint = String.Format("{0}/subscriptions/{1}", api_endpoint, subscriptionId);
-            return DoRequest<Subscription>(endpoint, RequestMethod.GET);
+            string endpoint = String.Format("{0}/subscriptions", api_endpoint);
+            return GetById<Subscription>(endpoint, subscriptionId);
         }
 
         /// <summary>
@@ -745,8 +758,8 @@ namespace Fitabase.Azure.ApiManagement
 
         public Logger GetLogger(string loggerId)
         {
-            string endpoint = String.Format("{0}/loggers/{1}", api_endpoint, loggerId);
-            return DoRequest<Logger>(endpoint, RequestMethod.GET);
+            string endpoint = String.Format("{0}/loggers", api_endpoint, loggerId);
+            return GetById<Logger>(endpoint, loggerId);
         }
 
         public void DeleteLogger(string loggerId)

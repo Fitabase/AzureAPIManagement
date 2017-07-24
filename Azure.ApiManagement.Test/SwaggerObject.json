@@ -1,75 +1,14 @@
 ﻿{
-  "name": "DailyActivity_GetBySubscriptionidAndProfileidAndStartAndEnd",
-  "method": "GET",
-  "urlTemplate": "/DailyActivity/Get?subscriptionId={subscriptionId}&profileId={profileId}&start={start}&end={end}",
-  "templateParameters": [
-    {
-      "name": "subscriptionId",
-      "type": "string",
-      "required": true,
-      "values": []
-    },
-    {
-      "name": "profileId",
-      "type": "string",
-      "description": "Format - uuid.",
-      "required": true,
-      "values": []
-    },
-    {
-      "name": "start",
-      "type": "string",
-      "description": "Format - date-time (as date-time in RFC3339).",
-      "required": true,
-      "values": []
-    },
-    {
-      "name": "end",
-      "type": "string",
-      "description": "Format - date-time (as date-time in RFC3339).",
-      "required": true,
-      "values": []
-    }
-  ],
-  "description": null,
-  "request": {
-    "description": null,
-    "queryParameters": [],
-    "headers": [],
-    "representations": []
-  },
-  "responses": [
-    {
-      "statusCode": 200,
-      "description": "OK",
-      "representations": [
-        {
-          "contentType": "application/json",
-          "sample": null,
-          "schemaId": "597265b42f02d31290052f88",
-          "typeName": "DailyActivityArray"
-        },
-        {
-          "contentType": "text/json",
-          "sample": null,
-          "schemaId": "597265b42f02d31290052f88",
-          "typeName": "DailyActivityArray"
-        },
-        {
-          "contentType": "application/xml",
-          "sample": null,
-          "schemaId": "597265b42f02d31290052f88",
-          "typeName": "DailyActivityArray"
-        },
-        {
-          "contentType": "text/xml",
-          "sample": null,
-          "schemaId": "597265b42f02d31290052f88",
-          "typeName": "DailyActivityArray"
-        }
-      ],
-      "headers": []
-    }
-  ],
-  "id": "/apis/597265b42f02d30ff48b3264/operations/597265b42f02d31290052f89"
+  "ClassName": "Fitabase.Azure.ApiManagement.Model.Exceptions.HttpResponseException",
+  "Message": "Unable to find the entity with ID = 597265b42f02d31290052f891",
+  "Data": null,
+  "InnerException": null,
+  "HelpURL": null,
+  "StackTraceString": "   at Fitabase.Azure.ApiManagement.ManagementClient.GetById[T](String endpoint, String ID) in C:\\Repositories\\AzureAPIManagement\\Azure.ApiManagement.Client\\ClientProxy\\ManagementClient.cs:line 178\r\n   at Fitabase.Azure.ApiManagement.ManagementClient.GetAPIOperation(String apiId, String operationId) in C:\\Repositories\\AzureAPIManagement\\Azure.ApiManagement.Client\\ClientProxy\\ManagementClient.cs:line 409\r\n   at Azure.ApiManagement.Test.ManagementClientTests.GetAPIOperation() in C:\\Repositories\\AzureAPIManagement\\Azure.ApiManagement.Test\\ManagementClientTests.cs:line 302",
+  "RemoteStackTraceString": null,
+  "RemoteStackIndex": 0,
+  "ExceptionMethod": "8\nGetById\nSmallStepsLabs.Azure.ApiManagement.Client, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\nFitabase.Azure.ApiManagement.ManagementClient\nT GetById[T](System.String, System.String)",
+  "HResult": -2146233088,
+  "Source": "SmallStepsLabs.Azure.ApiManagement.Client",
+  "WatsonBuckets": null
 }

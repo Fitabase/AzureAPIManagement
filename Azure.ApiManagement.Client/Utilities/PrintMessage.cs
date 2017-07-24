@@ -1,4 +1,5 @@
 ﻿using Fitabase.Azure.ApiManagement.Model;
+using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -33,16 +34,16 @@ namespace Fitabase.Azure.ApiManagement
 
         public static void Debug(string className, EntityBase obj)
         {
-            Debug(className, Utility.SerializeToJson(obj));
+            Debug(className, JsonConvert.SerializeObject(obj));
         }
         public static void Debug(string className, object obj)
         {
-            Debug(className, Utility.SerializeToJson(obj));
+            Debug(className, JsonConvert.SerializeObject(obj));
         }
 
         public static void Debug(object className, object obj)
         {
-            Debug(obj.GetType().Name, Utility.SerializeToJson(obj));
+            Debug(obj.GetType().Name, JsonConvert.SerializeObject(obj));
         }
     }
 }

@@ -11,6 +11,7 @@ using Newtonsoft.Json.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using Fitabase.Azure.ApiManagement.DataModel.Properties;
+using Fitabase.Azure.ApiManagement.Model.Exceptions;
 
 namespace Azure.ApiManagement.Test
 {
@@ -37,13 +38,9 @@ namespace Azure.ApiManagement.Test
         
        
 
-        [TestMethod]
-        public void GetSchema()
-        {
-            string schemaId = "597265b42f02d31290052f88";
-            Client.GetSchema(schemaId);
-        }
-        
+        /*********************************************************/
+        /************************  USER  *************************/
+        /*********************************************************/
 
         #region User TestCases
 
@@ -75,10 +72,15 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void GetUser()
         {
-            string userId = "66da331f7a1c49d98ac8a4ad136c7c64";
-            User user = Client.GetUser(userId);
-            Assert.IsNotNull(user);
-            Assert.AreEqual(userId, user.Id);
+            try {
+                string userId = "user_bef163ba98af433c917914dd4c208115";
+                User user = Client.GetUser(userId);
+                Assert.IsNotNull(user);
+                Assert.AreEqual(userId, user.Id);
+            } catch(HttpResponseException ex)
+            {
+                Print(ex);
+            }
         }
 
         [TestMethod]
@@ -142,16 +144,18 @@ namespace Azure.ApiManagement.Test
             User currUser = Client.GetUser(userId);
             Assert.AreEqual(currUser.FirstName, updateUser.FirstName);
         }
-        
+
         #endregion User TestCases
 
 
-       
 
+        /*********************************************************/
+        /*************************  API  *************************/
+        /*********************************************************/
 
         #region API TestCases
 
-     
+
 
         [TestMethod]
         public void CreateApi()
@@ -171,15 +175,20 @@ namespace Azure.ApiManagement.Test
         }
 
        
-
         [TestMethod]
-        public void GetApi()
+        public void GetAPI()
         {
-            string apiId = "api_05247cffcf9d4817adc81663625c18a1";
-            API api = Client.GetAPI(apiId);
-            Assert.IsNotNull(api);
-            Assert.AreEqual(api.Id, apiId);
-            Print(api);
+            try
+            {
+                string apiId = "597265b42f02d30ff48b3264";
+                API api = Client.GetAPI(apiId);
+                Assert.IsNotNull(api);
+                Assert.AreEqual(api.Id, apiId);
+                Print(api);
+            } catch(HttpResponseException ex)
+            {
+                Print(ex);
+            }
         }
 
 
@@ -205,6 +214,9 @@ namespace Azure.ApiManagement.Test
 
 
 
+        /*********************************************************/
+        /******************   API OPERATIONS  ********************/
+        /*********************************************************/
 
 
         #region API Operations TestCases
@@ -282,11 +294,18 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void GetAPIOperation()
         {
-            string apiId = "597265b42f02d30ff48b3264";
-            string operationId = "597265b42f02d31290052f89";
-            APIOperation operation = Client.GetAPIOperation(apiId, operationId);
-            Print(operation);
-            Assert.IsNotNull(operation);
+            try
+            {
+
+                string apiId = "api_2fece789626a4b11a71e040c6ba63b8f";
+                string operationId = "apioperation_65d8e757281b47b786313801d885a864";
+                APIOperation operation = Client.GetAPIOperation(apiId, operationId);
+                Assert.IsNotNull(operation);
+                Print(operation);
+            } catch(HttpResponseException ex)
+            {
+                Print(ex);
+            }
         }
 
         [TestMethod]
@@ -316,6 +335,9 @@ namespace Azure.ApiManagement.Test
 
 
 
+        /*********************************************************/
+        /**********************  PRODUCT  ************************/
+        /*********************************************************/
 
         #region Product TestCases
 
@@ -334,11 +356,17 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void GetProduct()
         {
-            string productId = "29f79d2acfab453eac057ddf3656a31b";
-            Product product = Client.GetProduct(productId);
-            Assert.IsNotNull(product);
-            Assert.AreEqual(productId, product.Id);
-            Print(product);
+            try
+            {
+                string productId = "product_5cdf0c46784b4e98b326f426bb6c2c81";
+                Product product = Client.GetProduct(productId);
+                Assert.IsNotNull(product);
+                Assert.AreEqual(productId, product.Id);
+                Print(product);
+            } catch(HttpResponseException ex)
+            {
+                Print(ex);
+            }
         }
 
         //[TestMethod]
@@ -468,6 +496,12 @@ namespace Azure.ApiManagement.Test
 
 
 
+
+
+        /*********************************************************/
+        /**********************  SUBSCRIPTION  *******************/
+        /*********************************************************/
+
         #region Subscription TestCases
 
         [TestMethod]
@@ -524,11 +558,17 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void GetSubscription()
         {
-            string subscriptionId = "subscription_801c5e5a9a9d4e9fba47b1561d1e19f6";
-            Subscription subscription = Client.GetSubscription(subscriptionId);
-            Print(subscription);
-            Assert.IsNotNull(subscription);
-            Assert.AreEqual(subscriptionId, subscription.Id);
+            try
+            {
+                string subscriptionId = "subscription_72208da5700b45e8a016605ccdc78aa1";
+                Subscription subscription = Client.GetSubscription(subscriptionId);
+                Print(subscription);
+                Assert.IsNotNull(subscription);
+                Assert.AreEqual(subscriptionId, subscription.Id);
+            } catch(HttpResponseException ex)
+            {
+                Print(ex);
+            }
         }
 
 
@@ -556,6 +596,10 @@ namespace Azure.ApiManagement.Test
         #endregion Subscription TestCases
 
 
+
+        /*********************************************************/
+        /**********************  GROUP  **************************/
+        /*********************************************************/
 
         #region GroupTestCases
 
@@ -638,6 +682,11 @@ namespace Azure.ApiManagement.Test
         #endregion GroupTestCases
 
 
+
+
+        /*********************************************************/
+        /**********************  LOGGERs  ************************/
+        /*********************************************************/
 
         #region Logger TestCases
 

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Net.Http;
 
 namespace Fitabase.Azure.ApiManagement.Model.Exceptions
 {
@@ -26,8 +27,19 @@ namespace Fitabase.Azure.ApiManagement.Model.Exceptions
             this.StatusCode = statusCode;
         }
 
+        public HttpResponseException(string message, HttpStatusCode statusCode): base(message)
+        {
+            this.StatusCode = statusCode;
+        }
+
+        public HttpResponseException(HttpResponseMessage resp) : base(resp.ReasonPhrase)
+        {
+            this.StatusCode = resp.StatusCode;
+        }
+
+
         //public HttpResponseException(SerializationInfo info, StreamingContext context) : base(info, context) {}
-        
+
         public HttpStatusCode StatusCode { get; set; }
         
     }
