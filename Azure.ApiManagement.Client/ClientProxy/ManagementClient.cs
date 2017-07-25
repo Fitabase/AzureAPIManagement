@@ -152,8 +152,7 @@ namespace Fitabase.Azure.ApiManagement
             {
                 return default(T);
             }
-            PrintMessage.Debug(this, json);
-            //var jsonDeserialized = Utility.DeserializeToJson<T>(json);
+            //PrintMessage.Debug(this, json);
             var jsonDeserialized = JsonConvert.DeserializeObject<T>(json); // Utility.DeserializeToJson<T>(json);
             return jsonDeserialized;
         }

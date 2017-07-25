@@ -11,7 +11,7 @@ namespace Fitabase.Azure.ApiManagement.Swagger
         }
         
 
-        public override string GetSwaggerJson()
+        protected override string GetSwaggerJson()
         {
             if(!IsUrlFormat(this.ResourcePath))
             {

@@ -25,7 +25,7 @@ namespace Fitabase.Azure.ApiManagement.ClientProxy
 
         
         /// <summary>
-        /// 
+        /// This method is used to publish a swagger to APIM
         /// </summary>
         public void Publish()
         {
@@ -38,15 +38,6 @@ namespace Fitabase.Azure.ApiManagement.ClientProxy
             API api = new APIComposer(swagger).Compose();
             PublishAPI(api);
             PublishAPIOperations(api);
-
-            
-            //WriteToFile(Configuration.OutputFolder + Documents.API_DOC, api);
-            //WriteToFile(Configuration.OutputFolder + Documents.API_OPERATION_DOC, api.Operations);
-        }
-        
-        private void Print(object ob)
-        {
-            PrintMessage.Debug(this.GetType().Name, ob);
         }
         
         private void PublishAPI(API api)
@@ -62,9 +53,8 @@ namespace Fitabase.Azure.ApiManagement.ClientProxy
                 {
                     Client.CreateAPIOperation(api, operation);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    PrintMessage.Debug(this.GetType().Name, ex);
                     if (FailQueue == null)
                         FailQueue = new Queue<APIOperation>();
                     FailQueue.Enqueue(operation);
@@ -73,14 +63,5 @@ namespace Fitabase.Azure.ApiManagement.ClientProxy
 
         }
         
-
-
-        //private void WriteToFile(string ouputFile, object obj)
-        //{
-        //    if(Configuration.WriteToFile)
-        //    {
-        //        Documents.Write(ouputFile, obj);
-        //    }
-        //}
     }
 }

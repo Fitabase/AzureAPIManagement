@@ -31,7 +31,7 @@ namespace Azure.ApiManagement.Test
             Client = new ManagementClient();
         }
 
-        private static void Print(object obj)
+        public static void Print(object obj)
         {
             PrintMessage.Debug("TestClass", obj);
         }
@@ -224,37 +224,23 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void CreateAPIOperation()
         {
-            string apiId = "api_2fece789626a4b11a71e040c6ba63b8f";
+            string apiId = "api_0789b75fd1b04a2a8990dafb89847742";
             int count_v1 = Client.GetOperationsByAPI(apiId).Count;
 
             string name = "Server API operation";
-            RequestMethod method = RequestMethod.GET;
+            RequestMethod method = RequestMethod.POST;
             string urlTemplate = "/Get/a/{a}/b/{b}";
-
-            ParameterContract[] parameters =
-            {
-                ParameterContract.Create("a", ParameterType.NUMBER.ToString()),
-                ParameterContract.Create("b", ParameterType.NUMBER.ToString())
-            };
+            string description = "an operation created in the operation";
+            ParameterContract[] parameters = null;
+            RequestContract request = null;
+            ResponseContract[] responses = null;
 
 
-            RequestContract request = new RequestContract();
-            request.Headers = new ParameterContract[] {
-                                            ParameterContract.Create("Ocp-Apim-Subscription-Key", ParameterType.STRING.ToString())
-                                        };
-            request.QueryParameters = new ParameterContract[] {
-                                            ParameterContract.Create("filter", ParameterType.STRING.ToString())
-                                        };
+            parameters = Parameters();
+            responses = Responses();
 
+            APIOperation operation = APIOperation.Create(name, method, urlTemplate, parameters, request, responses, description);
 
-            ResponseContract[] responses = {
-                   ResponseContract.Create(200, "good 200", new RepresentationContract[]{
-                       RepresentationContract.Create("application/json", "schemaId", "typeName", "sample data", GetFormParameters())
-                   }),
-                   ResponseContract.Create(201, "not much better", null),
-            };
-            APIOperation operation = APIOperation.Create(name, method, urlTemplate, parameters, request, responses);
-           
 
             APIOperation entity = Client.CreateAPIOperation(apiId, operation);
             Assert.IsNotNull(entity);
@@ -265,30 +251,45 @@ namespace Azure.ApiManagement.Test
             Assert.AreEqual(count_v1 + 1, count_v2);
         }
 
-        private ParameterContract[] GetFormParameters()
+        private ResponseContract[] Responses()
         {
-            return new ParameterContract[]{
-                            ParameterContract.Create("accountId", "long"),
-                            ParameterContract.Create("profileId", "long")
-                       };
+            ResponseContract[] responses = {
+                   ResponseContract.Create(200, "OK!", new RepresentationContract[]{
+                       RepresentationContract.Create("application/json", null, "typeName", null, null),
+                       RepresentationContract.Create("text/json", null, "typeName", "sample data", Parameters()),
+                   }),
+                   ResponseContract.Create(201, "Created", null),
+            };
+            return responses;
 
         }
-        
+
+        private RequestContract Request()
+        {
+            RequestContract request = new RequestContract();
+            request.Headers = new ParameterContract[] {
+                                            ParameterContract.Create("Ocp-Apim-Subscription-Key", ParameterType.STRING.ToString())
+                                        };
+            request.QueryParameters = new ParameterContract[] {
+                                            ParameterContract.Create("filter", ParameterType.STRING.ToString())
+                                        };
+            return request;
+        }
+
+        private ParameterContract[] Parameters()
+        {
+
+            ParameterContract[] parameters =
+            {
+                ParameterContract.Create("a", ParameterType.NUMBER.ToString()),
+                ParameterContract.Create("b", ParameterType.NUMBER.ToString())
+            };
+            return parameters;
+        }
 
 
-        //[TestMethod]
-        //public void Create()
-        //{
-        //    string apiId = "api_f8c105c775dd4123b201cf11adacede3";
-        //    string ResourcePath = @"C:\Repositories\AzureAPIManagement\Azure.ApiManagement.Test\SwaggerObject.json";
-        //    String json = File.ReadAllText(ResourcePath);
-        //    APIOperation operation = JsonConvert.DeserializeObject<APIOperation>(json);
-        //    operation.Id = "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz";
-        //    Print(operation);
-        //    APIOperation entity = Client.CreateAPIOperation(apiId, operation);
-        //    Assert.IsNotNull(entity);
-        //    Assert.IsNotNull(entity.Id);
-        //}
+
+
 
 
         [TestMethod]
@@ -297,8 +298,8 @@ namespace Azure.ApiManagement.Test
             try
             {
 
-                string apiId = "api_2fece789626a4b11a71e040c6ba63b8f";
-                string operationId = "apioperation_65d8e757281b47b786313801d885a864";
+                string apiId = "597687442f02d30494230f8c";
+                string operationId = "597687442f02d31290052fec";
                 APIOperation operation = Client.GetAPIOperation(apiId, operationId);
                 Assert.IsNotNull(operation);
                 Print(operation);

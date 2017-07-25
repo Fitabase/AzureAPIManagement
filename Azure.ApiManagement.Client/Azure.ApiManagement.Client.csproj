@@ -169,7 +169,6 @@
   <ItemGroup>
     <Compile Include="ClientProxy\APIPublisher.cs" />
     <Compile Include="ClientProxy\APIConfiguration.cs" />
-    <Compile Include="ClientProxy\APISetting.cs" />
     <Compile Include="DataModel\Abstract\EntityIdGenerator.cs" />
     <Compile Include="DataModel\Abstract\UpdateEntityBase.cs" />
     <Compile Include="DataModel\Exceptions\SwaggerResourceException.cs" />
@@ -220,7 +219,7 @@
     <Compile Include="Swagger\Models\Tag.cs" />
     <Compile Include="Swagger\SwaggerUrlReader.cs" />
     <Compile Include="Swagger\Models\Xml.cs" />
-    <Compile Include="Utilities\APIBuilder.cs" />
+    <Compile Include="ClientProxy\APIBuilder.cs" />
     <Compile Include="Utilities\Constants.cs" />
     <Compile Include="Utilities\PrintMessage.cs" />
     <Compile Include="Utilities\Utility.cs" />

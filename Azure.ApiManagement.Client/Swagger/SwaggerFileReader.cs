@@ -10,7 +10,7 @@ namespace Fitabase.Azure.ApiManagement.Swagger
         }
 
       
-        public override string GetSwaggerJson()
+        protected override string GetSwaggerJson()
         {
             // quick check if the file is json
             if (!this.ResourcePath.EndsWith(".json"))

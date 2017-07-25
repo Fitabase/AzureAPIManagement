@@ -14,23 +14,26 @@ namespace Fitabase.Azure.ApiManagement.Model
         public static APIOperation Create(string name, 
                             RequestMethod method, string urlTemplate, 
                             ParameterContract[] parameters,
-                            RequestContract request, ResponseContract[] responses)
+                            RequestContract request, ResponseContract[] responses, string description = null)
         {
             if (String.IsNullOrWhiteSpace(name))
-                throw new InvalidEntityException("APIOperation name is required");
+                throw new InvalidEntityException("Operation's is required");
+            if (name.Length > 100)
+                throw new InvalidEntityException("Length of operation's name must be < 100");
             if (String.IsNullOrWhiteSpace(urlTemplate))
-                throw new InvalidEntityException("APIOperation urlTemplate is required");
+                throw new InvalidEntityException("Operation's urlTemplate is required");
 
-            APIOperation api = new APIOperation();
-            api.Id = EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.APIOPERATION);
-            api.Name = name;
-            api.Method = method.ToString();
-            api.UrlTemplate = urlTemplate;
-            api.TemplateParameter = parameters;
-            api.Request = request;
-            api.Responses = responses;
+            APIOperation operation = new APIOperation();
+            operation.Id = EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.APIOPERATION);
+            operation.Name = name;
+            operation.Method = method.ToString();
+            operation.UrlTemplate = urlTemplate;
+            operation.TemplateParameter = parameters;
+            operation.Request = request;
+            operation.Responses = responses;
+            operation.Description = description;
 
-            return api;
+            return operation;
         }
 
         

@@ -77,10 +77,7 @@ namespace Fitabase.Azure.ApiManagement.Model
             subscription.State = state;
             subscription.StartDate = dateSettings.StartDate;
             subscription.ExpirationDate = dateSettings.ExpirationDate;
-
-            PrintMessage.Debug("subscription", subscription.StartDate.ToString());
-            PrintMessage.Debug("subscription", subscription.ExpirationDate.ToString());
-
+            
             return subscription;
         }
 

@@ -1,14 +1,134 @@
 ﻿{
-  "ClassName": "Fitabase.Azure.ApiManagement.Model.Exceptions.HttpResponseException",
-  "Message": "Unable to find the entity with ID = 597265b42f02d31290052f891",
-  "Data": null,
-  "InnerException": null,
-  "HelpURL": null,
-  "StackTraceString": "   at Fitabase.Azure.ApiManagement.ManagementClient.GetById[T](String endpoint, String ID) in C:\\Repositories\\AzureAPIManagement\\Azure.ApiManagement.Client\\ClientProxy\\ManagementClient.cs:line 178\r\n   at Fitabase.Azure.ApiManagement.ManagementClient.GetAPIOperation(String apiId, String operationId) in C:\\Repositories\\AzureAPIManagement\\Azure.ApiManagement.Client\\ClientProxy\\ManagementClient.cs:line 409\r\n   at Azure.ApiManagement.Test.ManagementClientTests.GetAPIOperation() in C:\\Repositories\\AzureAPIManagement\\Azure.ApiManagement.Test\\ManagementClientTests.cs:line 302",
-  "RemoteStackTraceString": null,
-  "RemoteStackIndex": 0,
-  "ExceptionMethod": "8\nGetById\nSmallStepsLabs.Azure.ApiManagement.Client, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\nFitabase.Azure.ApiManagement.ManagementClient\nT GetById[T](System.String, System.String)",
-  "HResult": -2146233088,
-  "Source": "SmallStepsLabs.Azure.ApiManagement.Client",
-  "WatsonBuckets": null
+  "swagger": "2.0",
+  "info": {
+    "version": "DailyActivity",
+    "title": "DailyActivity"
+  },
+  "host": "unittestsfitabase.portal.azure-api.net",
+  "basePath": "/v1",
+  "schemes": [ "http" ],
+  "paths": {
+    "/DailyActivity/Get": {
+      "get": {
+        "tags": [ "DailyActivity" ],
+        "operationId": "DailyActivity_GetBySubscriptionidAndProfileidAndStartAndEnd",
+        "consumes": [],
+        "produces": [ "application/json", "text/json", "application/xml", "text/xml" ],
+        "parameters": [
+          {
+            "name": "subscriptionId",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "profileId",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "format": "date-time"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": { "type": "array" }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "DailyActivity": {
+      "type": "object",
+      "properties": {
+        "ActivityDate": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "TotalDistance": {
+          "type": "number",
+          "format": "double"
+        },
+        "TrackerDistance": {
+          "type": "number",
+          "format": "double"
+        },
+        "LoggedActivitiesDistance": {
+          "type": "number",
+          "format": "double"
+        },
+        "VeryActiveDistance": {
+          "type": "number",
+          "format": "double"
+        },
+        "ModeratelyActiveDistance": {
+          "type": "number",
+          "format": "double"
+        },
+        "LightActiveDistance": {
+          "type": "number",
+          "format": "double"
+        },
+        "SedentaryActiveDistance": {
+          "type": "number",
+          "format": "double"
+        },
+        "VeryActiveMinutes": {
+          "type": "number",
+          "format": "double"
+        },
+        "FairlyActiveMinutes": {
+          "type": "number",
+          "format": "double"
+        },
+        "LightlyActiveMinutes": {
+          "type": "number",
+          "format": "double"
+        },
+        "SedentaryMinutes": {
+          "type": "number",
+          "format": "double"
+        },
+        "TotalSteps": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "Calories": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "Floors": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "CaloriesBMR": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "MarginalCalories": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "RestingHeartRate": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    }
+  }
 }

@@ -12,7 +12,7 @@ namespace Fitabase.Azure.ApiManagement.Swagger
     public abstract class AbstractSwaggerReader
     {
 
-        public string ResourcePath;
+        protected string ResourcePath;
 
         public AbstractSwaggerReader(string resourcePath)
         {
@@ -39,6 +39,6 @@ namespace Fitabase.Azure.ApiManagement.Swagger
         /// Retrieve swagger json from resource
         /// </summary>
         /// <returns>Json string</returns>
-        public abstract string GetSwaggerJson();
+        protected abstract string GetSwaggerJson();
     }
 }

@@ -10,9 +10,9 @@ namespace Fitabase.Azure.ApiManagement.Model
     public class RequestContract
     {
       
-        public static RequestContract Create(string description = null, 
+        public static RequestContract Create(string description = null,
+                                            ParameterContract[] headers = null,
                                             ParameterContract[] queryParameters = null, 
-                                            ParameterContract[] headers = null, 
                                             RepresentationContract[] represenations = null)
         {
             RequestContract e = new RequestContract();

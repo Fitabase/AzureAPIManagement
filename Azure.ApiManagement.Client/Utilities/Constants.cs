@@ -16,7 +16,7 @@ namespace Fitabase.Azure.ApiManagement
         internal static class IdPrefixTemplate
         {
             internal static readonly string API          = "api";
-            internal static readonly string APIOPERATION = "apioperation";
+            internal static readonly string APIOPERATION = "operation";
             internal static readonly string GROUP        = "group";
             internal static readonly string PRODUCT      = "product";
             internal static readonly string PROPERTY     = "property";

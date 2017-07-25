@@ -34,7 +34,7 @@ namespace Azure.ApiManagement.Test
                 @"http://localhost:2598/swagger/docs/TimeSeries",           // 8
                 @"http://localhost:2598/swagger/docs/Values"                // 9
             };
-            UrlPath = urls[2];
+            UrlPath = urls[0];
 
             //FilePath = @"C:\Repositories\AzureAPIManagement\Azure.ApiManagement.Test\SwaggerObject.json";
             //FilePath = @"C:\Users\inter\Desktop\FitabaseAPI/bodyTrace.json";
@@ -45,69 +45,7 @@ namespace Azure.ApiManagement.Test
 
 
 
-        //#region APIResponseBuilder TestCases
-
-        //[TestMethod]
-        //public void APIResponseBuilder()
-        //{
-
-        //    Dictionary<string, Schema> schemas = null;
-        //    APIBuilder.APISampleDataBuilder builder = new APIBuilder().GetBuilder(schemas);
-        //    builder.Build();
-        //}
-
-        //#endregion APIResponseBuilder TestCases
-
-
-
-
-        #region APIServiceUrlBuilder TestCases
-
-        [TestMethod]
-        public void ServiceUrlBuilder()
-        {
-            PathData pathdata =_SwaggerObject.Paths.First().Value;
-
-            APIBuilder.APIServiceUrlBuilder serviceBuilder = new APIBuilder().GetBuilder(pathdata);
-
-            OperationMethod operationMethod = serviceBuilder.GetOperationMethod();
-            PrintMessage.Debug(this, operationMethod);
-
-            PrintMessage.Debug(this, operationMethod.OperationId);
-
-            RequestMethod requestMethod = serviceBuilder.GetRequestMethod();
-            PrintMessage.Debug(this, requestMethod.ToString());
-
-            Parameter[] parameters = operationMethod.Parameters;
-            PrintMessage.Debug(this, parameters);
-
-            string url = serviceBuilder.BuildURN();
-            PrintMessage.Debug(this, url);
-        }
-
-        
-
-
-        [TestMethod]
-        public void GetPathData()
-        {
-            Dictionary<string, PathData> paths = _SwaggerObject.Paths;
-            foreach(KeyValuePair<string, PathData> path in paths)
-            {
-                Assert.IsNotNull(path.Key);
-                Assert.IsNotNull(path.Value);
-                PrintMessage.Debug(this, path.Key);
-                PrintMessage.Debug(this, path.Value);
-            }
-        }
-
-        #endregion APIServiceUrlBuilder TestCases
-
-
-
-
-
-#region Publish an API
+        #region Publish an API
 
         [TestMethod]
         public void PublishSwaggerAPI()
@@ -124,11 +62,11 @@ namespace Azure.ApiManagement.Test
                 PrintMessage.Debug(this, ex.ErrorResponse.ErrorData.ValidationDetails.ElementAt(0).Message);
                 PrintMessage.Debug(this, ex.ErrorResponse);
             }
-            catch (InvalidEntityException ex) 
+            catch (InvalidEntityException ex)
             {
                 PrintMessage.Debug(this, ex.Message);
             }
-            catch(SwaggerResourceException ex)
+            catch (SwaggerResourceException ex)
             {
                 PrintMessage.Debug(this, ex.Message);
             }
@@ -136,25 +74,5 @@ namespace Azure.ApiManagement.Test
 
         #endregion Publish an API
 
-
-
-#region SwaggerObject TestCases
-
-        [TestMethod]
-        public void GetSwaggerFromUrl()
-        {
-            SwaggerObject swagger = new SwaggerUrlReader(UrlPath).GetSwaggerObject();
-            Assert.IsNotNull(swagger);
-
-            PrintMessage.Debug(this, swagger);
-        }
-
-        [TestMethod]
-        public void Dictionary()
-        {
-            PrintMessage.Debug(this, _SwaggerObject.Definitions);
-        }
-        
     }
-#endregion SwaggerObject TestCases
 }

@@ -3,6 +3,7 @@ using Fitabase.Azure.ApiManagement.Model;
 using Fitabase.Azure.ApiManagement.Model.Exceptions;
 using Fitabase.Azure.ApiManagement.Swagger.Models;
 using Fitabase.Azure.ApiManagement.Utilities;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 
@@ -30,9 +31,7 @@ namespace Fitabase.Azure.ApiManagement.Swagger
         public API Compose()
         {
             if (Swagger == null)
-            {
                 throw new SwaggerResourceException("SwaggerObject is required");
-            }
             
             string name         = GetAPIName();                     // Get API name from swagger
             string path         = GetAPIPath();                     // Get API path from swagger
@@ -72,9 +71,7 @@ namespace Fitabase.Azure.ApiManagement.Swagger
         private string GetAPIName()
         {
             if (Swagger == null)
-            {
                 throw new SwaggerResourceException("SwaggerObject is required");
-            }
             return Swagger.Info.Title + Swagger.BasePath;
         }
 
@@ -105,47 +102,29 @@ namespace Fitabase.Azure.ApiManagement.Swagger
         /// <param name="path"></param>
         /// <returns></returns>
         private APIOperation GetOperation(KeyValuePair<string, PathData> path)
-        {                  // Swagger path name to UrlTemplate
+        {
             PathData pathdata = path.Value;
-            APIBuilder apiBuilder = new APIBuilder();
-            APIBuilder.APIServiceUrlBuilder urlBuilder = apiBuilder.GetBuilder(pathdata);
+            APIBuilder builder = new APIBuilder(pathdata);
 
-            OperationMethod operationMethod = urlBuilder.GetOperationMethod();
-            string operationName = operationMethod.OperationId;                     // Swagger path operationId
-            RequestMethod method = urlBuilder.GetRequestMethod();                   // Get request method
-            string urlTemplate = GetOperationnUrl(path.Key) + urlBuilder.BuildURN();
-
-            ParameterContract[] parameters = urlBuilder.GetTemplateParameters();    // Get Template parameter;
-            RequestContract request = null;
+            OperationMethod pathOperation = builder.GetOperationMethod();
+            string operationName = pathOperation.OperationId;
+            string urlTemplate = GetOperationnUrl(path.Key) + builder.BuildServiceURL();
+            string description = null;
+            RequestMethod method = builder.GetRequestMethod();
+            ParameterContract[] parameters = builder.BuildeTemplateParameters();
+            RequestContract request = GetRequest();
+            ResponseContract[] responses =  GetMethodResponses(pathOperation, method).ToArray();
             
-            ResponseContract[] responses = apiBuilder.GetBuilder(operationMethod.Responses).Build();
-
-            APIOperation apiOperation = APIOperation.Create(operationName, method, urlTemplate, parameters, request, responses);
+            APIOperation apiOperation = APIOperation.Create(operationName, method, urlTemplate, parameters, request, responses, description);
             return apiOperation;
         }
+        
 
-
-
-        /// <summary>
-        /// Compose Swagger response to API operation response
-        /// </summary>
-        /// <param name="responses"></param>
-        /// <returns></returns>
-        //private APIResponse[] GetResponse(
-        //    Dictionary<string, Response> responses)
-        //{
-        //    List<Model.APIResponse> list = new List<Model.APIResponse>();
-        //    foreach (KeyValuePair<string, Response> response in responses)
-        //    {
-        //        var code = response.Key;
-        //        var description = response.Value.Description;
-        //        list.Add(Model.APIResponse.Create(int.Parse(code), description));
-
-        //    }
-
-        //    return list.ToArray();
-        //}
-
+        private RequestContract GetRequest()
+        { 
+            // TODO create operation request
+            return RequestContract.Create();
+        }
 
 
         /// <summary>
@@ -157,5 +136,42 @@ namespace Fitabase.Azure.ApiManagement.Swagger
         {
             return operationName.ToLower().Replace("/" + Swagger.Info.Title.ToLower(), "");
         }
+
+
+
+        
+        private string GetSampleData()
+        {
+            return JsonConvert.SerializeObject(Swagger.Definitions, Formatting.Indented);
+        }
+
+
+        private List<ResponseContract> GetMethodResponses(OperationMethod operation, RequestMethod method)
+        {
+            if (operation == null)
+                return null;
+
+            List<ResponseContract> list = new List<ResponseContract>();
+            foreach(KeyValuePair<string, Response> response in operation.Responses)
+            {
+                string code = response.Key;
+                int statusCode = int.Parse(code);
+                string description = response.Value.Description;
+
+                RepresentationContract[] representations = null;
+                if(method == RequestMethod.GET)
+                    representations = new RepresentationContract[] { GetJsonRepresenation() };
+
+                ResponseContract r = ResponseContract.Create(statusCode, description, representations);
+                list.Add(r);
+            }
+            return list;
+        }
+        
+        private RepresentationContract GetJsonRepresenation()
+        {
+            return RepresentationContract.Create("application/json", null, Swagger.Info.Title, GetSampleData(), null);
+        }
+
     }
 }
