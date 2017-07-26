@@ -28,7 +28,7 @@ namespace Azure.ApiManagement.Test
         [TestInitialize]
         public void SetUp()
         {
-            Client = new ManagementClient();
+            Client = new ManagementClient(@"C:\Repositories\AzureAPIManagement\Azure.ApiManagement.Test\APIMKeys.json");
         }
 
         public static void Print(object obj)

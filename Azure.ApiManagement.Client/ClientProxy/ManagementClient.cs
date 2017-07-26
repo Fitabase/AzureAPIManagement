@@ -4,7 +4,6 @@ using Fitabase.Azure.ApiManagement.Model.Exceptions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Collections;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -15,7 +14,6 @@ namespace Fitabase.Azure.ApiManagement
     public class ManagementClient
     {
         //static readonly string user_agent = "Fitabase/v1";
-        private static readonly string FileContext;// = @"C:\Repositories\AzureAPIManagement\Azure.ApiManagement.Test\APIMKeys.json";
         public static readonly int RatesReqTimeout = 25;
         public static readonly int TransactionReqTimeOut = 25;
         static readonly Encoding encoding = Encoding.UTF8;
@@ -34,8 +32,7 @@ namespace Fitabase.Azure.ApiManagement
 
         public int TimeoutSeconds { get; set; }
 
-        public ManagementClient() : this(FileContext) {}
-
+        
         public ManagementClient(string host, string serviceId, string accessToken)
             : this(host, serviceId, accessToken, Constants.ApiManagement.Versions.Feb2014)
         {

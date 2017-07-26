@@ -1,11 +1,8 @@
 ﻿using Fitabase.Azure.ApiManagement;
-using Fitabase.Azure.ApiManagement.ClientProxy;
-using Fitabase.Azure.ApiManagement.DataModel.Properties;
 using Fitabase.Azure.ApiManagement.Model;
 using Fitabase.Azure.ApiManagement.Model.Exceptions;
 using Fitabase.Azure.ApiManagement.Swagger;
 using Fitabase.Azure.ApiManagement.Swagger.Models;
-using Fitabase.Azure.ApiManagement.Utilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +15,7 @@ namespace Azure.ApiManagement.Test
         private string UrlPath;
         private AbstractSwaggerReader _SwaggerReader;
         private SwaggerObject _SwaggerObject;
+        private ManagementClient _Client;
 
         [TestInitialize]
         public void Init()
@@ -35,12 +33,10 @@ namespace Azure.ApiManagement.Test
                 @"http://localhost:2598/swagger/docs/Values"                // 9
             };
             UrlPath = urls[0];
-
-            //FilePath = @"C:\Repositories\AzureAPIManagement\Azure.ApiManagement.Test\SwaggerObject.json";
-            //FilePath = @"C:\Users\inter\Desktop\FitabaseAPI/bodyTrace.json";
-
+            
             _SwaggerReader = new SwaggerUrlReader(UrlPath);
             _SwaggerObject = _SwaggerReader.GetSwaggerObject();
+            _Client = new ManagementClient(@"C:\Repositories\AzureAPIManagement\Azure.ApiManagement.Test\APIMKeys.json");
         }
 
 
@@ -52,9 +48,13 @@ namespace Azure.ApiManagement.Test
         {
             try
             {
-                APIConfiguration configuration = new APIConfiguration(_SwaggerReader);
-                APIPublisher publiser = new APIPublisher(configuration);
-                publiser.Publish();
+                APIBuilder builder = APIBuilder.GetBuilder(UrlPath);
+                API api = builder.BuildAPIAndOperations();
+                _Client.CreateAPI(api);
+                foreach(APIOperation operation in api.Operations)
+                {
+                    _Client.CreateAPIOperation(api, operation);
+                }
             }
             catch (HttpResponseException ex)
             {
