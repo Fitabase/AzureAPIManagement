@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Fitabase.Azure.ApiManagement.Model
 {
-    public class EntityIdGenerator
+    class EntityIdGenerator
     {
         public static string GenerateIdSignature(string prefixId)
         {

@@ -11,7 +11,7 @@ namespace Fitabase.Azure.ApiManagement
     /// <summary>
     /// This class is used to compose a Swagger object to a API object
     /// </summary>
-    class APIBuilder
+    public class APIBuilder
     {
         public SwaggerObject Swagger;
 

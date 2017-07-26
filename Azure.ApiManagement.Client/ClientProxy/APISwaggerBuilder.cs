@@ -8,7 +8,7 @@ using System.Text;
 namespace Fitabase.Azure.ApiManagement
 {
 
-    public class APISwaggerBuilder
+    class APISwaggerBuilder
     {
         private PathData PathData;
 
