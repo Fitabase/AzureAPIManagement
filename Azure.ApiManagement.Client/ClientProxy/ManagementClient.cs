@@ -147,8 +147,8 @@ namespace Fitabase.Azure.ApiManagement
             {
                 return default(T);
             }
-            //PrintMessage.Debug(this, json);
-            var jsonDeserialized = JsonConvert.DeserializeObject<T>(json); // Utility.DeserializeToJson<T>(json);
+            PrintMessage.Debug("Management.DoRequest", json);
+            var jsonDeserialized = JsonConvert.DeserializeObject<T>(json); 
             return jsonDeserialized;
         }
 
@@ -307,13 +307,13 @@ namespace Fitabase.Azure.ApiManagement
         /// <summary>
         /// Update a specific user model
         /// </summary>
-        public User UpdateUser(UpdateUser updateUser)
+        public void UpdateUser(User user)
         {
-            string endpoint = String.Format("{0}/users/{1}", _api_endpoint, updateUser.Id);
-            return DoRequest<User>(endpoint, RequestMethod.PATCH, JsonConvert.SerializeObject(updateUser.GetUpdateProperties()));
+            if (String.IsNullOrWhiteSpace(user.Id))
+                throw new InvalidEntityException("User's Id is required");
+            string endpoint = String.Format("{0}/users/{1}", _api_endpoint, user.Id);
+            DoRequest<User>(endpoint, RequestMethod.PATCH, JsonConvert.SerializeObject(user));
         }
-
-
 
         #endregion
 
@@ -358,6 +358,8 @@ namespace Fitabase.Azure.ApiManagement
 
         public void UpdateAPI(API api)
         {
+            if (String.IsNullOrWhiteSpace(api.Id))
+                throw new InvalidEntityException("API's Id is required");
             string endpoint = String.Format("{0}/apis/{1}", _api_endpoint, api.Id);
             DoRequest<API>(endpoint, RequestMethod.PATCH, JsonConvert.SerializeObject(api));
         }
@@ -466,11 +468,14 @@ namespace Fitabase.Azure.ApiManagement
         /// <summary>
         /// Update a product
         /// </summary>
-        public void UpdateProduct(UpdateProduct updateProduct)
+        public void UpdateProduct(Product product)
         {
-            string endpoint = String.Format("{0}/products/{1}", _api_endpoint, updateProduct.Id);
-            DoRequest<Product>(endpoint, RequestMethod.PATCH, JsonConvert.SerializeObject(updateProduct.GetUpdateProperties()));
+            if (String.IsNullOrWhiteSpace(product.Id))
+                throw new InvalidEntityException("Product's Id is required");
+            string endpoint = String.Format("{0}/products/{1}", _api_endpoint, product.Id);
+            DoRequest<Product>(endpoint, RequestMethod.PATCH, JsonConvert.SerializeObject(product));
         }
+
 
         /// <summary>
         /// Delete a product
@@ -698,10 +703,12 @@ namespace Fitabase.Azure.ApiManagement
         /// <summary>
         /// Updates the details of a subscription specificied by its identifier.
         /// </summary>
-        public void UpdateSubscription(string subscriptionId, UpdateSubscription updateSubscription)
+        public void UpdateSubscription(Subscription subscription)
         {
-            string endpoint = String.Format("{0}/subscriptions/{1}", _api_endpoint, subscriptionId);
-            DoRequest<Subscription>(endpoint, RequestMethod.PATCH, Utility.SerializeToJson(updateSubscription.GetUpdateProperties()));
+            if (String.IsNullOrWhiteSpace(subscription.Id))
+                throw new InvalidEntityException("Subscription's Id is required");
+            string endpoint = String.Format("{0}/subscriptions/{1}", _api_endpoint, subscription.Id);
+            DoRequest<Subscription>(endpoint, RequestMethod.PATCH, JsonConvert.SerializeObject(subscription));
         }
 
         /// <summary>

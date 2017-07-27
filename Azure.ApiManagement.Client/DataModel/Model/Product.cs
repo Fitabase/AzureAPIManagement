@@ -7,46 +7,6 @@ using Fitabase.Azure.ApiManagement.Model.Exceptions;
 
 namespace Fitabase.Azure.ApiManagement.Model
 {
-
-    public class UpdateProduct : UpdateEntityBase
-    {
-        public UpdateProduct(string id) : base(id) {}
-
-        public override Hashtable GetUpdateProperties()
-        {
-            Hashtable parameters = new Hashtable();
-
-            if (!String.IsNullOrWhiteSpace(Name))
-                parameters.Add("name", Name);
-            if (!String.IsNullOrWhiteSpace(Description))
-                parameters.Add("description", Description);
-            if (!String.IsNullOrWhiteSpace(Terms))
-                parameters.Add("terms", Terms);
-            if (SubscriptionRequired != null)
-                parameters.Add("subscriptionRequired", SubscriptionRequired);
-            if (ApprovalRequired != null)
-                parameters.Add("approvalRequired", ApprovalRequired);
-            if (SubscriptionsLimit != null)
-                parameters.Add("subscriptionLimit", SubscriptionsLimit);
-            if (State != null)
-                parameters.Add("state", State);
-
-            return parameters;
-        }
-
-
-        
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public string Terms { get; set; }                       
-        public bool? SubscriptionRequired { get; set; }         
-        public bool? ApprovalRequired { get; set; }            
-        public int? SubscriptionsLimit { get; set; }           
-        public ProductState? State { get; set; }                
-
-       
-    }
-
     public class Product : EntityBase
     {
         protected override string UriIdFormat { get { return "/products/"; } }
@@ -75,29 +35,29 @@ namespace Fitabase.Azure.ApiManagement.Model
         }
 
         
-        [JsonProperty("name")]
+        [JsonProperty("name", NullValueHandling = NullValueHandling.Ignore)]
         public string Name { get; set; }
 
-        [JsonProperty("description")]
+        [JsonProperty("description", NullValueHandling = NullValueHandling.Ignore)]
         public string Description { get; set; }
 
-        [JsonProperty("terms")]
+        [JsonProperty("terms", NullValueHandling = NullValueHandling.Ignore)]
         public string Terms { get; set; }                       // Product terms of use.
 
-        [JsonProperty("subscriptionRequired")]
+        [JsonProperty("subscriptionRequired", NullValueHandling = NullValueHandling.Ignore)]
         public bool SubscriptionRequired { get; set; }          // Whether a product subscription is required for accessing APIs included in this product
 
-        [JsonProperty("approvalRequired")]
+        [JsonProperty("approvalRequired", NullValueHandling = NullValueHandling.Ignore)]
         public bool? ApprovalRequired { get; set; }             // whether subscription approval is required.
 
-        [JsonProperty("subscriptionsLimit")]
+        [JsonProperty("subscriptionsLimit", NullValueHandling = NullValueHandling.Ignore)]
         public int? SubscriptionsLimit { get; set; }            // Whether the number of subscriptions a user can have to this product at the same time.
 
-        [JsonProperty("state")]
+        [JsonProperty("state", NullValueHandling = NullValueHandling.Ignore)]
         [JsonConverter(typeof(StringEnumConverter))]
         public ProductState State { get; set; }                 // whether product is published or not.
 
-        [JsonProperty("groups")]
+        [JsonProperty("groups", NullValueHandling = NullValueHandling.Ignore)]
         public List<Group> Groups {get; set;}
 
     }

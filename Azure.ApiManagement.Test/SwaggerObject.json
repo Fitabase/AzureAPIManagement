@@ -1,15 +1,15 @@
 ﻿{
-  "name": "serverName",
-  "apiRevision": "1",
-  "description": "Update current api",
-  "serviceUrl": "https://unittestsfitabase.portal.azure-api.net",
-  "path": "v1/batchexport",
-  "protocols": [ "http", "https" ],
-  "authenticationSettings": {},
-  "subscriptionKeyParameterNames": {
-    "header": "Ocp-Apim-Subscription-Key",
-    "query": "subscription-key"
-  },
-  "isCurrent": true,
-  "id": "/apis/api_2ee0f0a800334301b857367980c332c4"
+  "id": "/subscriptions/5870184f9898000087070001",
+  "userId": "/users/1",
+  "productId": "/products/5870184f9898000087060001",
+  "name": "newServerName",
+  "state": "active",
+  "createdDate": "2017-01-06T22:21:03.55",
+  "startDate": null,
+  "expirationDate": "2017-07-27T00:00:00",
+  "endDate": null,
+  "notificationDate": null,
+  "primaryKey": "0ed9e06511a64c24a84105152ee11e9d",
+  "secondaryKey": "bee84fe530c3425da2bdc24cea6351e8",
+  "stateComment": null
 }

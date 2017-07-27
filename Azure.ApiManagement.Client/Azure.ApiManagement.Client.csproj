@@ -168,9 +168,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataModel\Abstract\EntityIdGenerator.cs" />
-    <Compile Include="DataModel\Abstract\UpdateEntityBase.cs" />
     <Compile Include="DataModel\Exceptions\SwaggerResourceException.cs" />
     <Compile Include="DataModel\Model\Logger.cs" />
+    <Compile Include="DataModel\Model\UserIdentity.cs" />
     <Compile Include="DataModel\ResponseContract.cs" />
     <Compile Include="DataModel\Properties\Documents.cs" />
     <Compile Include="DataModel\Properties\ParameterType.cs" />

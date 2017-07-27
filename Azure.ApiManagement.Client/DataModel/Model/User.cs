@@ -13,40 +13,7 @@ namespace Fitabase.Azure.ApiManagement.Model
         blocked
     }
 
-    public class UpdateUser : UpdateEntityBase
-    {
-        public UpdateUser(string id) : base(id)
-        {
-        }
-
-        public override Hashtable GetUpdateProperties()
-        {
-            Hashtable parameters = new Hashtable();
-            if (!String.IsNullOrWhiteSpace(FirstName))
-                parameters.Add("firstName", FirstName);
-            if (!String.IsNullOrWhiteSpace(LastName))
-                parameters.Add("lastName", LastName);
-            if (!String.IsNullOrWhiteSpace(Email))
-                parameters.Add("email", Email);
-            if (!String.IsNullOrWhiteSpace(Password))
-                parameters.Add("password", Password);
-            return parameters;
-        }
-
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string Email { get; set; }
-        public string Password { get; set; }
-    }
-
-
-    public class UserIdentity
-    {
-        [JsonProperty("provider")]
-        public string Provider { get; set; }
-        [JsonProperty("id")]
-        public string Id { get; set; }
-    }
+   
 
 
 
@@ -80,13 +47,13 @@ namespace Fitabase.Azure.ApiManagement.Model
 
         }
 
-        [JsonProperty("firstName")]
+        [JsonProperty("firstName", NullValueHandling = NullValueHandling.Ignore)]
         public string FirstName { get; set; }
 
-        [JsonProperty("lastName")]
+        [JsonProperty("lastName", NullValueHandling = NullValueHandling.Ignore)]
         public string LastName { get; set; }
 
-        [JsonProperty("email")]
+        [JsonProperty("email", NullValueHandling = NullValueHandling.Ignore)]
         public string Email { get; set; }
 
         [JsonProperty("password", NullValueHandling = NullValueHandling.Ignore)]
@@ -95,14 +62,14 @@ namespace Fitabase.Azure.ApiManagement.Model
         [JsonProperty("registrationDate", NullValueHandling = NullValueHandling.Ignore)]
         public DateTime? RegistrationDate { get; set; }
 
-        [JsonProperty("state")]
+        [JsonProperty("state", NullValueHandling = NullValueHandling.Ignore)]
         [JsonConverter(typeof(StringEnumConverter))]
         public UserState State { get; set; }
 
-        [JsonProperty("note")]
+        [JsonProperty("note", NullValueHandling = NullValueHandling.Ignore)]
         public string Note { get; set; }
         
-        [JsonProperty("identities")]
+        [JsonProperty("identities", NullValueHandling = NullValueHandling.Ignore)]
         public UserIdentity[] Identities { get; set; }
 
         [JsonProperty("groups", NullValueHandling = NullValueHandling.Ignore)]

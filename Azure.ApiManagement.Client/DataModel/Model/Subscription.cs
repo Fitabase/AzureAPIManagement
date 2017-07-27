@@ -18,38 +18,7 @@ namespace Fitabase.Azure.ApiManagement.Model
         public DateTime? ExpirationDate { get; set; }    
     }
     
-
-    public class UpdateSubscription : UpdateEntityBase
-    {
-        public UpdateSubscription(string subscriptionId) : base(subscriptionId)
-        {
-            
-        }
-
-        public override Hashtable GetUpdateProperties()
-        {
-            Hashtable parameters = new Hashtable();
-            if(!String.IsNullOrWhiteSpace(this.UserId))
-                parameters.Add("userId", "/users/" + this.UserId);
-
-            if (!String.IsNullOrWhiteSpace(this.ProductId))
-                parameters.Add("productId", "/products/" + this.ProductId);
-            
-            if (this.ExpirationDate != null)
-                parameters.Add("expirationDate", this.ExpirationDate);
-
-            return parameters;
-        }
-
-        [JsonProperty("userId", NullValueHandling = NullValueHandling.Ignore)]
-        public string UserId { get; set; }
-
-        [JsonProperty("productId", NullValueHandling = NullValueHandling.Ignore)]
-        public string ProductId { get; set; }
-
-        [JsonProperty("expirationDate", NullValueHandling = NullValueHandling.Ignore)]
-        public DateTime? ExpirationDate { get; set; }
-    }
+    
 
     public class Subscription : EntityBase
     {
@@ -69,8 +38,8 @@ namespace Fitabase.Azure.ApiManagement.Model
 
             Subscription subscription = new Subscription();
             subscription.Id = EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.SUBSCRIPTION);
-            subscription.UserId = "/users/" + userId;
-            subscription.ProductId = "/products/" + productId;
+            subscription.UserId = userId;
+            subscription.ProductId = productId;
             subscription.Name = name;
             subscription.PrimaryKey = primaryKey;
             subscription.SecondaryKey = secondaryKey;
@@ -82,44 +51,72 @@ namespace Fitabase.Azure.ApiManagement.Model
         }
 
         protected override string UriIdFormat { get { return "/subscriptions/"; } }
-        
 
 
-        [JsonProperty("userId")]
-        public string UserId { get; set; }      // User (user id path) for whom subscription is being created in form /users/{uid}
+        private string userId;
+        [JsonProperty("userId", NullValueHandling = NullValueHandling.Ignore)]
+        public string UserId                    // User (user id path) for whom subscription is being created in form /users/{uid}
+        {
+            get
+            {
+                if (String.IsNullOrWhiteSpace(userId))
+                    return null;
+                if (this.userId.Contains("/users/"))
+                    return userId;
+                return "/users/" + this.userId;
+            }
+            set
+            {
+                this.userId = value;
+            }
+        }
 
-        [JsonProperty("productId")]
-        public string ProductId { get; set; }       // Product (product id path) for which subscription is being created in form /products/{productid} 
-
-        [JsonProperty("name")]
+        private string productId;
+        [JsonProperty("productId", NullValueHandling = NullValueHandling.Ignore)]
+        public string ProductId                          // Product (product id path) for which subscription is being created in form /products/{productid} 
+        {
+            get
+            {
+                if (String.IsNullOrWhiteSpace(productId))
+                    return null;
+                if (this.productId.Contains("/products/"))
+                    return this.productId;
+                return "/products/" + this.productId;
+            }
+            set
+            {
+                this.productId = value;
+            }      
+        }
+        [JsonProperty("name", NullValueHandling = NullValueHandling.Ignore)]
         public string Name { get; set; }            // Subscription name.
         
-        [JsonProperty("state")]
+        [JsonProperty("state", NullValueHandling = NullValueHandling.Ignore)]
         [JsonConverter(typeof(StringEnumConverter))]
-        public SubscriptionState State { get; set; }    // The state of the subscription. 
+        public SubscriptionState? State { get; set; }    // The state of the subscription. 
         
-        [JsonProperty("createdDate")]
-        public DateTime CreatedDate { get; set; }       // Subscription creation date. 
+        [JsonProperty("createdDate", NullValueHandling = NullValueHandling.Ignore)]
+        public DateTime? CreatedDate { get; set; }       // Subscription creation date. 
 
-        [JsonProperty("startDate")]
+        [JsonProperty("startDate", NullValueHandling = NullValueHandling.Ignore)]
         public DateTime? StartDate { get; set; }         // Subscription activation date.
 
-        [JsonProperty("expirationDate")]
+        [JsonProperty("expirationDate", NullValueHandling = NullValueHandling.Ignore)]
         public DateTime? ExpirationDate { get; set; }    // Subscription expiration date.
 
-        [JsonProperty("endDate")]
+        [JsonProperty("endDate", NullValueHandling = NullValueHandling.Ignore)]
         public DateTime? EndDate { get; set; }           // Date when subscription was cancelled or expired.
 
-        [JsonProperty("notifiactionDate")]
+        [JsonProperty("notifiactionDate", NullValueHandling = NullValueHandling.Ignore)]
         public DateTime? NotificationDate { get; set; }  // Upcoming subscription expiration notification date.
 
-        [JsonProperty("stateComment")]
+        [JsonProperty("stateComment", NullValueHandling = NullValueHandling.Ignore)]
         public string StateComment { get; set; }        // Optional subscription comment added by an administrator.
 
-        [JsonProperty("primaryKey")]
+        [JsonProperty("primaryKey", NullValueHandling = NullValueHandling.Ignore)]
         public string PrimaryKey { get; set; }          // Primary subscription key. If not specified during request key will be generated automatically.
         
-        [JsonProperty("secondaryKey")]
+        [JsonProperty("secondaryKey", NullValueHandling = NullValueHandling.Ignore)]
         public string SecondaryKey { get; set; }        // Secondary subscription key. If not specified during request key will be generated automatically.
 
     }

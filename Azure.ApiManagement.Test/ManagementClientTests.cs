@@ -130,20 +130,22 @@ namespace Azure.ApiManagement.Test
             Assert.IsNotNull(user.Url);
         }
 
+   
         [TestMethod]
         public void UpdateUser()
         {
             string userId = "66da331f7a1c49d98ac8a4ad136c7c64";
-            
-            UpdateUser updateUser = new UpdateUser(userId);
-            updateUser.FirstName = "NewName";
-            updateUser.Email = "updateEmail@gmail.com";
+            User user = new User()
+            {
+                Id = userId,
+                FirstName = "serverName"
+            };
+            Client.UpdateUser(user);
+            User entity = Client.GetUser(userId);
+            Assert.AreEqual(entity.FirstName, user.FirstName);
 
-            Client.UpdateUser(updateUser);
-
-            User currUser = Client.GetUser(userId);
-            Assert.AreEqual(currUser.FirstName, updateUser.FirstName);
         }
+        
 
         #endregion User TestCases
 
@@ -408,23 +410,21 @@ namespace Azure.ApiManagement.Test
         //    //    Print(product.State.ToString() + " " + product.Id);
         //    //}
         //}
-
+        
         [TestMethod]
         public void UpdateProduct()
         {
-            string productId = "product_5cdf0c46784b4e98b326f426bb6c2c81";
-
-            UpdateProduct updateProduct = new UpdateProduct(productId);
-            updateProduct.State = ProductState.published;
-            updateProduct.Name = "updated name";
-            updateProduct.Description = "This is updated description";
-
-            Client.UpdateProduct(updateProduct);
-            Product product = Client.GetProduct(productId);
-
-            Assert.AreEqual(product.State, updateProduct.State);
-            Assert.AreEqual(product.Description, updateProduct.Description);
+            string productId = "29f79d2acfab453eac057ddf3656a31b";
+            Product product = new Product()
+            {
+                Id = productId,
+                Name = "AbcProduct"
+            };
+            Client.UpdateProduct(product);
+            Product entity = Client.GetProduct(productId);
+            Assert.AreEqual(product.Name, entity.Name);
         }
+
 
         [TestMethod]
         public void DeletProduct()
@@ -555,20 +555,21 @@ namespace Azure.ApiManagement.Test
             Assert.AreEqual(c1 - 1, c2);
         }
 
+     
         [TestMethod]
         public void UpdateSubscription()
         {
-            string subscriptionId  = "subscription_72208da5700b45e8a016605ccdc78aa1";
-            Subscription entity_v1 = Client.GetSubscription(subscriptionId);
+            string subscriptionId = "5870184f9898000087070001";
+            Subscription subscription = new Subscription()
+            {
+                Id = subscriptionId,
+                Name = "newServerName",
+                ExpirationDate = DateTime.Now
+            };
+            Client.UpdateSubscription(subscription);
+            Subscription entity = Client.GetSubscription(subscriptionId);
 
-            UpdateSubscription updateSubscription = new UpdateSubscription(subscriptionId);
-            DateTime now = DateTime.Now;
-            updateSubscription.ExpirationDate = now.AddMonths(23);
-            Print(JsonConvert.SerializeObject(updateSubscription));
-            Client.UpdateSubscription(subscriptionId, updateSubscription);
-            Subscription entity_v2 = Client.GetSubscription(subscriptionId);
-            
-            Assert.AreNotEqual(entity_v1.ExpirationDate, entity_v2.ExpirationDate);
+            Assert.AreEqual(subscription.Name, entity.Name);
         }
 
         [TestMethod]
