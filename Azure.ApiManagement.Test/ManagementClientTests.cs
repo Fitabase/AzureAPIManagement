@@ -210,6 +210,29 @@ namespace Azure.ApiManagement.Test
             int count_v2 = Client.GetAPIs().Count;
             Assert.AreEqual(count_v1 - 1, count_v2);
     }
+        
+        
+        [TestMethod]
+        public void UpdateAPI()
+        {
+            string apiId = "api_2ee0f0a800334301b857367980c332c4";
+            API api = new API()
+            {
+                Id = apiId,
+                Name = "serverName",
+                IsCurrent = false,
+                Protocols = new string[]{ "http", "https" },
+                ServiceUrl = "https://unittestsfitabase.portal.azure-api.net"
+            };
+
+            Print(JsonConvert.SerializeObject(api));
+            Client.UpdateAPI(api);
+
+            API entity = Client.GetAPI(apiId);
+            
+            Print(entity);
+        }
+
         #endregion APITestCases
 
 

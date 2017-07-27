@@ -356,6 +356,12 @@ namespace Fitabase.Azure.ApiManagement
             DoRequest<API>(endpoint, RequestMethod.DELETE);
         }
 
+        public void UpdateAPI(API api)
+        {
+            string endpoint = String.Format("{0}/apis/{1}", _api_endpoint, api.Id);
+            DoRequest<API>(endpoint, RequestMethod.PATCH, JsonConvert.SerializeObject(api));
+        }
+
         /// <summary>
         /// Lists all APIs of the API Management service instance.
         /// </summary>

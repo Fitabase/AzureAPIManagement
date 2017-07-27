@@ -1,134 +1,15 @@
 ﻿{
-  "swagger": "2.0",
-  "info": {
-    "version": "DailyActivity",
-    "title": "DailyActivity"
+  "name": "serverName",
+  "apiRevision": "1",
+  "description": "Update current api",
+  "serviceUrl": "https://unittestsfitabase.portal.azure-api.net",
+  "path": "v1/batchexport",
+  "protocols": [ "http", "https" ],
+  "authenticationSettings": {},
+  "subscriptionKeyParameterNames": {
+    "header": "Ocp-Apim-Subscription-Key",
+    "query": "subscription-key"
   },
-  "host": "unittestsfitabase.portal.azure-api.net",
-  "basePath": "/v1",
-  "schemes": [ "http" ],
-  "paths": {
-    "/DailyActivity/Get": {
-      "get": {
-        "tags": [ "DailyActivity" ],
-        "operationId": "DailyActivity_GetBySubscriptionidAndProfileidAndStartAndEnd",
-        "consumes": [],
-        "produces": [ "application/json", "text/json", "application/xml", "text/xml" ],
-        "parameters": [
-          {
-            "name": "subscriptionId",
-            "in": "query",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "profileId",
-            "in": "query",
-            "required": true,
-            "type": "string",
-            "format": "uuid"
-          },
-          {
-            "name": "start",
-            "in": "query",
-            "required": true,
-            "type": "string",
-            "format": "date-time"
-          },
-          {
-            "name": "end",
-            "in": "query",
-            "required": true,
-            "type": "string",
-            "format": "date-time"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": { "type": "array" }
-          }
-        }
-      }
-    }
-  },
-  "definitions": {
-    "DailyActivity": {
-      "type": "object",
-      "properties": {
-        "ActivityDate": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "TotalDistance": {
-          "type": "number",
-          "format": "double"
-        },
-        "TrackerDistance": {
-          "type": "number",
-          "format": "double"
-        },
-        "LoggedActivitiesDistance": {
-          "type": "number",
-          "format": "double"
-        },
-        "VeryActiveDistance": {
-          "type": "number",
-          "format": "double"
-        },
-        "ModeratelyActiveDistance": {
-          "type": "number",
-          "format": "double"
-        },
-        "LightActiveDistance": {
-          "type": "number",
-          "format": "double"
-        },
-        "SedentaryActiveDistance": {
-          "type": "number",
-          "format": "double"
-        },
-        "VeryActiveMinutes": {
-          "type": "number",
-          "format": "double"
-        },
-        "FairlyActiveMinutes": {
-          "type": "number",
-          "format": "double"
-        },
-        "LightlyActiveMinutes": {
-          "type": "number",
-          "format": "double"
-        },
-        "SedentaryMinutes": {
-          "type": "number",
-          "format": "double"
-        },
-        "TotalSteps": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "Calories": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "Floors": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "CaloriesBMR": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "MarginalCalories": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "RestingHeartRate": {
-          "type": "integer",
-          "format": "int32"
-        }
-      }
-    }
-  }
+  "isCurrent": true,
+  "id": "/apis/api_2ee0f0a800334301b857367980c332c4"
 }
