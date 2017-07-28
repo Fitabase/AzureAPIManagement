@@ -36,26 +36,31 @@ namespace Fitabase.Azure.ApiManagement.Model
             return operation;
         }
 
+        public string GetPlainOperationId () {
+            string[] splits = Uri.Split('/');
+            return splits[splits.Length - 1];
+        }
+
         
-        [JsonProperty("name")]
+        [JsonProperty("name", NullValueHandling = NullValueHandling.Ignore)]
         public string Name { get; set; }
         
-        [JsonProperty("method")]
+        [JsonProperty("method", NullValueHandling = NullValueHandling.Ignore)]
         public string Method { get; set; }          // A Valid HTTP Operation Method.
 
-        [JsonProperty("urlTemplate")]
+        [JsonProperty("urlTemplate", NullValueHandling = NullValueHandling.Ignore)]
         public string UrlTemplate { get; set; }     // Relative URL template identifying the target resource for this operation
         
-        [JsonProperty("templateParameters")]
+        [JsonProperty("templateParameters", NullValueHandling = NullValueHandling.Ignore)]
         public ParameterContract[] TemplateParameter { get; set; }  // Collection of URL template parameters. E.g calc.com/sum?a=5&b=10
         
-        [JsonProperty("description")]
+        [JsonProperty("description", NullValueHandling = NullValueHandling.Ignore)]
         public string Description { get; set; }         // Description of the operation. May include HTML formatting tags.
         
-        [JsonProperty("request")]
+        [JsonProperty("request", NullValueHandling = NullValueHandling.Ignore)]
         public RequestContract Request { get; set; }    // An entity containing request details
 
-        [JsonProperty("responses")]
+        [JsonProperty("responses", NullValueHandling = NullValueHandling.Ignore)]
         public ResponseContract[] Responses { get; set; }
 
         

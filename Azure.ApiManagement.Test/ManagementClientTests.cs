@@ -337,10 +337,13 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void GetOperationsByAPI()
         {
-            string apiId = "api_f98e6f1c4f674a35888aa1e8979e331e";
+            string apiId = "api_2ee0f0a800334301b857367980c332c4";
             EntityCollection<APIOperation> collection = Client.GetOperationsByAPI(apiId);
             Assert.IsNotNull(collection);
             Print(collection);
+            Print(collection.Values[0].Id);
+            Print(collection.Values[0].Uri);
+            Print(collection.Values[0].GetPlainOperationId());
         }
 
         [TestMethod]
