@@ -374,7 +374,7 @@ namespace Azure.ApiManagement.Test
         public void CreateProduct()
         {
             int count_v1 = Client.GetProducts().Count;
-            Product product = Product.Create("Server product", "This product is created from the server");
+            Product product = Product.Create("new Server product", "This product is created from the server", ProductState.published);
             Product entity = Client.CreateProduct(product);
             Assert.IsNotNull(entity);
             Assert.IsNotNull(entity.Id);

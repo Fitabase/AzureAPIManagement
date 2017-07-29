@@ -12,14 +12,24 @@ namespace Fitabase.Azure.ApiManagement.Model
         protected override string UriIdFormat { get { return "/products/"; } }
         
 
-        public static Product Create(string name, string description, string terms = null,
+        public static Product Create(string name, string description,
                         ProductState state = ProductState.notPublished,
                         bool subscriptionRequired = true,
-                        bool apporvalRequired = false,
-                        int? subscriptionsLimit = null)
+                        bool? approvalRequired = true,
+                        int? subscriptionsLimit = 0,
+                        string terms = null)
         {
             if (String.IsNullOrWhiteSpace(name))
                 throw new InvalidEntityException("Product's name is required");
+
+            if (String.IsNullOrEmpty(description) && description.Length > 1000)
+                throw new InvalidEntityException("Product configuration is not valid. 'Description' is required and must not exceed 1000 characters.");
+
+            if (!subscriptionRequired)
+            {
+                if (approvalRequired.HasValue || subscriptionsLimit.HasValue)
+                    throw new InvalidEntityException("Product configuration is not valid. Subscription requirement cannot be false while either Subscription limit or Approval required is set");
+            }
 
             Product product = new Product();
             product.Id = EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.PRODUCT);
@@ -28,7 +38,7 @@ namespace Fitabase.Azure.ApiManagement.Model
             product.Terms = terms;
             product.State = state;
             product.SubscriptionRequired = subscriptionRequired;
-            product.ApprovalRequired = apporvalRequired;
+            product.ApprovalRequired = approvalRequired;
             product.SubscriptionsLimit = subscriptionsLimit;
             return product;
 

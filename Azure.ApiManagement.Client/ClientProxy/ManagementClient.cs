@@ -450,7 +450,6 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         public Product CreateProduct(Product product)
         {
-            Validator.ValidateProduct(product);
             string endpoint = String.Format("{0}/products/{1}", _api_endpoint, product.Id);
             DoRequest<Product>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(product));
             return product;
