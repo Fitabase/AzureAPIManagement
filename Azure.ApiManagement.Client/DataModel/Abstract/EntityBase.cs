@@ -41,6 +41,11 @@ namespace Fitabase.Azure.ApiManagement.Model
         [JsonProperty("id", NullValueHandling = NullValueHandling.Ignore)]
         public string Uri { get; set; }
 
+        public string GetPlainId()
+        {
+            string[] splits = Uri.Split('/');
+            return splits[splits.Length - 1];
+        }
 
     }
 }

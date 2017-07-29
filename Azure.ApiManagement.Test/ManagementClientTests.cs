@@ -343,7 +343,7 @@ namespace Azure.ApiManagement.Test
             Print(collection);
             Print(collection.Values[0].Id);
             Print(collection.Values[0].Uri);
-            Print(collection.Values[0].GetPlainOperationId());
+            Print(collection.Values[0].GetPlainId());
         }
 
         [TestMethod]
@@ -432,12 +432,12 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void DeletProduct()
         {
-            string productId = "product_9ddcf499a9e540eab24bf6f3323d956b";
+            string productId = "product_5cdf0c46784b4e98b326f426bb6c2c81";
             int count_v1 = Client.GetProducts().Count;
             Client.DeleteProduct(productId);
             int count_v2 = Client.GetProducts().Count;
 
-            Assert.AreEqual(count_v1, count_v2);
+            Assert.AreEqual(count_v1 - 1, count_v2);
         }
 
         [TestMethod]
@@ -445,6 +445,7 @@ namespace Azure.ApiManagement.Test
         {
             EntityCollection<Product> products = Client.GetProducts();
             Assert.IsNotNull(products);
+            Print(products.Values[0].GetPlainId());
         }
 
 

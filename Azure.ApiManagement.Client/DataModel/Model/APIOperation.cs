@@ -36,10 +36,7 @@ namespace Fitabase.Azure.ApiManagement.Model
             return operation;
         }
 
-        public string GetPlainOperationId () {
-            string[] splits = Uri.Split('/');
-            return splits[splits.Length - 1];
-        }
+       
 
         
         [JsonProperty("name", NullValueHandling = NullValueHandling.Ignore)]

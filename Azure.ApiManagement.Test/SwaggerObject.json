@@ -1,15 +1,56 @@
 ﻿{
-  "id": "/subscriptions/5870184f9898000087070001",
-  "userId": "/users/1",
-  "productId": "/products/5870184f9898000087060001",
-  "name": "newServerName",
-  "state": "active",
-  "createdDate": "2017-01-06T22:21:03.55",
-  "startDate": null,
-  "expirationDate": "2017-07-27T00:00:00",
-  "endDate": null,
-  "notificationDate": null,
-  "primaryKey": "0ed9e06511a64c24a84105152ee11e9d",
-  "secondaryKey": "bee84fe530c3425da2bdc24cea6351e8",
-  "stateComment": null
+  "value": [
+    {
+      "id": "/products/29f79d2acfab453eac057ddf3656a31b",
+      "name": "AbcProduct",
+      "description": "Testing",
+      "terms": null,
+      "subscriptionRequired": false,
+      "approvalRequired": null,
+      "subscriptionsLimit": null,
+      "state": "notPublished"
+    },
+    {
+      "id": "/products/5956a9b92f02d30b88dfad7d",
+      "name": "Derek Product",
+      "description": "much better description",
+      "terms": null,
+      "subscriptionRequired": true,
+      "approvalRequired": true,
+      "subscriptionsLimit": 1,
+      "state": "published"
+    },
+    {
+      "id": "/products/5870184f9898000087060001",
+      "name": "Starter",
+      "description": "3:02:12 PM",
+      "terms": "",
+      "subscriptionRequired": true,
+      "approvalRequired": false,
+      "subscriptionsLimit": 1,
+      "state": "notPublished"
+    },
+    {
+      "id": "/products/5870184f9898000087060002",
+      "name": "Unlimited",
+      "description": "Subscribers have completely unlimited access to the API. Administrator approval is required.",
+      "terms": null,
+      "subscriptionRequired": true,
+      "approvalRequired": true,
+      "subscriptionsLimit": 1,
+      "state": "published"
+    },
+    {
+      "id": "/products/product_5cdf0c46784b4e98b326f426bb6c2c81",
+      "name": "updated name",
+      "description": "This is updated description",
+      "terms": null,
+      "subscriptionRequired": true,
+      "approvalRequired": false,
+      "subscriptionsLimit": null,
+      "state": "published"
+    }
+  ],
+  "count": 5,
+  "nextLink": null
 }
