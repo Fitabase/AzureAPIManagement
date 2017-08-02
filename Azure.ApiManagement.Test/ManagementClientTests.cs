@@ -276,6 +276,31 @@ namespace Azure.ApiManagement.Test
             Assert.AreEqual(count_v1 + 1, count_v2);
         }
 
+        [TestMethod]
+        public void CreateAPIOperation_v1()
+        {
+            string apiId = "597687442f02d30494230f8c";
+            string url = "http://localhost:2598/swagger/docs/Echo";
+            string urlTemplate = "/get/subscriptionId/{subscriptionId}";
+            long count_v1 = Client.GetOperationsByAPI(apiId).Count;
+            APIBuilder builder = APIBuilder.GetBuilder(url);
+            ICollection<APIOperation> operations = builder.BuildAPIAndOperations().Operations;
+            APIOperation apiOperation = null;
+
+            foreach (var operation in operations)
+            {
+                if (operation.UrlTemplate == urlTemplate)
+                {
+                    apiOperation = operation;
+                }
+            }
+
+            APIOperation entity = Client.CreateAPIOperation(apiId, apiOperation);
+            long count_v2 = Client.GetOperationsByAPI(apiId).Count;
+            Assert.AreEqual(count_v1 + 1, count_v2);
+
+        }
+
         private ResponseContract[] Responses()
         {
             ResponseContract[] responses = {
@@ -345,6 +370,7 @@ namespace Azure.ApiManagement.Test
             Print(collection.Values[0].Uri);
             Print(collection.Values[0].GetPlainId());
         }
+        
 
         [TestMethod]
 

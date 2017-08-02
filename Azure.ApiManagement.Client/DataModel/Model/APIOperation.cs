@@ -36,9 +36,26 @@ namespace Fitabase.Azure.ApiManagement.Model
             return operation;
         }
 
-       
 
-        
+        public static APIOperation Create(string name,
+                            string method, string urlTemplate,
+                            ParameterContract[] parameters,
+                            RequestContract request, ResponseContract[] responses, string description = null)
+        {
+            RequestMethod requestMethod;
+            if (method == "GET") requestMethod = RequestMethod.GET;
+            else if (method == "POST") requestMethod = RequestMethod.POST;
+            else if (method == "PUT") requestMethod = RequestMethod.PUT;
+            else if (method == "DELETE") requestMethod = RequestMethod.DELETE;
+            else if (method == "PATCH") requestMethod = RequestMethod.PATCH;
+            else throw new InvalidEntityException("Invalid operation's method");
+
+            return Create(name, requestMethod, urlTemplate, parameters, request, responses, description);
+        }
+
+
+
+
         [JsonProperty("name", NullValueHandling = NullValueHandling.Ignore)]
         public string Name { get; set; }
         
