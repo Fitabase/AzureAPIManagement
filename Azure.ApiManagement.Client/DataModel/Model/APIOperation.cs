@@ -28,7 +28,7 @@ namespace Fitabase.Azure.ApiManagement.Model
             operation.Name = name;
             operation.Method = method.ToString();
             operation.UrlTemplate = urlTemplate;
-            operation.TemplateParameter = parameters;
+            operation.TemplateParameters = parameters;
             operation.Request = request;
             operation.Responses = responses;
             operation.Description = description;
@@ -66,7 +66,7 @@ namespace Fitabase.Azure.ApiManagement.Model
         public string UrlTemplate { get; set; }     // Relative URL template identifying the target resource for this operation
         
         [JsonProperty("templateParameters", NullValueHandling = NullValueHandling.Ignore)]
-        public ParameterContract[] TemplateParameter { get; set; }  // Collection of URL template parameters. E.g calc.com/sum?a=5&b=10
+        public ParameterContract[] TemplateParameters { get; set; }  // Collection of URL template parameters. E.g calc.com/sum?a=5&b=10
         
         [JsonProperty("description", NullValueHandling = NullValueHandling.Ignore)]
         public string Description { get; set; }         // Description of the operation. May include HTML formatting tags.

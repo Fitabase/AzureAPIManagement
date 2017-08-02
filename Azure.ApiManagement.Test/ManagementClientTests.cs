@@ -348,7 +348,7 @@ namespace Azure.ApiManagement.Test
             try
             {
 
-                string apiId = "597687442f02d30494230f8c";
+                string apiId = "597687442f02d30494230f81c";
                 string operationId = "597687442f02d31290052fec";
                 APIOperation operation = Client.GetAPIOperation(apiId, operationId);
                 Assert.IsNotNull(operation);

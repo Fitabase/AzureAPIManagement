@@ -46,15 +46,18 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void PublishSwaggerAPI()
         {
+            UrlPath = "localhost:2598/swagger/docs/BodyTrace";
+
             try
             {
                 APIBuilder builder = APIBuilder.GetBuilder(UrlPath);
                 API api = builder.BuildAPIAndOperations();
-                _Client.CreateAPI(api);
-                foreach(APIOperation operation in api.Operations)
-                {
-                    _Client.CreateAPIOperation(api, operation);
-                }
+                //_Client.CreateAPI(api);
+                //foreach(APIOperation operation in api.Operations)
+                //{
+                //    _Client.CreateAPIOperation(api, operation);
+                //}
+                PrintMessage.Debug(this, api);
             }
             catch (HttpResponseException ex)
             {
