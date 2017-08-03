@@ -31,19 +31,19 @@ namespace Fitabase.Azure.ApiManagement
             if (parameters == null || parameters.Length == 0)
                 return null;
 
-            ParameterContract[] array = new ParameterContract[parameters.Length];
+            ParameterContract[] parameterContracts = new ParameterContract[parameters.Length];
 
             for (int i = 0; i < parameters.Length; i++)
             {
                 string json = JsonConvert.SerializeObject(parameters[i]);
                 ParameterContract template = JsonConvert.DeserializeObject<ParameterContract>(json);
                 template.Description = parameters[i].Format;
-                array[i] = template;
+                parameterContracts[i] = template;
             }
-            return array;
+            return parameterContracts;
         }
 
-        public string BuildServiceURL()
+        public string BuildRestParametersURL()
         {
             if (PathData == null)
                 throw new SwaggerResourceException("PathData is required");

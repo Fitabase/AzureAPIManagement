@@ -394,12 +394,19 @@ namespace Fitabase.Azure.ApiManagement
         {
             string endpoint = String.Format("{0}/apis/{1}/operations/{2}",
                                                 _api_endpoint, apiId, operation.Id);
-            DoRequest<APIOperation>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(operation));
+            DoRequest<APIOperation>(endpoint, RequestMethod.PUT, JsonConvert.SerializeObject(operation));
             return operation;
         }
         public APIOperation CreateAPIOperation(API api, APIOperation operation)
         {
             return CreateAPIOperation(api.Id, operation);
+        }
+
+        public void UpdateAPIOperation(string apiId, string operationId, APIOperation operation)
+        {
+            string endpoint = String.Format("{0}/apis/{1}/operations/{2}",
+                                                _api_endpoint, apiId, operationId);
+            DoRequest<APIOperation>(endpoint, RequestMethod.PATCH, JsonConvert.SerializeObject(operation));
         }
 
         /// <summary>

@@ -338,8 +338,73 @@ namespace Azure.ApiManagement.Test
         }
 
 
+        [TestMethod]
+        public void UpdateAPIOperation()
+        {
+            string apiId = "597687442f02d30494230f8c";
+            string operationId = "597687442f02d31290052fed";
+            APIOperation entity_v1 = Client.GetAPIOperation(apiId, operationId);
+            
+            APIOperation operation = new APIOperation()
+            {
+                Name = "New Operation Name",
+                Method = "POST"
+            };
+            
+            Client.UpdateAPIOperation(apiId, operationId, operation);
+            APIOperation entity_v2 = Client.GetAPIOperation(apiId, operationId);
+
+            Assert.AreNotEqual(entity_v1.Name, entity_v2.Name);
+            Assert.AreNotEqual(entity_v1.Method, entity_v2.Method);
+        }
 
 
+        [TestMethod]
+        public void UpdateOperationParameter()
+        {
+            string apiId = "api_2ee0f0a800334301b857367980c332c4";
+            string operationId = "operation_9a4eea768ecc48a5be9fcb8f33781189";
+            APIOperation entity_v1 = Client.GetAPIOperation(apiId, operationId);
+
+            APIOperation operation = new APIOperation()
+            {
+                UrlTemplate = "Retrieve/a/{a}/b/{b}",
+                TemplateParameters = new ParameterContract[]
+                {
+                    ParameterContract.Create("a", "string"),
+                    ParameterContract.Create("b", "string")
+                }
+            };
+
+            Client.UpdateAPIOperation(apiId, operationId, operation);
+            APIOperation entity_v2 = Client.GetAPIOperation(apiId, operationId);
+
+            Print(entity_v2);
+        }
+
+        [TestMethod]
+        public void UpdateOperationResponse()
+        {
+            string apiId = "api_2ee0f0a800334301b857367980c332c4";
+            string operationId = "operation_9a4eea768ecc48a5be9fcb8f33781189";
+            APIOperation entity_v1 = Client.GetAPIOperation(apiId, operationId);
+            
+            ResponseContract response = ResponseContract.Create(400, "Ok", null);
+            List<ResponseContract> responses = entity_v1.Responses.ToList();
+
+            responses.Add(response);
+
+            APIOperation operation = new APIOperation()
+            {
+                UrlTemplate = "Retrieve/a/{a}/b/{b}",
+                Responses = responses.ToArray()
+            };
+
+            Client.UpdateAPIOperation(apiId, operationId, operation);
+            APIOperation entity_v2 = Client.GetAPIOperation(apiId, operationId);
+
+            Print(entity_v2);
+        }
 
 
         [TestMethod]
@@ -348,11 +413,11 @@ namespace Azure.ApiManagement.Test
             try
             {
 
-                string apiId = "597687442f02d30494230f81c";
-                string operationId = "597687442f02d31290052fec";
+                string apiId = "api_2ee0f0a800334301b857367980c332c4";
+                string operationId = "operation_9a4eea768ecc48a5be9fcb8f33781189";
                 APIOperation operation = Client.GetAPIOperation(apiId, operationId);
                 Assert.IsNotNull(operation);
-                Print(operation);
+                Print(operation.Request);
             } catch(HttpResponseException ex)
             {
                 Print(ex);
@@ -362,13 +427,10 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void GetOperationsByAPI()
         {
-            string apiId = "api_2ee0f0a800334301b857367980c332c4";
+            string apiId = "597687442f02d30494230f8c";
             EntityCollection<APIOperation> collection = Client.GetOperationsByAPI(apiId);
             Assert.IsNotNull(collection);
             Print(collection);
-            Print(collection.Values[0].Id);
-            Print(collection.Values[0].Uri);
-            Print(collection.Values[0].GetPlainId());
         }
         
 

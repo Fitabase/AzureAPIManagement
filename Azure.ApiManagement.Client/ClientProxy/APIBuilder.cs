@@ -131,7 +131,7 @@ namespace Fitabase.Azure.ApiManagement
 
             OperationMethod pathOperation = builder.GetOperationMethod();
             string operationName = pathOperation.OperationId;
-            string urlTemplate = GetOperationnUrl(path.Key) + builder.BuildServiceURL();
+            string urlTemplate = GetOperationnUrl(path.Key) + builder.BuildRestParametersURL();        // Append parameters to the URL
             string description = null;
             RequestMethod method = builder.GetRequestMethod();
             ParameterContract[] parameters = builder.BuildeTemplateParameters();
