@@ -455,6 +455,39 @@ namespace Azure.ApiManagement.Test
             Assert.AreEqual(count_v1 - 1, count_v2);
         }
 
+
+        [TestMethod]
+        public void DeleteOperationResponse()
+        {
+            string apiId = "597687442f02d30494230f8c";
+            string operationId = "597687442f02d31290052fec";
+            int statusCode = 200;
+
+            try
+            {
+                APIOperation entity = Client.GetAPIOperation(apiId, operationId);
+                List<ResponseContract> responses = entity.Responses.ToList();
+                foreach (ResponseContract response in responses)
+                {
+                    if (response.StatusCode == statusCode)
+                    {
+                        responses.Remove(response);
+                        break;
+                    }
+                }
+                APIOperation operation = new APIOperation()
+                {
+                    Responses = responses.ToArray()
+                };
+                Client.UpdateAPIOperation(apiId, operationId, operation);
+            }
+            catch (HttpResponseException ex)
+            {
+                Print(ex);
+            }
+
+        }
+
         #endregion API Operations TestCases
 
 
