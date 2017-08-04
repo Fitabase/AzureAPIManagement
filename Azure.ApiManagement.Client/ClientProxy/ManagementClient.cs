@@ -81,11 +81,56 @@ namespace Fitabase.Azure.ApiManagement
             }
         }
 
-        private string AppendUrlApiVersion(string url)
+        /// <summary>
+        /// Ensure the endpoint is properly formatted
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        private string GetFormatedEndpoint(string url)
         {
-            return (url.Contains("?"))
-                            ? ("&api-version=" + _apiVersion)
-                            : ("?api-version=" + _apiVersion);
+            StringBuilder builder = new StringBuilder();
+
+            // ensure the url contains the api endpoint with proper format
+            // url = _api_endpoint/request_endpoint
+            if (!url.Contains(_api_endpoint))
+            {
+                if (url.StartsWith("/"))
+                {
+                    builder.Append(_api_endpoint);
+                }
+                else
+                {
+                    builder.Append(_api_endpoint).Append("/");
+                }
+                builder.Append(url);
+            }
+            else
+            {
+                builder.Append(url);
+            }
+
+            // ensure the url contains the api version 
+            // url = _api_endpoint/request_endpoint?api-version=_apiVersion
+            // or url = _api_endpoint/request_endpoint?params&api-version=_apiVersion
+            if (!url.Contains(_apiVersion))
+            {
+                if (url.Contains("?"))
+                {
+                    if (url.EndsWith("?"))
+                    {
+                        builder.Append("api-version=").Append(_apiVersion);
+                    }
+                    else
+                    {
+                        builder.Append("&api-version=").Append(_apiVersion);
+                    }
+                }
+                else
+                {
+                    builder.Append("?api-version=").Append(_apiVersion);
+                }
+            }
+            return builder.ToString();
         }
 
         /// <summary>
@@ -96,10 +141,10 @@ namespace Fitabase.Azure.ApiManagement
         /// <returns>WebRequest</returns>
         protected virtual WebRequest SetupRequestHeader(String method, string url, string body = null)
         {
-            url += AppendUrlApiVersion(url);
+            string endpoint = GetFormatedEndpoint(url);
             string token = Utility.CreateSharedAccessToken(_serviceId, _accessToken, DateTime.UtcNow.AddDays(1));
 
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(endpoint);
             request.Method = method;
             request.Timeout = TimeoutSeconds * 1000;
             request.Headers.Add("Authorization", Constants.ApiManagement.AccessToken + " " + token);
