@@ -2,12 +2,46 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Fitabase.Azure.ApiManagement;
 using Fitabase.Azure.ApiManagement.Model;
+using Fitabase.Azure.ApiManagement.DataModel.Properties;
 
 namespace Azure.ApiManagement.Test
 {
     [TestClass]
     public class DataModelTests
     {
+
+        [TestMethod]
+        public void APIOperationBuilder()
+        {
+            string name = "Server API operation";
+            RequestMethod method = RequestMethod.POST;
+            string urlTemplate = "/Get/a/{a}/b/{b}";
+            string description = "an operation created in the operation";
+            ParameterContract[] parameters = null;
+            RequestContract request = null;
+            ResponseContract[] responses = null;
+
+            parameters = Parameters();
+            
+            APIOperation operation = APIOperation.Create(name, method, urlTemplate, parameters, request, responses, description);
+
+            APIOperationHelper helper = new APIOperationHelper(operation);
+            PrintMessage.Debug("helper", helper.BuildParametersURL());
+            PrintMessage.Debug("helper", helper.GetOriginalURL());
+            PrintMessage.Debug("operation", operation.UrlTemplate);
+        }
+        
+
+        private ParameterContract[] Parameters()
+        {
+
+            ParameterContract[] parameters =
+            {
+                ParameterContract.Create("a", ParameterType.NUMBER.ToString()),
+                ParameterContract.Create("b", ParameterType.NUMBER.ToString())
+            };
+            return parameters;
+        }
 
 
 

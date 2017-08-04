@@ -7,6 +7,40 @@ using System.Text;
 
 namespace Fitabase.Azure.ApiManagement.Model
 {   
+
+    public class APIOperationHelper
+    {
+        public APIOperation Operation;
+
+
+
+        public APIOperationHelper(APIOperation operation)
+        {
+            this.Operation = operation;
+        }
+
+        public string GetOriginalURL()
+        {
+            return Operation.UrlTemplate.Replace(BuildParametersURL(), "");
+        }
+        
+        public string BuildParametersURL()
+        {
+            return BuildParametersURL(Operation.TemplateParameters);
+        }
+
+        public static string BuildParametersURL(ICollection<ParameterContract> parameters)
+        {
+            StringBuilder builder = new StringBuilder();
+            foreach (var param in parameters)
+            {
+                builder.Append("/").Append(param.Name)
+                        .Append("/{").Append(param.Name).Append("}");
+            }
+            return builder.ToString();
+        }
+    }
+
     public class APIOperation : EntityBase
     {
         protected override string UriIdFormat => "/operations";
@@ -23,16 +57,24 @@ namespace Fitabase.Azure.ApiManagement.Model
                 throw new InvalidEntityException("Length of operation's name must be < 100");
             if (String.IsNullOrWhiteSpace(urlTemplate))
                 throw new InvalidEntityException("Operation's urlTemplate is required");
-
+            
+            
             APIOperation operation = new APIOperation();
             operation.Id = EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.APIOPERATION);
             operation.Name = name;
             operation.Method = method.ToString();
-            operation.UrlTemplate = urlTemplate;
             operation.TemplateParameters = parameters;
             operation.Request = request;
             operation.Responses = responses;
             operation.Description = description;
+
+            string paramsUrl = APIOperationHelper.BuildParametersURL(parameters);
+            operation.UrlTemplate = urlTemplate;
+            if (!String.IsNullOrEmpty(paramsUrl) && !urlTemplate.Contains(paramsUrl))
+            {
+                operation.UrlTemplate += paramsUrl;
+            }
+            
 
             return operation;
         }
@@ -53,8 +95,6 @@ namespace Fitabase.Azure.ApiManagement.Model
 
             return Create(name, requestMethod, urlTemplate, parameters, request, responses, description);
         }
-
-
 
 
         [JsonProperty("name", NullValueHandling = NullValueHandling.Ignore)]
