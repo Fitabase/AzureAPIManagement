@@ -67,7 +67,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="SwaggerObject.json" />
     <None Include="APIMKeys.BLANK.json" />
     <None Include="APIMKeys.json" />
     <None Include="app.config" />

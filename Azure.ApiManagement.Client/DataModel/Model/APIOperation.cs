@@ -78,23 +78,19 @@ namespace Fitabase.Azure.ApiManagement.Model
         [JsonProperty("responses", NullValueHandling = NullValueHandling.Ignore)]
         public ResponseContract[] Responses { get; set; }
 
-        //public string GetOriginalPath()
-        //{
-        //    StringBuilder builder = new StringBuilder();
-        //    for (int i = 0; i < TemplateParameters.Length; i++)
-        //    {
-        //        string param = TemplateParameters[i].Name;
-        //        builder.Append("/").Append(param)
-        //                .Append("/{").Append(param).Append("}");
-        //    }
-        //    PrintMessage.Debug("apioeration", builder.ToString());
-        //    string str = UrlTemplate.Replace(builder.ToString(), "");
-
-
-        //    return str;
-        //}
-        
-
+        public string GetOriginalPath()
+        {
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < TemplateParameters.Length; i++)
+            {
+                string param = TemplateParameters[i].Name;
+                builder.Append("/").Append(param)
+                        .Append("/{").Append(param).Append("}");
+            }
+            PrintMessage.Debug("apioeration", builder.ToString());
+            string str = UrlTemplate.Replace(builder.ToString(), "");
+            return str;
+        }
     }
 
 

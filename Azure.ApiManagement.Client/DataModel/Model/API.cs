@@ -30,17 +30,22 @@ namespace Fitabase.Azure.ApiManagement.Model
 
             API api = new API();
             api.Id = EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.API);
-            api.Name = name;
+            api.Name        = name;
             api.Description = description;
-            api.ServiceUrl = api.GetServiceUrlFormat(serviceUrl);
-            api.Path = path.ToLower();
-            api.Protocols = protocols;
-            api.Authentication = authentication;
-            api.CustomNames = customNames;
+            api.ServiceUrl  = api.GetServiceUrlFormat(serviceUrl);
+            api.Path        = path.ToLower();
+            api.Protocols   = protocols;
             api.ApiRevision = "1";
+            api.CustomNames = customNames;
+            api.Authentication = authentication;
             return api;
         }
 
+        /// <summary>
+        /// Ensure the url is formated propertly
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
         public string GetServiceUrlFormat(string url)
         {
             string formatUrl;
@@ -49,11 +54,9 @@ namespace Fitabase.Azure.ApiManagement.Model
             }
             else
             {
-                formatUrl = Constants.HTTPS + url;
+                formatUrl = Constants.HTTP + url;
             }
             return formatUrl;
-                
-                   
         } 
 
         

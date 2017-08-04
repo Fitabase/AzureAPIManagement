@@ -43,7 +43,8 @@ namespace Fitabase.Azure.ApiManagement.Model
 
         public string GetPlainId()
         {
-            if(String.IsNullOrWhiteSpace(Uri)) {
+            if (String.IsNullOrWhiteSpace(Uri))
+            {
                 string[] splits = Uri.Split('/');
                 return splits[splits.Length - 1];
             }

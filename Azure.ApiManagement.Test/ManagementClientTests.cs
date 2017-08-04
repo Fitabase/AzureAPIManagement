@@ -35,8 +35,8 @@ namespace Azure.ApiManagement.Test
         {
             PrintMessage.Debug("TestClass", obj);
         }
-        
-       
+
+
 
         /*********************************************************/
         /************************  USER  *************************/
@@ -52,7 +52,7 @@ namespace Azure.ApiManagement.Test
             string lastName = "Nguyen";
             string email = String.Format("{0}{1}@test.com", firstName, DateTimeOffset.Now.ToUnixTimeMilliseconds());
             string password = "P@ssWo3d";
-            User newUser = User.Create(firstName, lastName, email,  password);
+            User newUser = User.Create(firstName, lastName, email, password);
             User entity = Client.CreateUser(newUser);
             Assert.IsNotNull(entity);
             Assert.IsNotNull(entity.Id);
@@ -72,12 +72,14 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void GetUser()
         {
-            try {
+            try
+            {
                 string userId = "user_bef163ba98af433c917914dd4c208115";
                 User user = Client.GetUser(userId);
                 Assert.IsNotNull(user);
                 Assert.AreEqual(userId, user.Id);
-            } catch(HttpResponseException ex)
+            }
+            catch (HttpResponseException ex)
             {
                 Print(ex);
             }
@@ -110,7 +112,7 @@ namespace Azure.ApiManagement.Test
             int count_v2 = Client.GetUsers().Count;
             Assert.AreEqual(count_v1 - 1, count_v2);
         }
-        
+
         [TestMethod]
         public void DeleteUserWithSubscription()
         {
@@ -130,7 +132,7 @@ namespace Azure.ApiManagement.Test
             Assert.IsNotNull(user.Url);
         }
 
-   
+
         [TestMethod]
         public void UpdateUser()
         {
@@ -145,7 +147,7 @@ namespace Azure.ApiManagement.Test
             Assert.AreEqual(entity.FirstName, user.FirstName);
 
         }
-        
+
 
         #endregion User TestCases
 
@@ -163,12 +165,12 @@ namespace Azure.ApiManagement.Test
         public void CreateApi()
         {
             int count_v1 = Client.GetAPIs().Count;
-            string name = "Server API";
+            string name = "abcd";
             string description = "An example to create apis from service";
-            string serviceUrl = "server.com";
-            string path = "/v1";
-            string[] protocols = new string[]{ "http", "https" };
-            
+            string serviceUrl = "abc.com";
+            string path = "/v4";
+            string[] protocols = new string[] { "http", "https" };
+
             API newAPI = API.Create(name, serviceUrl, path, protocols, description);
             API api = Client.CreateAPI(newAPI);
             int count_v2 = Client.GetAPIs().Count;
@@ -176,7 +178,7 @@ namespace Azure.ApiManagement.Test
             Assert.AreEqual(count_v1 + 1, count_v2);
         }
 
-       
+
         [TestMethod]
         public void GetAPI()
         {
@@ -187,7 +189,8 @@ namespace Azure.ApiManagement.Test
                 Assert.IsNotNull(api);
                 Assert.AreEqual(api.Id, apiId);
                 Print(api);
-            } catch(HttpResponseException ex)
+            }
+            catch (HttpResponseException ex)
             {
                 Print(ex);
             }
@@ -211,9 +214,9 @@ namespace Azure.ApiManagement.Test
             Client.DeleteAPI(apiId);
             int count_v2 = Client.GetAPIs().Count;
             Assert.AreEqual(count_v1 - 1, count_v2);
-    }
-        
-        
+        }
+
+
         [TestMethod]
         public void UpdateAPI()
         {
@@ -223,7 +226,7 @@ namespace Azure.ApiManagement.Test
                 Id = apiId,
                 Name = "serverName",
                 IsCurrent = false,
-                Protocols = new string[]{ "http", "https" },
+                Protocols = new string[] { "http", "https" },
                 ServiceUrl = "https://unittestsfitabase.portal.azure-api.net"
             };
 
@@ -231,7 +234,7 @@ namespace Azure.ApiManagement.Test
             Client.UpdateAPI(api);
 
             API entity = Client.GetAPI(apiId);
-            
+
             Print(entity);
         }
 
@@ -344,13 +347,13 @@ namespace Azure.ApiManagement.Test
             string apiId = "597687442f02d30494230f8c";
             string operationId = "597687442f02d31290052fed";
             APIOperation entity_v1 = Client.GetAPIOperation(apiId, operationId);
-            
+
             APIOperation operation = new APIOperation()
             {
                 Name = "New Operation Name",
                 Method = "POST"
             };
-            
+
             Client.UpdateAPIOperation(apiId, operationId, operation);
             APIOperation entity_v2 = Client.GetAPIOperation(apiId, operationId);
 
@@ -388,7 +391,7 @@ namespace Azure.ApiManagement.Test
             string apiId = "api_2ee0f0a800334301b857367980c332c4";
             string operationId = "operation_9a4eea768ecc48a5be9fcb8f33781189";
             APIOperation entity_v1 = Client.GetAPIOperation(apiId, operationId);
-            
+
             ResponseContract response = ResponseContract.Create(400, "Ok", null);
             List<ResponseContract> responses = entity_v1.Responses.ToList();
 
@@ -418,7 +421,8 @@ namespace Azure.ApiManagement.Test
                 APIOperation operation = Client.GetAPIOperation(apiId, operationId);
                 Assert.IsNotNull(operation);
                 Print(operation.Request);
-            } catch(HttpResponseException ex)
+            }
+            catch (HttpResponseException ex)
             {
                 Print(ex);
             }
@@ -432,7 +436,7 @@ namespace Azure.ApiManagement.Test
             Assert.IsNotNull(collection);
             Print(collection);
         }
-        
+
 
         [TestMethod]
 
@@ -480,7 +484,8 @@ namespace Azure.ApiManagement.Test
                 Assert.IsNotNull(product);
                 Assert.AreEqual(productId, product.Id);
                 Print(product);
-            } catch(HttpResponseException ex)
+            }
+            catch (HttpResponseException ex)
             {
                 Print(ex);
             }
@@ -501,7 +506,7 @@ namespace Azure.ApiManagement.Test
         //    //    Print(product.State.ToString() + " " + product.Id);
         //    //}
         //}
-        
+
         [TestMethod]
         public void UpdateProduct()
         {
@@ -647,7 +652,7 @@ namespace Azure.ApiManagement.Test
             Assert.AreEqual(c1 - 1, c2);
         }
 
-     
+
         [TestMethod]
         public void UpdateSubscription()
         {
@@ -682,7 +687,8 @@ namespace Azure.ApiManagement.Test
                 Print(subscription);
                 Assert.IsNotNull(subscription);
                 Assert.AreEqual(subscriptionId, subscription.Id);
-            } catch(HttpResponseException ex)
+            }
+            catch (HttpResponseException ex)
             {
                 Print(ex);
             }
@@ -824,7 +830,7 @@ namespace Azure.ApiManagement.Test
             EntityCollection<Logger> loggers = Client.GetLoggers();
         }
 
-#endregion
+        #endregion
 
     }
 }

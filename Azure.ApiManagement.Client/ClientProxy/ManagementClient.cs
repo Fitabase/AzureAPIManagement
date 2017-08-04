@@ -22,7 +22,7 @@ namespace Fitabase.Azure.ApiManagement
         static string _serviceId;
         static string _accessToken;
         static string _apiVersion;
-        
+
         public string GetEndpoint()
         {
             return _api_endpoint;
@@ -32,7 +32,7 @@ namespace Fitabase.Azure.ApiManagement
 
         public int TimeoutSeconds { get; set; }
 
-        
+
         public ManagementClient(string host, string serviceId, string accessToken)
             : this(host, serviceId, accessToken, Constants.ApiManagement.Versions.Feb2014)
         {
@@ -53,7 +53,7 @@ namespace Fitabase.Azure.ApiManagement
             Init(filePath);
             TimeoutSeconds = 25;
         }
-        
+
         /// <summary>
         /// Read and initialize keys
         /// </summary>
@@ -98,7 +98,7 @@ namespace Fitabase.Azure.ApiManagement
         {
             url += AppendUrlApiVersion(url);
             string token = Utility.CreateSharedAccessToken(_serviceId, _accessToken, DateTime.UtcNow.AddDays(1));
-            
+
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
             request.Method = method;
             request.Timeout = TimeoutSeconds * 1000;
@@ -143,12 +143,12 @@ namespace Fitabase.Azure.ApiManagement
         public virtual T DoRequest<T>(string endpoint, RequestMethod method = RequestMethod.GET, string body = null)
         {
             var json = DoRequest(endpoint, method.ToString(), body);
-            if(String.IsNullOrWhiteSpace(json))
+            if (String.IsNullOrWhiteSpace(json))
             {
                 return default(T);
             }
             PrintMessage.Debug("Management.DoRequest", json);
-            var jsonDeserialized = JsonConvert.DeserializeObject<T>(json); 
+            var jsonDeserialized = JsonConvert.DeserializeObject<T>(json);
             return jsonDeserialized;
         }
 
@@ -160,7 +160,8 @@ namespace Fitabase.Azure.ApiManagement
             try
             {
                 return entity = DoRequest<T>(String.Format("{0}/{1}", endpoint, ID));
-            } catch(HttpResponseException)
+            }
+            catch (HttpResponseException)
             {
                 string message = String.Format("Unable to find the {0} with ID = {1}", entitySignatureName, ID);
                 var resp = new HttpResponseMessage(HttpStatusCode.NotFound)
@@ -173,7 +174,7 @@ namespace Fitabase.Azure.ApiManagement
             }
         }
 
-        public virtual string DoRequest(string endpoint, string method, string body) 
+        public virtual string DoRequest(string endpoint, string method, string body)
         {
             string result = null;
 
@@ -258,7 +259,7 @@ namespace Fitabase.Azure.ApiManagement
             return GetById<User>(endpoint, userId);
         }
 
-     
+
         /// <summary>
         /// Delete a specific user model of a given id
         /// </summary>
@@ -285,7 +286,7 @@ namespace Fitabase.Azure.ApiManagement
             string endpoint = String.Format("{0}/users", _api_endpoint);
             return DoRequest<EntityCollection<User>>(endpoint);
         }
-       
+
         /// <summary>
         /// Retrieve a list of subscriptions by the user
         /// </summary>
@@ -416,7 +417,7 @@ namespace Fitabase.Azure.ApiManagement
         {
             string endpoint = String.Format("{0}/apis/{1}/operations", _api_endpoint, apiId);
             return GetById<APIOperation>(endpoint, operationId);
-            
+
         }
 
         /// <summary>
@@ -451,7 +452,7 @@ namespace Fitabase.Azure.ApiManagement
         /*********************************************************/
 
         #region Product
-            
+
         /// <summary>
         /// Create a product
         /// </summary>
@@ -492,8 +493,8 @@ namespace Fitabase.Azure.ApiManagement
             string endpoint = String.Format("{0}/products/{1}?deleteSubscriptions=true", _api_endpoint, productId);
             DoRequest<Product>(endpoint, RequestMethod.DELETE);
         }
-        
-        
+
+
         /// <summary>
         /// Lists a collection of products in the specified service instance.
         /// </summary>
@@ -502,7 +503,7 @@ namespace Fitabase.Azure.ApiManagement
             string endpoint = String.Format("{0}/products", _api_endpoint);
             return DoRequest<EntityCollection<Product>>(endpoint, RequestMethod.GET);
         }
-        
+
         /// <summary>
         /// Adds an API to the specified product.
         /// </summary>
@@ -725,7 +726,7 @@ namespace Fitabase.Azure.ApiManagement
             string endpoint = String.Format("{0}/subscriptions", _api_endpoint);
             return DoRequest<EntityCollection<Subscription>>(endpoint, RequestMethod.GET);
         }
-        
+
         /// <summary>
         /// Gernerate subscription primary key
         /// </summary>
