@@ -434,7 +434,10 @@ namespace Azure.ApiManagement.Test
             string apiId = "597687442f02d30494230f8c";
             EntityCollection<APIOperation> collection = Client.GetOperationsByAPI(apiId);
             Assert.IsNotNull(collection);
-            Print(collection);
+            //Print(collection);
+            foreach(var operation in collection.Values) {
+                Print(operation.Uri + " --- " + operation.GetPlainId());
+            }
         }
 
 
