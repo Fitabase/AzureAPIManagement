@@ -143,45 +143,4 @@ namespace Fitabase.Azure.ApiManagement.Model
             return str;
         }
     }
-
-
-
-
-
-
-
-    public class OperationParameterVM
-    {
-        [JsonProperty("apiId")]
-        public string ApiId { get; set; }
-
-        [JsonProperty("operationId")]
-        public string OperationId { get; set; }
-
-        [JsonProperty("name")]
-        public string Name { get; set; }
-
-        [JsonProperty("type")]
-        public string Type { get; set; }
-
-        [JsonProperty("required")]
-        public string Required { get; set; }
-
-        public bool IsRequired
-        {
-            get
-            {
-                if (Required.ToLower() == "true") return true;
-                return false;
-            }
-        }
-
-        [JsonProperty("description")]
-        public string Description { get; set; }
-
-
-    }
-
-
-
 }
