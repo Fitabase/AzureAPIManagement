@@ -192,7 +192,6 @@ namespace Fitabase.Azure.ApiManagement
             {
                 return default(T);
             }
-            PrintMessage.Debug("Management.DoRequest", json);
             var jsonDeserialized = JsonConvert.DeserializeObject<T>(json);
             return jsonDeserialized;
         }
@@ -452,6 +451,8 @@ namespace Fitabase.Azure.ApiManagement
         {
             string endpoint = String.Format("{0}/apis/{1}/operations/{2}",
                                                 _api_endpoint, apiId, operationId);
+
+            System.Diagnostics.Debug.WriteLine(JsonConvert.SerializeObject(operation));
             DoRequest<APIOperation>(endpoint, RequestMethod.PATCH, JsonConvert.SerializeObject(operation));
         }
 

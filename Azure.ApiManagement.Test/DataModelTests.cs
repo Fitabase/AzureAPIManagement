@@ -26,9 +26,6 @@ namespace Azure.ApiManagement.Test
             APIOperation operation = APIOperation.Create(name, method, urlTemplate, parameters, request, responses, description);
 
             APIOperationHelper helper = new APIOperationHelper(operation);
-            PrintMessage.Debug("helper", helper.BuildParametersURL());
-            PrintMessage.Debug("helper", helper.GetOriginalURL());
-            PrintMessage.Debug("operation", operation.UrlTemplate);
         }
         
 

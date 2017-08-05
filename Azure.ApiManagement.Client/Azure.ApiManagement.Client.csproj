@@ -219,7 +219,6 @@
     <Compile Include="Swagger\Models\Xml.cs" />
     <Compile Include="ClientProxy\APISwaggerBuilder.cs" />
     <Compile Include="Utilities\Constants.cs" />
-    <Compile Include="Utilities\PrintMessage.cs" />
     <Compile Include="Utilities\Utility.cs" />
     <Compile Include="Utilities\Validator.cs" />
   </ItemGroup>

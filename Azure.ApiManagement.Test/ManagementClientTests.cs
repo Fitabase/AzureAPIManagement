@@ -31,13 +31,7 @@ namespace Azure.ApiManagement.Test
             Client = new ManagementClient(@"C:\Repositories\AzureAPIManagement\Azure.ApiManagement.Test\APIMKeys.json");
         }
 
-        public static void Print(object obj)
-        {
-            PrintMessage.Debug("TestClass", obj);
-        }
-
-
-
+ 
         /*********************************************************/
         /************************  USER  *************************/
         /*********************************************************/
@@ -64,7 +58,6 @@ namespace Azure.ApiManagement.Test
         public void GetUserCollection()
         {
             EntityCollection<User> userCollection = Client.GetUsers();
-            Print(userCollection);
             Assert.IsNotNull(userCollection);
             Assert.AreEqual(userCollection.Count, userCollection.Values.Count);
         }
@@ -72,17 +65,10 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void GetUser()
         {
-            try
-            {
-                string userId = "user_bef163ba98af433c917914dd4c208115";
-                User user = Client.GetUser(userId);
-                Assert.IsNotNull(user);
-                Assert.AreEqual(userId, user.Id);
-            }
-            catch (HttpResponseException ex)
-            {
-                Print(ex);
-            }
+            string userId = "user_bef163ba98af433c917914dd4c208115";
+            User user = Client.GetUser(userId);
+            Assert.IsNotNull(user);
+            Assert.AreEqual(userId, user.Id);
         }
 
         [TestMethod]
@@ -91,7 +77,6 @@ namespace Azure.ApiManagement.Test
             string userId = "66da331f7a1c49d98ac8a4ad136c7c64";
             EntityCollection<Subscription> collection = Client.GetUserSubscription(userId);
             Assert.IsNotNull(collection);
-            Print(collection);
         }
 
         [TestMethod]
@@ -100,7 +85,6 @@ namespace Azure.ApiManagement.Test
             string userId = "user_bef163ba98af433c917914dd4c208115";
             EntityCollection<Group> collection = Client.GetUserGroups(userId);
             Assert.IsNotNull(collection);
-            Print(collection);
         }
 
         [TestMethod]
@@ -182,18 +166,10 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void GetAPI()
         {
-            try
-            {
-                string apiId = "597265b42f02d30ff48b3264";
-                API api = Client.GetAPI(apiId);
-                Assert.IsNotNull(api);
-                Assert.AreEqual(api.Id, apiId);
-                Print(api);
-            }
-            catch (HttpResponseException ex)
-            {
-                Print(ex);
-            }
+            string apiId = "597265b42f02d30ff48b3264";
+            API api = Client.GetAPI(apiId);
+            Assert.IsNotNull(api);
+            Assert.AreEqual(api.Id, apiId);
         }
 
 
@@ -203,7 +179,6 @@ namespace Azure.ApiManagement.Test
             EntityCollection<API> apis = Client.GetAPIs();
             Assert.IsNotNull(apis);
             Assert.IsTrue(apis.Count > 0);
-            Print(apis);
         }
 
         [TestMethod]
@@ -229,13 +204,14 @@ namespace Azure.ApiManagement.Test
                 Protocols = new string[] { "http", "https" },
                 ServiceUrl = "https://unittestsfitabase.portal.azure-api.net"
             };
-
-            Print(JsonConvert.SerializeObject(api));
             Client.UpdateAPI(api);
 
             API entity = Client.GetAPI(apiId);
-
-            Print(entity);
+            Assert.AreEqual(entity.Id, api.Id);
+            Assert.AreEqual(entity.Name, api.Name);
+            Assert.AreEqual(entity.IsCurrent, api.IsCurrent);
+            Assert.AreEqual(entity.Protocols, api.Protocols);
+            Assert.AreEqual(entity.ServiceUrl, api.ServiceUrl);
         }
 
         #endregion APITestCases
@@ -365,24 +341,92 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void UpdateOperationParameter()
         {
-            string apiId = "api_2ee0f0a800334301b857367980c332c4";
-            string operationId = "operation_9a4eea768ecc48a5be9fcb8f33781189";
+            string apiId = "api_b8aad5c90425479c9e50c2513bfbc804";
+            string operationId = "598502e72f02d30cb42d9445";
             APIOperation entity_v1 = Client.GetAPIOperation(apiId, operationId);
 
-            APIOperation operation = new APIOperation()
+            ParameterContract parameter = ParameterContract.Create("c", "string");
+            List<ParameterContract> parameters = entity_v1.TemplateParameters.ToList();
+            
+            parameters.Add(parameter);
+
+
+            //APIOperation operation = new APIOperation()
+            //{
+            //    UrlTemplate = "Get/",
+            //    TemplateParameters = parameters.ToArray()
+            //};
+
+
+            //Client.UpdateAPIOperation(apiId, operationId, operation);
+            APIOperation entity_v2 = Client.GetAPIOperation(apiId, operationId);
+        }
+
+
+        [TestMethod]
+        public void UpdateOperationParameter_v1()
+        {
+
+            string apiId = "api_b8aad5c90425479c9e50c2513bfbc804";
+            string operationId = "598502e72f02d30cb42d9445";
+
+            OperationParameterVM vm = new OperationParameterVM()
             {
-                UrlTemplate = "Retrieve/a/{a}/b/{b}",
-                TemplateParameters = new ParameterContract[]
-                {
-                    ParameterContract.Create("a", "string"),
-                    ParameterContract.Create("b", "string")
-                }
+                ApiId = apiId,
+                OperationId = operationId,
+                Name = "name",
+                Type = "string",
+                Required = "true"
             };
 
-            Client.UpdateAPIOperation(apiId, operationId, operation);
-            APIOperation entity_v2 = Client.GetAPIOperation(apiId, operationId);
+            APIOperation entity = Client.GetAPIOperation(vm.ApiId, vm.OperationId);
 
-            Print(entity_v2);
+            List<ParameterContract> parameters = entity.TemplateParameters.ToList();
+            Dictionary<string, ParameterContract> dic = parameters.ToDictionary(p => p.Name, p => p);
+
+
+            foreach (KeyValuePair<string, ParameterContract> abc in dic)
+            {
+                System.Diagnostics.Debug.WriteLine(abc.Key + "---" + JsonConvert.SerializeObject(abc.Value));
+            }
+
+            //string str = JsonConvert.SerializeObject(vm);
+            //ParameterContract param = JsonConvert.DeserializeObject<ParameterContract>(str);
+
+            //dic.Add(param.Name, param);
+
+            //// Retrieve the original UrlTemplate of the operation
+            //APIOperationHelper operationHelper = new APIOperationHelper(entity);
+            //string urlTemplate = operationHelper.GetOriginalURL();
+
+            //ParameterContract[] _params = dic.Select(p => p.Value).ToArray();
+
+            //APIOperation operation = new APIOperation()
+            //{
+            //    UrlTemplate = urlTemplate + APIOperationHelper.BuildParametersURL(_params),
+            //    TemplateParameters = _params
+            //};
+
+            //string a = operation.UrlTemplate;
+            //string b = JsonConvert.SerializeObject(operation.TemplateParameters);
+
+            //Client.UpdateAPIOperation(vm.ApiId, vm.OperationId, operation);
+
+            //APIOperation entity_v2 = Client.GetAPIOperation(apiId, operationId);
+
+            //Print(entity_v2);
+        }
+
+        [TestMethod]
+        public void UpdateOperationServiceURL()
+        {
+            string apiId = "api_b8aad5c90425479c9e50c2513bfbc804";
+            string operationId = "598502e72f02d30cb42d9445";
+
+            APIOperation entity = Client.GetAPIOperation(apiId, operationId);
+
+            System.Diagnostics.Debug.WriteLine(entity.UrlTemplate);
+            System.Diagnostics.Debug.WriteLine(JsonConvert.SerializeObject(entity.TemplateParameters));
         }
 
         [TestMethod]
@@ -405,27 +449,17 @@ namespace Azure.ApiManagement.Test
 
             Client.UpdateAPIOperation(apiId, operationId, operation);
             APIOperation entity_v2 = Client.GetAPIOperation(apiId, operationId);
-
-            Print(entity_v2);
+            Assert.AreEqual(entity_v2.Responses.Count(), operation.Responses.Count());
         }
 
 
         [TestMethod]
         public void GetAPIOperation()
         {
-            try
-            {
-
-                string apiId = "api_2ee0f0a800334301b857367980c332c4";
-                string operationId = "operation_9a4eea768ecc48a5be9fcb8f33781189";
-                APIOperation operation = Client.GetAPIOperation(apiId, operationId);
-                Assert.IsNotNull(operation);
-                Print(operation.Request);
-            }
-            catch (HttpResponseException ex)
-            {
-                Print(ex);
-            }
+            string apiId = "api_2ee0f0a800334301b857367980c332c4";
+            string operationId = "operation_9a4eea768ecc48a5be9fcb8f33781189";
+            APIOperation operation = Client.GetAPIOperation(apiId, operationId);
+            Assert.IsNotNull(operation);
         }
 
         [TestMethod]
@@ -434,10 +468,6 @@ namespace Azure.ApiManagement.Test
             string apiId = "597687442f02d30494230f8c";
             EntityCollection<APIOperation> collection = Client.GetOperationsByAPI(apiId);
             Assert.IsNotNull(collection);
-            //Print(collection);
-            foreach(var operation in collection.Values) {
-                Print(operation.Uri + " --- " + operation.GetPlainId());
-            }
         }
 
 
@@ -463,29 +493,23 @@ namespace Azure.ApiManagement.Test
             string operationId = "597687442f02d31290052fec";
             int statusCode = 200;
 
-            try
+            APIOperation entity = Client.GetAPIOperation(apiId, operationId);
+            List<ResponseContract> responses = entity.Responses.ToList();
+            foreach (ResponseContract response in responses)
             {
-                APIOperation entity = Client.GetAPIOperation(apiId, operationId);
-                List<ResponseContract> responses = entity.Responses.ToList();
-                foreach (ResponseContract response in responses)
+                if (response.StatusCode == statusCode)
                 {
-                    if (response.StatusCode == statusCode)
-                    {
-                        responses.Remove(response);
-                        break;
-                    }
+                    responses.Remove(response);
+                    break;
                 }
-                APIOperation operation = new APIOperation()
-                {
-                    Responses = responses.ToArray()
-                };
-                Client.UpdateAPIOperation(apiId, operationId, operation);
             }
-            catch (HttpResponseException ex)
+            APIOperation operation = new APIOperation()
             {
-                Print(ex);
-            }
-
+                Responses = responses.ToArray()
+            };
+            Client.UpdateAPIOperation(apiId, operationId, operation);
+            entity = Client.GetAPIOperation(apiId, operationId);
+            Assert.AreEqual(entity.Responses.Count(), operation.Responses.Count());
         }
 
         #endregion API Operations TestCases
@@ -513,18 +537,10 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void GetProduct()
         {
-            try
-            {
-                string productId = "product_5cdf0c46784b4e98b326f426bb6c2c81";
-                Product product = Client.GetProduct(productId);
-                Assert.IsNotNull(product);
-                Assert.AreEqual(productId, product.Id);
-                Print(product);
-            }
-            catch (HttpResponseException ex)
-            {
-                Print(ex);
-            }
+            string productId = "product_5cdf0c46784b4e98b326f426bb6c2c81";
+            Product product = Client.GetProduct(productId);
+            Assert.IsNotNull(product);
+            Assert.AreEqual(productId, product.Id);
         }
 
         //[TestMethod]
@@ -574,7 +590,6 @@ namespace Azure.ApiManagement.Test
         {
             EntityCollection<Product> products = Client.GetProducts();
             Assert.IsNotNull(products);
-            Print(products.Values[0].GetPlainId());
         }
 
 
@@ -710,24 +725,15 @@ namespace Azure.ApiManagement.Test
         {
             EntityCollection<Subscription> collection = Client.GetSubscriptions();
             Assert.IsNotNull(collection);
-            Print(collection);
         }
 
         [TestMethod]
         public void GetSubscription()
         {
-            try
-            {
-                string subscriptionId = "subscription_72208da5700b45e8a016605ccdc78aa1";
-                Subscription subscription = Client.GetSubscription(subscriptionId);
-                Print(subscription);
-                Assert.IsNotNull(subscription);
-                Assert.AreEqual(subscriptionId, subscription.Id);
-            }
-            catch (HttpResponseException ex)
-            {
-                Print(ex);
-            }
+            string subscriptionId = "subscription_72208da5700b45e8a016605ccdc78aa1";
+            Subscription subscription = Client.GetSubscription(subscriptionId);
+            Assert.IsNotNull(subscription);
+            Assert.AreEqual(subscriptionId, subscription.Id);
         }
 
 
@@ -800,7 +806,6 @@ namespace Azure.ApiManagement.Test
         {
             EntityCollection<Group> collection = Client.GetGroups();
             Assert.IsNotNull(collection);
-            Print(collection);
         }
 
         [TestMethod]
@@ -809,7 +814,6 @@ namespace Azure.ApiManagement.Test
             string groupId = "5870184f9898000087020002";
             EntityCollection<User> collection = Client.GetUsersInGroup(groupId);
             Assert.IsNotNull(collection);
-            Print(collection);
         }
 
 

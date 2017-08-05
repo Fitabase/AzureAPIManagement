@@ -47,32 +47,8 @@ namespace Azure.ApiManagement.Test
         public void PublishSwaggerAPI()
         {
             UrlPath = "localhost:2598/swagger/docs/BodyTrace";
-
-            try
-            {
-                APIBuilder builder = APIBuilder.GetBuilder(UrlPath);
-                API api = builder.BuildAPIAndOperations();
-                //_Client.CreateAPI(api);
-                //foreach(APIOperation operation in api.Operations)
-                //{
-                //    _Client.CreateAPIOperation(api, operation);
-                //}
-                PrintMessage.Debug(this, api);
-            }
-            catch (HttpResponseException ex)
-            {
-                PrintMessage.Debug(this, ex.StatusCode);
-                PrintMessage.Debug(this, ex.ErrorResponse.ErrorData.ValidationDetails.ElementAt(0).Message);
-                PrintMessage.Debug(this, ex.ErrorResponse);
-            }
-            catch (InvalidEntityException ex)
-            {
-                PrintMessage.Debug(this, ex.Message);
-            }
-            catch (SwaggerResourceException ex)
-            {
-                PrintMessage.Debug(this, ex.Message);
-            }
+            APIBuilder builder = APIBuilder.GetBuilder(UrlPath);
+            API api = builder.BuildAPIAndOperations();
         }
 
         #endregion Publish an API

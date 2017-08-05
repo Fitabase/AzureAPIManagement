@@ -127,7 +127,6 @@ namespace Fitabase.Azure.ApiManagement.Model
                 builder.Append("/").Append(param)
                         .Append("/{").Append(param).Append("}");
             }
-            PrintMessage.Debug("apioeration", builder.ToString());
             string str = UrlTemplate.Replace(builder.ToString(), "");
             return str;
         }
@@ -139,7 +138,37 @@ namespace Fitabase.Azure.ApiManagement.Model
 
 
 
+    public class OperationParameterVM
+    {
+        [JsonProperty("apiId")]
+        public string ApiId { get; set; }
 
+        [JsonProperty("operationId")]
+        public string OperationId { get; set; }
+
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        [JsonProperty("type")]
+        public string Type { get; set; }
+
+        [JsonProperty("required")]
+        public string Required { get; set; }
+
+        public bool IsRequired
+        {
+            get
+            {
+                if (Required.ToLower() == "true") return true;
+                return false;
+            }
+        }
+
+        [JsonProperty("description")]
+        public string Description { get; set; }
+
+
+    }
 
 
 
