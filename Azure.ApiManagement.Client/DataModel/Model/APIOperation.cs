@@ -21,21 +21,39 @@ namespace Fitabase.Azure.ApiManagement.Model
 
         public string GetOriginalURL()
         {
-            return Operation.UrlTemplate.Replace(BuildParametersURL(), "");
+            string paramURL = GetParametersURL();
+            if(String.IsNullOrEmpty(paramURL))
+            {
+                return Operation.UrlTemplate;
+            }
+            return Operation.UrlTemplate.Replace(GetParametersURL(), "");
         }
         
-        public string BuildParametersURL()
+        public string GetParametersURL()
         {
             return BuildParametersURL(Operation.TemplateParameters);
         }
 
         public static string BuildParametersURL(ICollection<ParameterContract> parameters)
         {
+            if (parameters == null) return "";
             StringBuilder builder = new StringBuilder();
             foreach (var param in parameters)
             {
                 builder.Append("/").Append(param.Name)
                         .Append("/{").Append(param.Name).Append("}");
+            }
+            return builder.ToString();
+        }
+        public static string BuildURL(string url, ICollection<ParameterContract> parameters)
+        {
+            if (parameters == null) return url;
+
+            string parameterURL = BuildParametersURL(parameters);
+            StringBuilder builder = new StringBuilder(url);
+            if(!url.Contains(parameterURL))
+            {
+                builder.Append(parameterURL);
             }
             return builder.ToString();
         }
@@ -67,15 +85,9 @@ namespace Fitabase.Azure.ApiManagement.Model
             operation.Request = request;
             operation.Responses = responses;
             operation.Description = description;
-
-            string paramsUrl = APIOperationHelper.BuildParametersURL(parameters);
-            operation.UrlTemplate = urlTemplate;
-            if (!String.IsNullOrEmpty(paramsUrl) && !urlTemplate.Contains(paramsUrl))
-            {
-                operation.UrlTemplate += paramsUrl;
-            }
             
-
+            operation.UrlTemplate = APIOperationHelper.BuildURL(urlTemplate, parameters);
+            
             return operation;
         }
 
