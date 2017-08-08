@@ -235,9 +235,9 @@ namespace Azure.ApiManagement.Test
             long c1, c2;
             string apiId = "api_b8aad5c90425479c9e50c2513bfbc804";
 
-            string name = "Operation_v1";
+            string name = "Operation_v2";
             RequestMethod method = RequestMethod.GET;
-            string urlTemplate = "/add";
+            string urlTemplate = "/get";
             string description = "an operation created in the operation";
 
             APIOperation operation = APIOperation.Create(name, method, urlTemplate, Parameters(), Request(), Responses(), description);
@@ -261,7 +261,7 @@ namespace Azure.ApiManagement.Test
             #endregion
 
             #region Update INFO
-            entity.Name = entity.Name + "---------";
+            entity.Name = entity.Name + "-new";
             var task = Client.UpdateAPIOperationAsync(apiId, entity.Id, entity);
             task.Wait();
             other = Client.GetAPIOperationAsync(apiId, entity.Id).Result;
