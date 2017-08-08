@@ -12,6 +12,9 @@ using System.Collections;
 using System.Collections.Generic;
 using Fitabase.Azure.ApiManagement.DataModel.Properties;
 using Fitabase.Azure.ApiManagement.Model.Exceptions;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
 
 namespace Azure.ApiManagement.Test
 {
@@ -166,7 +169,7 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void GetAPI()
         {
-            string apiId = "597265b42f02d30ff48b3264";
+            string apiId = "api_b8aad5c90425479c9e50c2513bfbc804";
             API api = Client.GetAPI(apiId);
             Assert.IsNotNull(api);
             Assert.AreEqual(api.Id, apiId);
@@ -195,23 +198,18 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void UpdateAPI()
         {
-            string apiId = "api_2ee0f0a800334301b857367980c332c4";
+            string apiId = "api_b8aad5c90425479c9e50c2513bfbc804";
+            API entity = Client.GetAPI(apiId);
             API api = new API()
             {
                 Id = apiId,
-                Name = "serverName",
-                IsCurrent = false,
-                Protocols = new string[] { "http", "https" },
-                ServiceUrl = "https://unittestsfitabase.portal.azure-api.net"
+                Name = "newName-"
             };
             Client.UpdateAPI(api);
 
-            API entity = Client.GetAPI(apiId);
+            entity = Client.GetAPI(apiId);
             Assert.AreEqual(entity.Id, api.Id);
             Assert.AreEqual(entity.Name, api.Name);
-            Assert.AreEqual(entity.IsCurrent, api.IsCurrent);
-            Assert.AreEqual(entity.Protocols, api.Protocols);
-            Assert.AreEqual(entity.ServiceUrl, api.ServiceUrl);
         }
 
         #endregion APITestCases
@@ -225,52 +223,111 @@ namespace Azure.ApiManagement.Test
 
         #region API Operations TestCases
 
+        
         [TestMethod]
-        public void CreateAPIOperation()
+        public void APIOperationLifeCycle()
         {
+            long c1, c2;
             string apiId = "api_b8aad5c90425479c9e50c2513bfbc804";
-            int count_v1 = Client.GetOperationsByAPI(apiId).Count;
-            string name = "Operation_v1";
+
+            string name = "Operation_v11";
             RequestMethod method = RequestMethod.GET;
-            string urlTemplate = "/Get";
+            string urlTemplate = "/sum";
             string description = "an operation created in the operation";
-            ParameterContract[] parameters = null;
-            RequestContract request = null;
-            ResponseContract[] responses = null;
-            //parameters = Parameters();
-            responses = Responses();
 
-            APIOperation operation = APIOperation.Create(name, method, urlTemplate, parameters, request, responses, description);
-            Client.CreateAPIOperation(apiId, operation);
+            APIOperation operation = APIOperation.Create(name, method, urlTemplate, Parameters(), Request(), Responses(), description);
 
-            int count_v2 = Client.GetOperationsByAPI(apiId).Count;
-            Assert.AreEqual(count_v1 + 1, count_v2);
+
+            #region CREATE
+
+            c1 = Client.GetOperationsByAPI(apiId).Count;
+            APIOperation entity = Client.CreateAPIOperation(apiId, operation);
+            c2 = Client.GetOperationsByAPI(apiId).Count;
+            Assert.AreEqual(c1 + 1, c2);
+
+            #endregion
+
+            #region RETRIEVE
+
+            APIOperation other = Client.GetAPIOperation(apiId, entity.Id);
+            Assert.AreEqual(entity.Name, other.Name);
+            Assert.AreEqual(entity.UrlTemplate, other.UrlTemplate);
+
+            #endregion
+
+            #region Update INFO
+            entity.Name = entity.Name + "---------";
+            Client.UpdateAPIOperation(apiId, entity.Id, entity);
+            other = Client.GetAPIOperation(apiId, entity.Id);
+            Assert.AreEqual(entity.Name, other.Name);
+            #endregion
+
+
+            #region UPDATE REPSPONSE
+            other = Client.GetAPIOperation(apiId, entity.Id);
+            Assert.AreEqual(entity.Responses.Count(), other.Responses.Count());
+            List<ResponseContract> responses = entity.Responses.ToList();
+            responses.Add(ResponseContract.Create(400, "so bad", new RepresentationContract[] {
+                RepresentationContract.Create("application/json", null, null, "sample code", null)
+            }));
+            entity.Responses = responses.ToArray();
+            Assert.AreEqual(entity.Responses.Count() - 1, other.Responses.Count());
+            Client.UpdateAPIOperation(apiId, entity.Id, entity);
+            other = Client.GetAPIOperation(apiId, entity.Id);
+            Assert.AreEqual(entity.Responses.Count(), other.Responses.Count());
+            #endregion
+
+
+
+            #region UPDATE REQUEST
+            other = Client.GetAPIOperation(apiId, entity.Id);
+            Assert.AreEqual(entity.Request.Description, other.Request.Description);
+            RequestContract request = RequestContract.Create(entity.Description + " -----new description");
+            entity.Request = request;
+            Assert.AreNotEqual(entity.Request.Description, other.Request.Description);
+            Client.UpdateAPIOperation(apiId, entity.Id, entity);
+            other = Client.GetAPIOperation(apiId, entity.Id);
+            Assert.AreEqual(entity.Request.Description, other.Request.Description);
+            #endregion
+
+
+            #region UPATE PARAMETERS
+            other = Client.GetAPIOperation(apiId, entity.Id);
+            Assert.AreEqual(entity.UrlTemplate, other.UrlTemplate);
+            Assert.AreEqual(entity.TemplateParameters.Count(), other.TemplateParameters.Count());
+            APIOperationHelper helper = new APIOperationHelper(entity);
+
+            List<ParameterContract> parameters = new List<ParameterContract>();
+            parameters.Add(ParameterContract.Create("account", "uuid"));
+            parameters.Add(ParameterContract.Create("other", "number"));
+            parameters.Add(ParameterContract.Create("start", "date-time"));
+            parameters.Add(ParameterContract.Create("end", "date-time"));
+            parameters.Add(ParameterContract.Create("description", "string"));
+
+
+            entity.UrlTemplate = APIOperationHelper.BuildURL(helper.GetOriginalURL(), parameters);
+            entity.TemplateParameters = parameters.ToArray();
+
+            Assert.AreNotEqual(entity.TemplateParameters.Count(), other.TemplateParameters.Count());
+            Assert.AreNotEqual(entity.UrlTemplate, other.UrlTemplate);
+            Client.UpdateAPIOperation(apiId, entity.Id, entity);
+
+            other = Client.GetAPIOperation(apiId, entity.Id);
+            Assert.AreEqual(entity.UrlTemplate, other.UrlTemplate);
+            Assert.AreEqual(entity.TemplateParameters.Count(), other.TemplateParameters.Count());
+
+            #endregion
+
+
+
+            #region DELETE Operation
+            c1 = Client.GetOperationsByAPI(apiId).Count;
+            Client.DeleteOperation(apiId, entity.Id);
+            c2 = Client.GetOperationsByAPI(apiId).Count;
+            Assert.AreEqual(c1 - 1, c2);
+            #endregion
         }
 
-        [TestMethod]
-        public void CreateAPIOperation_v1()
-        {
-            string apiId = "api_b8aad5c90425479c9e50c2513bfbc804";
-            string url = "http://localhost:2598/swagger/docs/Echo";
-            string urlTemplate = "/get/subscriptionId/{subscriptionId}";
-            long count_v1 = Client.GetOperationsByAPI(apiId).Count;
-            APIBuilder builder = APIBuilder.GetBuilder(url);
-            ICollection<APIOperation> operations = builder.BuildAPIAndOperations().Operations;
-            APIOperation apiOperation = null;
-
-            foreach (var operation in operations)
-            {
-                if (operation.UrlTemplate == urlTemplate)
-                {
-                    apiOperation = operation;
-                }
-            }
-
-            APIOperation entity = Client.CreateAPIOperation(apiId, apiOperation);
-            long count_v2 = Client.GetOperationsByAPI(apiId).Count;
-            Assert.AreEqual(count_v1 + 1, count_v2);
-
-        }
 
         private ResponseContract[] Responses()
         {
@@ -330,41 +387,35 @@ namespace Azure.ApiManagement.Test
         }
 
         
+
+
         [TestMethod]
-        public void UpdateOperationServiceURL()
+        public void UpdateOperationParameter()
         {
             string apiId = "api_b8aad5c90425479c9e50c2513bfbc804";
-            string operationId = "operation_e697f0da738e400f8990f3508c9c8bd6";
+            string operationId = "operation_ab7e97314cb840eca6cead919d7c003b";
 
             APIOperation entity = Client.GetAPIOperation(apiId, operationId);
             APIOperationHelper helper = new APIOperationHelper(entity);
 
-            string orginalUrl = helper.GetOriginalURL();
 
-            ParameterContract[] parameters = new ParameterContract[]
-            {
-                ParameterContract.Create("a", "string")
-            };
-            
-            APIOperation operation = new APIOperation()
-            {
-                Id = operationId,
-                UrlTemplate = APIOperationHelper.BuildURL(orginalUrl, parameters),
-                TemplateParameters = parameters
-            };
 
-            Client.UpdateAPIOperation(apiId, operationId, operation);
 
-            entity = Client.GetAPIOperation(apiId, operationId);
-            Assert.AreEqual(entity.UrlTemplate, operation.UrlTemplate);
-            Assert.AreEqual(entity.TemplateParameters.Count(), operation.TemplateParameters.Count());
+            List<ParameterContract> parameters = new List<ParameterContract>();
+            parameters.Add(ParameterContract.Create("account", "uuid"));
+
+            entity.UrlTemplate = APIOperationHelper.BuildURL(helper.GetOriginalURL(), parameters);
+            entity.TemplateParameters = parameters.ToArray();
+
+            Client.UpdateAPIOperation(apiId, operationId, entity);
+
         }
 
         [TestMethod]
         public void UpdateOperationResponse()
         {
-            string apiId = "api_2ee0f0a800334301b857367980c332c4";
-            string operationId = "operation_9a4eea768ecc48a5be9fcb8f33781189";
+            string apiId = "api_b8aad5c90425479c9e50c2513bfbc804";
+            string operationId = "operation_ab7e97314cb840eca6cead919d7c003b";
             APIOperation entity_v1 = Client.GetAPIOperation(apiId, operationId);
 
             ResponseContract response = ResponseContract.Create(400, "Ok", null);
@@ -374,7 +425,6 @@ namespace Azure.ApiManagement.Test
 
             APIOperation operation = new APIOperation()
             {
-                UrlTemplate = "Retrieve/a/{a}/b/{b}",
                 Responses = responses.ToArray()
             };
 
@@ -387,10 +437,18 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void GetAPIOperation()
         {
-            string apiId = "api_2ee0f0a800334301b857367980c332c4";
-            string operationId = "operation_9a4eea768ecc48a5be9fcb8f33781189";
-            APIOperation operation = Client.GetAPIOperation(apiId, operationId);
-            Assert.IsNotNull(operation);
+            try
+            {
+                string apiId = "api_2ee0f0a800334301b857367980c332c4";
+                string operationId = "operation_9a4eea768ecc48a5be9fcb8f33781189";
+                APIOperation operation = Client.GetAPIOperation(apiId, operationId);
+                Assert.IsNotNull(operation);
+            }
+            catch (HttpResponseException ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex.Message);
+                System.Diagnostics.Debug.WriteLine(ex.StatusCode);
+            }
         }
 
         [TestMethod]
@@ -410,9 +468,8 @@ namespace Azure.ApiManagement.Test
             string operationId = "d6be400efb924ea18c615cdcc486d278";
             int count_v1 = Client.GetOperationsByAPI(apiId).Count;
 
-            APIOperation operation = Client.DeleteOperation(apiId, operationId);
+            Client.DeleteOperation(apiId, operationId);
             int count_v2 = Client.GetOperationsByAPI(apiId).Count;
-            Assert.IsNotNull(operation);
             Assert.AreEqual(count_v1 - 1, count_v2);
         }
 

@@ -8,6 +8,7 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Fitabase.Azure.ApiManagement
 {
@@ -133,36 +134,27 @@ namespace Fitabase.Azure.ApiManagement
             return builder.ToString();
         }
 
-        /// <summary>
-        /// Set up request header metadata for each api call
-        /// </summary>
-        /// <param name="method">request method</param>
-        /// <param name="url">endpoint request url</param>
-        /// <returns>WebRequest</returns>
-        protected virtual WebRequest SetupRequestHeader(String method, string url, string body = null)
+
+        protected virtual HttpRequestMessage GetRequest(String method, string uri, string body = null)
         {
-            string endpoint = GetFormatedEndpoint(url);
+            string endpointURI = GetFormatedEndpoint(uri);
             string token = Utility.CreateSharedAccessToken(_serviceId, _accessToken, DateTime.UtcNow.AddDays(1));
+            
+            HttpMethod httpMethod = new HttpMethod(method);
+            HttpRequestMessage request = new HttpRequestMessage(httpMethod, endpointURI);
+            HttpContent content = null;
+            
 
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(endpoint);
-            request.Method = method;
-            request.Timeout = TimeoutSeconds * 1000;
-            request.Headers.Add("Authorization", Constants.ApiManagement.AccessToken + " " + token);
-            request.Headers.Add("api-version", _apiVersion);
-
-            // Add header metadata depending on request method
             if (method == RequestMethod.POST.ToString() || method == RequestMethod.PUT.ToString())
             {
-                request.ContentType = "application/json";
-                if (body == null)
+                if (body != null)
                 {
-                    request.ContentLength = 0;
+                    content = new StringContent(body, Encoding.UTF8, "application/json");
                 }
             }
             else if (method == RequestMethod.PATCH.ToString())
             {
-                request.Accept = "application/json";
-                request.ContentType = "application/json";
+                content = new StringContent(body, Encoding.UTF8, "application/json");
                 request.Headers.Add("If-Match", "*");
             }
             else if (method == RequestMethod.DELETE.ToString())
@@ -170,30 +162,31 @@ namespace Fitabase.Azure.ApiManagement
                 request.Headers.Add("If-Match", "*");
             }
 
+            request.Headers.Add("Authorization", Constants.ApiManagement.AccessToken + " " + token);
+            request.Headers.Add("api-version", _apiVersion);
+            request.Content = content;
+
             return request;
         }
-
-        static string GetResponseAsString(WebResponse response)
-        {
-            using (StreamReader responseStreamReader = new StreamReader(response.GetResponseStream(), encoding))
-            {
-                return responseStreamReader.ReadToEnd();
-            }
-        }
-
-
+        
 
         #region Generic Requests
 
         public virtual T DoRequest<T>(string endpoint, RequestMethod method = RequestMethod.GET, string body = null)
         {
-            var json = DoRequest(endpoint, method.ToString(), body);
+            //var json = DoRequest(endpoint, method.ToString(), body);
+            string json = null;
+            Task.Run(async () =>
+            {
+                json = await MakeRequest(endpoint, method.ToString(), body);
+            }).GetAwaiter().GetResult();
+
             if (String.IsNullOrWhiteSpace(json))
             {
                 return default(T);
             }
-            var jsonDeserialized = JsonConvert.DeserializeObject<T>(json);
-            return jsonDeserialized;
+            T obj = JsonConvert.DeserializeObject<T>(json);
+            return obj;
         }
 
         public virtual T GetById<T>(string endpoint, string ID)
@@ -218,51 +211,31 @@ namespace Fitabase.Azure.ApiManagement
             }
         }
 
-        public virtual string DoRequest(string endpoint, string method, string body)
+        public virtual async Task<string> MakeRequest(string endpoint, string method, string body)
         {
-            string result = null;
-
-            WebRequest request = SetupRequestHeader(method, endpoint);
-
-            if (body != null)
-            {
-                byte[] requestBodyBytes = encoding.GetBytes(body.ToString());
-                request.ContentLength = requestBodyBytes.Length;
-                using (Stream postStream = request.GetRequestStream())
-                {
-                    postStream.Write(requestBodyBytes, 0, requestBodyBytes.Length);
-                }
-            }
-
-            try
-            {
-                using (WebResponse resp = (WebResponse)request.GetResponse())
-                {
-                    result = GetResponseAsString(resp);
-                }
-            }
-            catch (WebException wexc)
-            {
-                if (wexc.Response != null)
-                {
-                    string json_error = GetResponseAsString(wexc.Response);
-                    HttpStatusCode status_code = HttpStatusCode.BadRequest;
-                    HttpWebResponse resp = wexc.Response as HttpWebResponse;
-
-                    if (resp != null)
-                        status_code = resp.StatusCode;
-
-                    if ((int)status_code <= 500)
-                    {
-                        throw new HttpResponseException(json_error, wexc, status_code);
-                    }
-                }
-                throw;
-            }
+            HttpClient client = new HttpClient();
+            HttpRequestMessage request = GetRequest(method, endpoint, body);
+            HttpResponseMessage response = await client.SendAsync(request);
+            string result = await OnHandleResponseAsync(response);
             return result;
         }
 
 
+        public virtual async Task<string> OnHandleResponseAsync(HttpResponseMessage response)
+        {
+            if (response == null)
+                throw new HttpResponseException("Unable to get response message", HttpStatusCode.BadRequest);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                string message = response.Content.ReadAsStringAsync().Result;
+                throw new HttpResponseException(message, response.StatusCode);
+            }
+
+            return await response.Content.ReadAsStringAsync();
+        }
+
+        
         #endregion
 
 
@@ -451,8 +424,6 @@ namespace Fitabase.Azure.ApiManagement
         {
             string endpoint = String.Format("{0}/apis/{1}/operations/{2}",
                                                 _api_endpoint, apiId, operationId);
-
-            System.Diagnostics.Debug.WriteLine(JsonConvert.SerializeObject(operation));
             DoRequest<APIOperation>(endpoint, RequestMethod.PATCH, JsonConvert.SerializeObject(operation));
         }
 
@@ -478,11 +449,11 @@ namespace Fitabase.Azure.ApiManagement
         /// <summary>
         /// Deletes the specified operation in the API.
         /// </summary>
-        public APIOperation DeleteOperation(string apiId, string operationId)
+        public void DeleteOperation(string apiId, string operationId)
         {
             string endpoint = String.Format("{0}/apis/{1}/operations/{2}",
                                                 _api_endpoint, apiId, operationId);
-            return DoRequest<APIOperation>(endpoint, RequestMethod.DELETE);
+            DoRequest<APIOperation>(endpoint, RequestMethod.DELETE);
         }
 
 
@@ -706,10 +677,10 @@ namespace Fitabase.Azure.ApiManagement
         /// <summary>
         /// Deletes specific group of the API Management
         /// </summary>
-        public Group DeleteGroup(string groupId)
+        public void DeleteGroup(string groupId)
         {
             string endpoint = String.Format("{0}/groups/{1}", _api_endpoint, groupId);
-            return DoRequest<Group>(endpoint, RequestMethod.DELETE);
+            DoRequest<Group>(endpoint, RequestMethod.DELETE);
         }
         #endregion
 

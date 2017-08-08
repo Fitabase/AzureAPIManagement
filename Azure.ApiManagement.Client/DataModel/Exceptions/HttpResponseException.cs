@@ -20,6 +20,8 @@ namespace Fitabase.Azure.ApiManagement.Model.Exceptions
                 return JsonConvert.DeserializeObject<ErrorResponse>(Message);
             }
         }
+        public HttpStatusCode StatusCode { get; set; }
+
 
         public HttpResponseException(string message, Exception exception, HttpStatusCode statusCode) 
                 : base(message, exception)
@@ -36,11 +38,11 @@ namespace Fitabase.Azure.ApiManagement.Model.Exceptions
         {
             this.StatusCode = resp.StatusCode;
         }
+        
 
 
         //public HttpResponseException(SerializationInfo info, StreamingContext context) : base(info, context) {}
 
-        public HttpStatusCode StatusCode { get; set; }
         
     }
 
