@@ -44,23 +44,23 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void CreateUser()
         {
-            int count_v1 = Client.GetUsers().Count;
+            int count_v1 = Client.GetUsersAsync().Result.Count;
             string firstName = "Derek";
             string lastName = "Nguyen";
             string email = String.Format("{0}{1}@test.com", firstName, DateTimeOffset.Now.ToUnixTimeMilliseconds());
             string password = "P@ssWo3d";
             User newUser = User.Create(firstName, lastName, email, password);
-            User entity = Client.CreateUser(newUser);
+            User entity = Client.CreateUserAsync(newUser).Result;
             Assert.IsNotNull(entity);
             Assert.IsNotNull(entity.Id);
-            int count_v2 = Client.GetUsers().Count;
+            int count_v2 = Client.GetUsersAsync().Result.Count;
             Assert.AreEqual(count_v1 + 1, count_v2);
         }
 
         [TestMethod]
         public void GetUserCollection()
         {
-            EntityCollection<User> userCollection = Client.GetUsers();
+            EntityCollection<User> userCollection = Client.GetUsersAsync().Result;
             Assert.IsNotNull(userCollection);
             Assert.AreEqual(userCollection.Count, userCollection.Values.Count);
         }
@@ -69,7 +69,7 @@ namespace Azure.ApiManagement.Test
         public void GetUser()
         {
             string userId = "user_bef163ba98af433c917914dd4c208115";
-            User user = Client.GetUser(userId);
+            User user = Client.GetUserAsync(userId).Result;
             Assert.IsNotNull(user);
             Assert.AreEqual(userId, user.Id);
         }
@@ -78,7 +78,7 @@ namespace Azure.ApiManagement.Test
         public void GetUserSubscriptions()
         {
             string userId = "66da331f7a1c49d98ac8a4ad136c7c64";
-            EntityCollection<Subscription> collection = Client.GetUserSubscription(userId);
+            EntityCollection<Subscription> collection = Client.GetUserSubscriptionAsync(userId).Result;
             Assert.IsNotNull(collection);
         }
 
@@ -86,27 +86,29 @@ namespace Azure.ApiManagement.Test
         public void GetUserGroup()
         {
             string userId = "user_bef163ba98af433c917914dd4c208115";
-            EntityCollection<Group> collection = Client.GetUserGroups(userId);
+            EntityCollection<Group> collection = Client.GetUserGroupsAsync(userId).Result;
             Assert.IsNotNull(collection);
         }
 
         [TestMethod]
         public void DeleteUser()
         {
-            int count_v1 = Client.GetUsers().Count;
+            int count_v1 = Client.GetUsersAsync().Result.Count;
             string userId = "user__1c83a712efdb41fe8b9ef0687d3e7b17";
-            Client.DeleteUser(userId);
-            int count_v2 = Client.GetUsers().Count;
+            var task = Client.DeleteUserAsync(userId);
+            task.Wait();
+            int count_v2 = Client.GetUsersAsync().Result.Count;
             Assert.AreEqual(count_v1 - 1, count_v2);
         }
 
         [TestMethod]
         public void DeleteUserWithSubscription()
         {
-            int count_v1 = Client.GetUsers().Count;
+            int count_v1 = Client.GetUsersAsync().Result.Count;
             string userId = "";
-            Client.DeleteUser(userId);
-            int count_v2 = Client.GetUsers().Count;
+            var task = Client.DeleteUserAsync(userId);
+            task.Wait();
+            int count_v2 = Client.GetUsersAsync().Result.Count;
             Assert.AreEqual(count_v1 - 1, count_v2);
         }
 
@@ -114,7 +116,7 @@ namespace Azure.ApiManagement.Test
         public void GetUserSsoURL()
         {
             string userId = "66da331f7a1c49d98ac8a4ad136c7c64";
-            SsoUrl user = Client.GenerateSsoURL(userId);
+            SsoUrl user = Client.GenerateSsoURLAsync(userId).Result;
             Assert.IsNotNull(user);
             Assert.IsNotNull(user.Url);
         }
@@ -129,8 +131,9 @@ namespace Azure.ApiManagement.Test
                 Id = userId,
                 FirstName = "serverName"
             };
-            Client.UpdateUser(user);
-            User entity = Client.GetUser(userId);
+            var task = Client.UpdateUserAsync(user);
+            task.Wait();
+            User entity = Client.GetUserAsync(userId).Result;
             Assert.AreEqual(entity.FirstName, user.FirstName);
 
         }
@@ -151,7 +154,7 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void CreateApi()
         {
-            int count_v1 = Client.GetAPIs().Count;
+            int count_v1 = Client.GetAPIsAsync().Result.Count;
             string name = "abcd";
             string description = "An example to create apis from service";
             string serviceUrl = "abc.com";
@@ -159,8 +162,8 @@ namespace Azure.ApiManagement.Test
             string[] protocols = new string[] { "http", "https" };
 
             API newAPI = API.Create(name, serviceUrl, path, protocols, description);
-            API api = Client.CreateAPI(newAPI);
-            int count_v2 = Client.GetAPIs().Count;
+            API api = Client.CreateAPIAsync(newAPI).Result;
+            int count_v2 = Client.GetAPIsAsync().Result.Count;
             Assert.IsNotNull(api.Id);
             Assert.AreEqual(count_v1 + 1, count_v2);
         }
@@ -170,7 +173,7 @@ namespace Azure.ApiManagement.Test
         public void GetAPI()
         {
             string apiId = "api_b8aad5c90425479c9e50c2513bfbc804";
-            API api = Client.GetAPI(apiId);
+            API api = Client.GetAPIAsync(apiId).Result;
             Assert.IsNotNull(api);
             Assert.AreEqual(api.Id, apiId);
         }
@@ -179,7 +182,7 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void ApiCollection()
         {
-            EntityCollection<API> apis = Client.GetAPIs();
+            EntityCollection<API> apis = Client.GetAPIsAsync().Result;
             Assert.IsNotNull(apis);
             Assert.IsTrue(apis.Count > 0);
         }
@@ -187,10 +190,11 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void DeleteAPI()
         {
-            int count_v1 = Client.GetAPIs().Count;
+            int count_v1 = Client.GetAPIsAsync().Result.Count;
             string apiId = "api_05247cffcf9d4817adc81663625c18a1";
-            Client.DeleteAPI(apiId);
-            int count_v2 = Client.GetAPIs().Count;
+            var task = Client.DeleteAPIAsync(apiId);
+            task.Wait();
+            int count_v2 = Client.GetAPIsAsync().Result.Count;
             Assert.AreEqual(count_v1 - 1, count_v2);
         }
 
@@ -199,15 +203,16 @@ namespace Azure.ApiManagement.Test
         public void UpdateAPI()
         {
             string apiId = "api_b8aad5c90425479c9e50c2513bfbc804";
-            API entity = Client.GetAPI(apiId);
+            API entity = Client.GetAPIAsync(apiId).Result;
             API api = new API()
             {
                 Id = apiId,
                 Name = "newName-"
             };
-            Client.UpdateAPI(api);
+            var task = Client.UpdateAPIAsync(api);
+            task.Wait();
 
-            entity = Client.GetAPI(apiId);
+            entity = Client.GetAPIAsync(apiId).Result;
             Assert.AreEqual(entity.Id, api.Id);
             Assert.AreEqual(entity.Name, api.Name);
         }
@@ -230,9 +235,9 @@ namespace Azure.ApiManagement.Test
             long c1, c2;
             string apiId = "api_b8aad5c90425479c9e50c2513bfbc804";
 
-            string name = "Operation_v11";
+            string name = "Operation_v1";
             RequestMethod method = RequestMethod.GET;
-            string urlTemplate = "/sum";
+            string urlTemplate = "/add";
             string description = "an operation created in the operation";
 
             APIOperation operation = APIOperation.Create(name, method, urlTemplate, Parameters(), Request(), Responses(), description);
@@ -240,16 +245,16 @@ namespace Azure.ApiManagement.Test
 
             #region CREATE
 
-            c1 = Client.GetOperationsByAPI(apiId).Count;
-            APIOperation entity = Client.CreateAPIOperation(apiId, operation);
-            c2 = Client.GetOperationsByAPI(apiId).Count;
+            c1 = Client.GetOperationsByAPIAsync(apiId).Result.Count;
+            APIOperation entity = Client.CreateAPIOperationAsync(apiId, operation).Result;
+            c2 = Client.GetOperationsByAPIAsync(apiId).Result.Count;
             Assert.AreEqual(c1 + 1, c2);
 
             #endregion
 
             #region RETRIEVE
 
-            APIOperation other = Client.GetAPIOperation(apiId, entity.Id);
+            APIOperation other = Client.GetAPIOperationAsync(apiId, entity.Id).Result;
             Assert.AreEqual(entity.Name, other.Name);
             Assert.AreEqual(entity.UrlTemplate, other.UrlTemplate);
 
@@ -257,14 +262,15 @@ namespace Azure.ApiManagement.Test
 
             #region Update INFO
             entity.Name = entity.Name + "---------";
-            Client.UpdateAPIOperation(apiId, entity.Id, entity);
-            other = Client.GetAPIOperation(apiId, entity.Id);
+            var task = Client.UpdateAPIOperationAsync(apiId, entity.Id, entity);
+            task.Wait();
+            other = Client.GetAPIOperationAsync(apiId, entity.Id).Result;
             Assert.AreEqual(entity.Name, other.Name);
             #endregion
 
 
             #region UPDATE REPSPONSE
-            other = Client.GetAPIOperation(apiId, entity.Id);
+            other = Client.GetAPIOperationAsync(apiId, entity.Id).Result;
             Assert.AreEqual(entity.Responses.Count(), other.Responses.Count());
             List<ResponseContract> responses = entity.Responses.ToList();
             responses.Add(ResponseContract.Create(400, "so bad", new RepresentationContract[] {
@@ -272,27 +278,29 @@ namespace Azure.ApiManagement.Test
             }));
             entity.Responses = responses.ToArray();
             Assert.AreEqual(entity.Responses.Count() - 1, other.Responses.Count());
-            Client.UpdateAPIOperation(apiId, entity.Id, entity);
-            other = Client.GetAPIOperation(apiId, entity.Id);
+            task = Client.UpdateAPIOperationAsync(apiId, entity.Id, entity);
+            task.Wait();
+            other = Client.GetAPIOperationAsync(apiId, entity.Id).Result;
             Assert.AreEqual(entity.Responses.Count(), other.Responses.Count());
             #endregion
 
 
 
             #region UPDATE REQUEST
-            other = Client.GetAPIOperation(apiId, entity.Id);
+            other = Client.GetAPIOperationAsync(apiId, entity.Id).Result;
             Assert.AreEqual(entity.Request.Description, other.Request.Description);
             RequestContract request = RequestContract.Create(entity.Description + " -----new description");
             entity.Request = request;
             Assert.AreNotEqual(entity.Request.Description, other.Request.Description);
-            Client.UpdateAPIOperation(apiId, entity.Id, entity);
-            other = Client.GetAPIOperation(apiId, entity.Id);
+            task = Client.UpdateAPIOperationAsync(apiId, entity.Id, entity);
+            task.Wait();
+            other = Client.GetAPIOperationAsync(apiId, entity.Id).Result;
             Assert.AreEqual(entity.Request.Description, other.Request.Description);
             #endregion
 
 
             #region UPATE PARAMETERS
-            other = Client.GetAPIOperation(apiId, entity.Id);
+            other = Client.GetAPIOperationAsync(apiId, entity.Id).Result;
             Assert.AreEqual(entity.UrlTemplate, other.UrlTemplate);
             Assert.AreEqual(entity.TemplateParameters.Count(), other.TemplateParameters.Count());
             APIOperationHelper helper = new APIOperationHelper(entity);
@@ -310,9 +318,10 @@ namespace Azure.ApiManagement.Test
 
             Assert.AreNotEqual(entity.TemplateParameters.Count(), other.TemplateParameters.Count());
             Assert.AreNotEqual(entity.UrlTemplate, other.UrlTemplate);
-            Client.UpdateAPIOperation(apiId, entity.Id, entity);
+            task = Client.UpdateAPIOperationAsync(apiId, entity.Id, entity);
+            task.Wait();
 
-            other = Client.GetAPIOperation(apiId, entity.Id);
+            other = Client.GetAPIOperationAsync(apiId, entity.Id).Result;
             Assert.AreEqual(entity.UrlTemplate, other.UrlTemplate);
             Assert.AreEqual(entity.TemplateParameters.Count(), other.TemplateParameters.Count());
 
@@ -321,9 +330,10 @@ namespace Azure.ApiManagement.Test
 
 
             #region DELETE Operation
-            c1 = Client.GetOperationsByAPI(apiId).Count;
-            Client.DeleteOperation(apiId, entity.Id);
-            c2 = Client.GetOperationsByAPI(apiId).Count;
+            c1 = Client.GetOperationsByAPIAsync(apiId).Result.Count;
+            task = Client.DeleteOperationAsync(apiId, entity.Id);
+            task.Wait();
+            c2 = Client.GetOperationsByAPIAsync(apiId).Result.Count;
             Assert.AreEqual(c1 - 1, c2);
             #endregion
         }
@@ -371,7 +381,7 @@ namespace Azure.ApiManagement.Test
         {
             string apiId = "597687442f02d30494230f8c";
             string operationId = "597687442f02d31290052fed";
-            APIOperation entity_v1 = Client.GetAPIOperation(apiId, operationId);
+            APIOperation entity_v1 = Client.GetAPIOperationAsync(apiId, operationId).Result;
 
             APIOperation operation = new APIOperation()
             {
@@ -379,8 +389,9 @@ namespace Azure.ApiManagement.Test
                 Method = "POST"
             };
 
-            Client.UpdateAPIOperation(apiId, operationId, operation);
-            APIOperation entity_v2 = Client.GetAPIOperation(apiId, operationId);
+            var task = Client.UpdateAPIOperationAsync(apiId, operationId, operation);
+            task.Wait();
+            APIOperation entity_v2 = Client.GetAPIOperationAsync(apiId, operationId).Result;
 
             Assert.AreNotEqual(entity_v1.Name, entity_v2.Name);
             Assert.AreNotEqual(entity_v1.Method, entity_v2.Method);
@@ -395,7 +406,7 @@ namespace Azure.ApiManagement.Test
             string apiId = "api_b8aad5c90425479c9e50c2513bfbc804";
             string operationId = "operation_ab7e97314cb840eca6cead919d7c003b";
 
-            APIOperation entity = Client.GetAPIOperation(apiId, operationId);
+            APIOperation entity = Client.GetAPIOperationAsync(apiId, operationId).Result;
             APIOperationHelper helper = new APIOperationHelper(entity);
 
 
@@ -407,7 +418,8 @@ namespace Azure.ApiManagement.Test
             entity.UrlTemplate = APIOperationHelper.BuildURL(helper.GetOriginalURL(), parameters);
             entity.TemplateParameters = parameters.ToArray();
 
-            Client.UpdateAPIOperation(apiId, operationId, entity);
+            var task = Client.UpdateAPIOperationAsync(apiId, operationId, entity);
+            task.Wait();
 
         }
 
@@ -416,7 +428,7 @@ namespace Azure.ApiManagement.Test
         {
             string apiId = "api_b8aad5c90425479c9e50c2513bfbc804";
             string operationId = "operation_ab7e97314cb840eca6cead919d7c003b";
-            APIOperation entity_v1 = Client.GetAPIOperation(apiId, operationId);
+            APIOperation entity_v1 = Client.GetAPIOperationAsync(apiId, operationId).Result;
 
             ResponseContract response = ResponseContract.Create(400, "Ok", null);
             List<ResponseContract> responses = entity_v1.Responses.ToList();
@@ -428,8 +440,9 @@ namespace Azure.ApiManagement.Test
                 Responses = responses.ToArray()
             };
 
-            Client.UpdateAPIOperation(apiId, operationId, operation);
-            APIOperation entity_v2 = Client.GetAPIOperation(apiId, operationId);
+            var task = Client.UpdateAPIOperationAsync(apiId, operationId, operation);
+            task.Wait();
+            APIOperation entity_v2 = Client.GetAPIOperationAsync(apiId, operationId).Result;
             Assert.AreEqual(entity_v2.Responses.Count(), operation.Responses.Count());
         }
 
@@ -441,7 +454,7 @@ namespace Azure.ApiManagement.Test
             {
                 string apiId = "api_2ee0f0a800334301b857367980c332c4";
                 string operationId = "operation_9a4eea768ecc48a5be9fcb8f33781189";
-                APIOperation operation = Client.GetAPIOperation(apiId, operationId);
+                APIOperation operation = Client.GetAPIOperationAsync(apiId, operationId).Result;
                 Assert.IsNotNull(operation);
             }
             catch (HttpResponseException ex)
@@ -455,7 +468,7 @@ namespace Azure.ApiManagement.Test
         public void GetOperationsByAPI()
         {
             string apiId = "597687442f02d30494230f8c";
-            EntityCollection<APIOperation> collection = Client.GetOperationsByAPI(apiId);
+            EntityCollection<APIOperation> collection = Client.GetOperationsByAPIAsync(apiId).Result;
             Assert.IsNotNull(collection);
         }
 
@@ -466,10 +479,11 @@ namespace Azure.ApiManagement.Test
         {
             string apiId = "65d17612d5074d8bbfde4026357a24da";
             string operationId = "d6be400efb924ea18c615cdcc486d278";
-            int count_v1 = Client.GetOperationsByAPI(apiId).Count;
+            int count_v1 = Client.GetOperationsByAPIAsync(apiId).Result.Count;
 
-            Client.DeleteOperation(apiId, operationId);
-            int count_v2 = Client.GetOperationsByAPI(apiId).Count;
+            var task = Client.DeleteOperationAsync(apiId, operationId);
+            task.Wait();
+            int count_v2 = Client.GetOperationsByAPIAsync(apiId).Result.Count;
             Assert.AreEqual(count_v1 - 1, count_v2);
         }
 
@@ -481,7 +495,7 @@ namespace Azure.ApiManagement.Test
             string operationId = "597687442f02d31290052fec";
             int statusCode = 200;
 
-            APIOperation entity = Client.GetAPIOperation(apiId, operationId);
+            APIOperation entity = Client.GetAPIOperationAsync(apiId, operationId).Result;
             List<ResponseContract> responses = entity.Responses.ToList();
             foreach (ResponseContract response in responses)
             {
@@ -495,8 +509,9 @@ namespace Azure.ApiManagement.Test
             {
                 Responses = responses.ToArray()
             };
-            Client.UpdateAPIOperation(apiId, operationId, operation);
-            entity = Client.GetAPIOperation(apiId, operationId);
+            var task = Client.UpdateAPIOperationAsync(apiId, operationId, operation);
+            task.Wait();
+            entity = Client.GetAPIOperationAsync(apiId, operationId).Result;
             Assert.AreEqual(entity.Responses.Count(), operation.Responses.Count());
         }
 
@@ -513,12 +528,12 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void CreateProduct()
         {
-            int count_v1 = Client.GetProducts().Count;
+            int count_v1 = Client.GetProductsAsync().Result.Count;
             Product product = Product.Create("new Server product", "This product is created from the server", ProductState.published);
-            Product entity = Client.CreateProduct(product);
+            Product entity = Client.CreateProductAsync(product).Result;
             Assert.IsNotNull(entity);
             Assert.IsNotNull(entity.Id);
-            int count_v2 = Client.GetProducts().Count;
+            int count_v2 = Client.GetProductsAsync().Result.Count;
             Assert.AreEqual(count_v1 + 1, count_v2);
         }
 
@@ -526,7 +541,7 @@ namespace Azure.ApiManagement.Test
         public void GetProduct()
         {
             string productId = "product_5cdf0c46784b4e98b326f426bb6c2c81";
-            Product product = Client.GetProduct(productId);
+            Product product = Client.GetProductAsync(productId).Result;
             Assert.IsNotNull(product);
             Assert.AreEqual(productId, product.Id);
         }
@@ -556,8 +571,9 @@ namespace Azure.ApiManagement.Test
                 Id = productId,
                 Name = "AbcProduct"
             };
-            Client.UpdateProduct(product);
-            Product entity = Client.GetProduct(productId);
+            var task = Client.UpdateProductAsync(product);
+            task.Wait();
+            Product entity = Client.GetProductAsync(productId).Result;
             Assert.AreEqual(product.Name, entity.Name);
         }
 
@@ -566,9 +582,10 @@ namespace Azure.ApiManagement.Test
         public void DeletProduct()
         {
             string productId = "product_5cdf0c46784b4e98b326f426bb6c2c81";
-            int count_v1 = Client.GetProducts().Count;
-            Client.DeleteProduct(productId);
-            int count_v2 = Client.GetProducts().Count;
+            int count_v1 = Client.GetProductsAsync().Result.Count;
+            var task = Client.DeleteProductAsync(productId);
+            task.Wait();
+            int count_v2 = Client.GetProductsAsync().Result.Count;
 
             Assert.AreEqual(count_v1 - 1, count_v2);
         }
@@ -576,7 +593,7 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void ProductCollection()
         {
-            EntityCollection<Product> products = Client.GetProducts();
+            EntityCollection<Product> products = Client.GetProductsAsync().Result;
             Assert.IsNotNull(products);
         }
 
@@ -585,7 +602,7 @@ namespace Azure.ApiManagement.Test
         public void GetProductSubscriptions()
         {
             string productId = "5956a9b92f02d30b88dfad7d";
-            EntityCollection<Subscription> collection = Client.GetProductSubscriptions(productId);
+            EntityCollection<Subscription> collection = Client.GetProductSubscriptionsAsync(productId).Result;
             Assert.IsNotNull(collection);
         }
 
@@ -594,7 +611,7 @@ namespace Azure.ApiManagement.Test
         public void GetProductAPIs()
         {
             string productId = "5956a9b92f02d30b88dfad7d";
-            EntityCollection<API> collection = Client.GetProductAPIs(productId);
+            EntityCollection<API> collection = Client.GetProductAPIsAsync(productId).Result;
             Assert.IsNotNull(collection);
         }
         [TestMethod]
@@ -602,9 +619,10 @@ namespace Azure.ApiManagement.Test
         {
             string productId = "5956a9b92f02d30b88dfad7d";
             string apiId = "5956a87a2f02d30b88dfad7b";
-            int count_v1 = Client.GetProductAPIs(productId).Count;
-            Client.AddProductAPI(productId, apiId);
-            int count_v2 = Client.GetProductAPIs(productId).Count;
+            int count_v1 = Client.GetProductAPIsAsync(productId).Result.Count;
+            var task = Client.AddProductAPIAsync(productId, apiId);
+            task.Wait();
+            int count_v2 = Client.GetProductAPIsAsync(productId).Result.Count;
 
             Assert.AreEqual(count_v1 + 1, count_v2);
         }
@@ -614,9 +632,10 @@ namespace Azure.ApiManagement.Test
         {
             string productId = "5956a9b92f02d30b88dfad7d";
             string apiId = "5956a87a2f02d30b88dfad7b";
-            int count_v1 = Client.GetProductAPIs(productId).Count;
-            Client.DeleteProductAPI(productId, apiId);
-            int count_v2 = Client.GetProductAPIs(productId).Count;
+            int count_v1 = Client.GetProductAPIsAsync(productId).Result.Count;
+            var task= Client.DeleteProductAPIAsync(productId, apiId);
+            task.Wait();
+            int count_v2 = Client.GetProductAPIsAsync(productId).Result.Count;
 
             Assert.AreEqual(count_v1 - 1, count_v2);
         }
@@ -626,7 +645,7 @@ namespace Azure.ApiManagement.Test
         public void GetProductGroups()
         {
             string productId = "5956a9b92f02d30b88dfad7d";
-            EntityCollection<Group> collection = Client.GetProductGroups(productId);
+            EntityCollection<Group> collection = Client.GetProductGroupsAsync(productId).Result;
             Assert.IsNotNull(collection);
         }
         [TestMethod]
@@ -634,9 +653,10 @@ namespace Azure.ApiManagement.Test
         {
             string productId = "5956a9b92f02d30b88dfad7d";
             string groupId = "5870184f9898000087020001";
-            int count_v1 = Client.GetProductGroups(productId).Count;
-            Client.AddProductGroup(productId, groupId);
-            int count_v2 = Client.GetProductGroups(productId).Count;
+            int count_v1 = Client.GetProductGroupsAsync(productId).Result.Count;
+            var task = Client.AddProductGroupAsync(productId, groupId);
+            task.Wait();
+            int count_v2 = Client.GetProductGroupsAsync(productId).Result.Count;
             Assert.AreEqual(count_v1 + 1, count_v2);
         }
         [TestMethod]
@@ -644,9 +664,10 @@ namespace Azure.ApiManagement.Test
         {
             string productId = "5956a9b92f02d30b88dfad7d";
             string groupId = "5870184f9898000087020001";
-            int count_v1 = Client.GetProductGroups(productId).Count;
-            Client.DeleteProductGroup(productId, groupId);
-            int count_v2 = Client.GetProductGroups(productId).Count;
+            int count_v1 = Client.GetProductGroupsAsync(productId).Result.Count;
+            var task = Client.DeleteProductGroupAsync(productId, groupId);
+            task.Wait();
+            int count_v2 = Client.GetProductGroupsAsync(productId).Result.Count;
             Assert.AreEqual(count_v1 - 1, count_v2);
         }
 
@@ -667,27 +688,28 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void CreateSubscription()
         {
-            int c1 = Client.GetSubscriptions().Count;
+            int c1 = Client.GetSubscriptionsAsync().Result.Count;
             string userId = "user_bef163ba98af433c917914dd4c208115";
             string productId = "5870184f9898000087060002";
             string name = "server subscriptions";
             DateTime now = DateTime.Now;
             SubscriptionDateSettings dateSettings = new SubscriptionDateSettings(now.AddDays(1), now.AddMonths(2));
             Subscription subscription = Subscription.Create(userId, productId, name, dateSettings, SubscriptionState.active);
-            Subscription entity = Client.CreateSubscription(subscription);
+            Subscription entity = Client.CreateSubscriptionAsync(subscription).Result;
             Assert.IsNotNull(entity);
             Assert.IsNotNull(entity.Id);
-            int c2 = Client.GetSubscriptions().Count;
+            int c2 = Client.GetSubscriptionsAsync().Result.Count;
             Assert.AreEqual(c1 + 1, c2);
         }
 
         [TestMethod]
         public void DeleteSubscription()
         {
-            int c1 = Client.GetSubscriptions().Count;
+            int c1 = Client.GetSubscriptionsAsync().Result.Count;
             string subscriptionId = "subscription_c0ddc8fd75934e1eb2325ff507908140";
-            Client.DeleteSubscription(subscriptionId);
-            int c2 = Client.GetSubscriptions().Count;
+            var task = Client.DeleteSubscriptionAsync(subscriptionId);
+            task.Wait();
+            int c2 = Client.GetSubscriptionsAsync().Result.Count;
             Assert.AreEqual(c1 - 1, c2);
         }
 
@@ -702,8 +724,9 @@ namespace Azure.ApiManagement.Test
                 Name = "newServerName",
                 ExpirationDate = DateTime.Now
             };
-            Client.UpdateSubscription(subscription);
-            Subscription entity = Client.GetSubscription(subscriptionId);
+            var task = Client.UpdateSubscriptionAsync(subscription);
+            task.Wait();
+            Subscription entity = Client.GetSubscriptionAsync(subscriptionId).Result;
 
             Assert.AreEqual(subscription.Name, entity.Name);
         }
@@ -711,7 +734,7 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void GetSubscriptionCollection()
         {
-            EntityCollection<Subscription> collection = Client.GetSubscriptions();
+            EntityCollection<Subscription> collection = Client.GetSubscriptionsAsync().Result;
             Assert.IsNotNull(collection);
         }
 
@@ -719,7 +742,7 @@ namespace Azure.ApiManagement.Test
         public void GetSubscription()
         {
             string subscriptionId = "subscription_72208da5700b45e8a016605ccdc78aa1";
-            Subscription subscription = Client.GetSubscription(subscriptionId);
+            Subscription subscription = Client.GetSubscriptionAsync(subscriptionId).Result;
             Assert.IsNotNull(subscription);
             Assert.AreEqual(subscriptionId, subscription.Id);
         }
@@ -729,9 +752,10 @@ namespace Azure.ApiManagement.Test
         public void GeneratePrimaryKey()
         {
             string subscriptionId = "5870184f9898000087070001";
-            string key_v1 = Client.GetSubscription(subscriptionId).PrimaryKey;
-            Client.GeneratePrimaryKey(subscriptionId);
-            string key_v2 = Client.GetSubscription(subscriptionId).PrimaryKey;
+            string key_v1 = Client.GetSubscriptionAsync(subscriptionId).Result.PrimaryKey;
+            var task = Client.GeneratePrimaryKeyAsync(subscriptionId);
+            task.Wait();
+            string key_v2 = Client.GetSubscriptionAsync(subscriptionId).Result.PrimaryKey;
             Assert.AreNotEqual(key_v1, key_v2);
         }
 
@@ -739,9 +763,10 @@ namespace Azure.ApiManagement.Test
         public void GenerateSecondaryKey()
         {
             string subscriptionId = "5870184f9898000087070001";
-            string key_v1 = Client.GetSubscription(subscriptionId).SecondaryKey;
-            Client.GenerateSecondaryKey(subscriptionId);
-            string key_v2 = Client.GetSubscription(subscriptionId).SecondaryKey;
+            string key_v1 = Client.GetSubscriptionAsync(subscriptionId).Result.SecondaryKey;
+            var task = Client.GenerateSecondaryKeyAsync(subscriptionId);
+            task.Wait();
+            string key_v2 = Client.GetSubscriptionAsync(subscriptionId).Result.SecondaryKey;
             Assert.AreNotEqual(key_v1, key_v2);
 
         }
@@ -759,14 +784,14 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void CreateGroup()
         {
-            int count_v1 = Client.GetGroups().Count;
+            int count_v1 = Client.GetGroupsAsync().Result.Count;
             string name = "server group 3";
             string description = "this group is created from server";
             Group group = Group.Create(name, description, GroupType.system);
-            Group entity = Client.CreateGroup(group);
+            Group entity = Client.CreateGroupAsync(group).Result;
             Assert.IsNotNull(entity);
             Assert.IsNotNull(entity.Id);
-            int count_v2 = Client.GetGroups().Count;
+            int count_v2 = Client.GetGroupsAsync().Result.Count;
             Assert.AreEqual(count_v1 + 1, count_v2);
         }
 
@@ -774,7 +799,7 @@ namespace Azure.ApiManagement.Test
         public void GetGroup()
         {
             string groupId = "group_7ac29362a8c743aaa798b331cc87919e";
-            Group group = Client.GetGroup(groupId);
+            Group group = Client.GetGroupAsync(groupId).Result;
             Assert.IsNotNull(group);
             Assert.AreEqual(groupId, group.Id);
         }
@@ -782,17 +807,18 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void DeleteGroup()
         {
-            int count_v1 = Client.GetGroups().Count;
+            int count_v1 = Client.GetGroupsAsync().Result.Count;
             string groupId = "5963e39d2f02d312f01a7dcf";
-            Client.DeleteGroup(groupId);
-            int count_v2 = Client.GetGroups().Count;
+            var task = Client.DeleteGroupAsync(groupId);
+            task.Wait();
+            int count_v2 = Client.GetGroupsAsync().Result.Count;
             Assert.AreEqual(count_v1 - 1, count_v2);
         }
 
         [TestMethod]
         public void GroupCollection()
         {
-            EntityCollection<Group> collection = Client.GetGroups();
+            EntityCollection<Group> collection = Client.GetGroupsAsync().Result;
             Assert.IsNotNull(collection);
         }
 
@@ -800,7 +826,7 @@ namespace Azure.ApiManagement.Test
         public void GetGroupUsers()
         {
             string groupId = "5870184f9898000087020002";
-            EntityCollection<User> collection = Client.GetUsersInGroup(groupId);
+            EntityCollection<User> collection = Client.GetUsersInGroupAsync(groupId).Result;
             Assert.IsNotNull(collection);
         }
 
@@ -810,9 +836,10 @@ namespace Azure.ApiManagement.Test
         {
             string userId = "user_bef163ba98af433c917914dd4c208115";
             string groupId = "group_7ac29362a8c743aaa798b331cc87919e";
-            int count_v1 = Client.GetUsersInGroup(groupId).Count;
-            Client.AddUserToGroup(groupId, userId);
-            int count_v2 = Client.GetUsersInGroup(groupId).Count;
+            int count_v1 = Client.GetUsersInGroupAsync(groupId).Result.Count;
+            var task = Client.AddUserToGroupAsync(groupId, userId);
+            task.Wait();
+            int count_v2 = Client.GetUsersInGroupAsync(groupId).Result.Count;
             Assert.AreEqual(count_v1 + 1, count_v2);
         }
 
@@ -823,9 +850,10 @@ namespace Azure.ApiManagement.Test
         {
             string userId = "user_bef163ba98af433c917914dd4c208115";
             string groupId = "group_7ac29362a8c743aaa798b331cc87919e";
-            int count_v1 = Client.GetUsersInGroup(groupId).Count;
-            Client.RemoveUserFromGroup(groupId, userId);
-            int count_v2 = Client.GetUsersInGroup(groupId).Count;
+            int count_v1 = Client.GetUsersInGroupAsync(groupId).Result.Count;
+            var task = Client.RemoveUserFromGroupAsync(groupId, userId);
+            task.Wait();
+            int count_v2 = Client.GetUsersInGroupAsync(groupId).Result.Count;
             Assert.AreEqual(count_v1 - 1, count_v2);
         }
 
@@ -849,13 +877,13 @@ namespace Azure.ApiManagement.Test
             string description = "This logger is created in server";
             object credentials = null;
             Logger logger = Logger.Create(loggerType, name, description, credentials);
-            Logger entity = Client.CreateLogger(logger);
+            Logger entity = Client.CreateLoggerAsync(logger).Result;
         }
 
         [TestMethod]
         public void GetLoggers()
         {
-            EntityCollection<Logger> loggers = Client.GetLoggers();
+            EntityCollection<Logger> loggers = Client.GetLoggersAsync().Result;
         }
 
         #endregion

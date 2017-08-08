@@ -172,14 +172,10 @@ namespace Fitabase.Azure.ApiManagement
 
         #region Generic Requests
 
-        public virtual T DoRequest<T>(string endpoint, RequestMethod method = RequestMethod.GET, string body = null)
+        public virtual async Task<T> DoRequestAsync<T>(string endpoint, RequestMethod method = RequestMethod.GET, string body = null)
         {
             //var json = DoRequest(endpoint, method.ToString(), body);
-            string json = null;
-            Task.Run(async () =>
-            {
-                json = await MakeRequest(endpoint, method.ToString(), body);
-            }).GetAwaiter().GetResult();
+            string json = await DoRequestAsync(endpoint, method.ToString(), body);
 
             if (String.IsNullOrWhiteSpace(json))
             {
@@ -189,14 +185,14 @@ namespace Fitabase.Azure.ApiManagement
             return obj;
         }
 
-        public virtual T GetById<T>(string endpoint, string ID)
+        public virtual async Task<T> GetByIdAsync<T>(string endpoint, string ID)
         {
             string[] splits = ID.Split('_');
             string entitySignatureName = (splits.Length > 1) ? splits[0] : "entity";
-            T entity;
             try
             {
-                return entity = DoRequest<T>(String.Format("{0}/{1}", endpoint, ID));
+                T entity = await DoRequestAsync<T>(String.Format("{0}/{1}", endpoint, ID));
+                return entity;
             }
             catch (HttpResponseException)
             {
@@ -211,7 +207,7 @@ namespace Fitabase.Azure.ApiManagement
             }
         }
 
-        public virtual async Task<string> MakeRequest(string endpoint, string method, string body)
+        public virtual async Task<string> DoRequestAsync(string endpoint, string method, string body)
         {
             HttpClient client = new HttpClient();
             HttpRequestMessage request = GetRequest(method, endpoint, body);
@@ -251,86 +247,86 @@ namespace Fitabase.Azure.ApiManagement
         /// Retrieves a redirection URL containing an authentication 
         /// token for signing a given user into the developer portal.
         /// </summary>
-        public SsoUrl GenerateSsoURL(string userId)
+        public async Task<SsoUrl> GenerateSsoURLAsync(string userId)
         {
             string endpoint = String.Format("{0}/users/{1}/generateSsoUrl", _api_endpoint, userId);
-            return DoRequest<SsoUrl>(endpoint, RequestMethod.POST);
+            return await DoRequestAsync<SsoUrl>(endpoint, RequestMethod.POST);
         }
 
         /// <summary>
         /// Create a new user model
         /// </summary>
-        public User CreateUser(User user)
+        public async Task<User> CreateUserAsync(User user)
         {
             string endpoint = String.Format("{0}/users/{1}", _api_endpoint, user.Id);
-            DoRequest<User>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(user));
+            await DoRequestAsync<User>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(user));
             return user;
         }
 
         /// <summary>
         ///  Retrieve a specific user model of a given id
         /// </summary>
-        public User GetUser(string userId)
+        public async Task<User> GetUserAsync(string userId)
         {
             string endpoint = String.Format("{0}/users", _api_endpoint);
-            return GetById<User>(endpoint, userId);
+            return await GetByIdAsync<User>(endpoint, userId);
         }
 
 
         /// <summary>
         /// Delete a specific user model of a given id
         /// </summary>
-        public void DeleteUser(string userId)
+        public async Task DeleteUserAsync(string userId)
         {
             string endpoint = String.Format("{0}/users/{1}", _api_endpoint, userId);
-            DoRequest<User>(endpoint, RequestMethod.DELETE);
+            await DoRequestAsync<User>(endpoint, RequestMethod.DELETE);
         }
 
         /// <summary>
         /// Delete user's subscriptions
         /// </summary>
-        public void DeleteUserWithSubscriptions(string userId)
+        public async Task DeleteUserWithSubscriptionsAsync(string userId)
         {
             string endpoint = String.Format("{0}/users/{1}?deleteSubscriptions=true", _api_endpoint, userId);
-            DoRequest<User>(endpoint, RequestMethod.DELETE);
+            await DoRequestAsync<User>(endpoint, RequestMethod.DELETE);
         }
 
         /// <summary>
         /// Retrieve all user models
         /// </summary>
-        public EntityCollection<User> GetUsers()
+        public async Task<EntityCollection<User>> GetUsersAsync()
         {
             string endpoint = String.Format("{0}/users", _api_endpoint);
-            return DoRequest<EntityCollection<User>>(endpoint);
+            return await DoRequestAsync<EntityCollection<User>>(endpoint);
         }
 
         /// <summary>
         /// Retrieve a list of subscriptions by the user
         /// </summary>
-        public EntityCollection<Subscription> GetUserSubscription(string userId)
+        public async Task<EntityCollection<Subscription>> GetUserSubscriptionAsync(string userId)
         {
             string endpoint = String.Format("{0}/users/{1}/subscriptions", _api_endpoint, userId);
-            return DoRequest<EntityCollection<Subscription>>(endpoint, RequestMethod.GET);
+            return await DoRequestAsync<EntityCollection<Subscription>>(endpoint, RequestMethod.GET);
         }
 
         /// <summary>
         /// Retrieve a list of groups that the specific user belongs to
         /// </summary>
-        public EntityCollection<Group> GetUserGroups(string userId)
+        public async Task<EntityCollection<Group>> GetUserGroupsAsync(string userId)
         {
             string endpoint = String.Format("{0}/users/{1}/groups", _api_endpoint, userId);
-            return DoRequest<EntityCollection<Group>>(endpoint, RequestMethod.GET);
+            return await DoRequestAsync<EntityCollection<Group>>(endpoint, RequestMethod.GET);
         }
 
         /// <summary>
         /// Update a specific user model
         /// </summary>
-        public void UpdateUser(User user)
+        public async Task UpdateUserAsync(User user)
         {
             if (String.IsNullOrWhiteSpace(user.Id))
                 throw new InvalidEntityException("User's Id is required");
             string endpoint = String.Format("{0}/users/{1}", _api_endpoint, user.Id);
-            DoRequest<User>(endpoint, RequestMethod.PATCH, JsonConvert.SerializeObject(user));
+            await DoRequestAsync<User>(endpoint, RequestMethod.PATCH, JsonConvert.SerializeObject(user));
         }
 
         #endregion
@@ -349,46 +345,46 @@ namespace Fitabase.Azure.ApiManagement
         /// <summary>
         /// Creates new API of the API Management service instance.
         /// </summary>
-        public API CreateAPI(API api)
+        public async Task<API> CreateAPIAsync(API api)
         {
             string endpoint = String.Format("{0}/apis/{1}", _api_endpoint, api.Id);
-            DoRequest<API>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(api));
+            await DoRequestAsync<API>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(api));
             return api;
         }
 
         /// <summary>
         /// Gets the details of the API specified by its identifier.
         /// </summary>
-        public API GetAPI(string apiId)
+        public async Task<API> GetAPIAsync(string apiId)
         {
             string endpoint = String.Format("{0}/apis", _api_endpoint);
-            return GetById<API>(endpoint, apiId);
+            return await GetByIdAsync<API>(endpoint, apiId);
         }
 
         /// <summary>
         /// Deletes the specified API of the API Management service instance.
         /// </summary>
-        public void DeleteAPI(string apiId)
+        public async Task DeleteAPIAsync(string apiId)
         {
             string endpoint = String.Format("{0}/apis/{1}", _api_endpoint, apiId);
-            DoRequest<API>(endpoint, RequestMethod.DELETE);
+            await DoRequestAsync<API>(endpoint, RequestMethod.DELETE);
         }
 
-        public void UpdateAPI(API api)
+        public async Task UpdateAPIAsync(API api)
         {
             if (String.IsNullOrWhiteSpace(api.Id))
                 throw new InvalidEntityException("API's Id is required");
             string endpoint = String.Format("{0}/apis/{1}", _api_endpoint, api.Id);
-            DoRequest<API>(endpoint, RequestMethod.PATCH, JsonConvert.SerializeObject(api));
+            await DoRequestAsync<API>(endpoint, RequestMethod.PATCH, JsonConvert.SerializeObject(api));
         }
 
         /// <summary>
         /// Lists all APIs of the API Management service instance.
         /// </summary>
-        public EntityCollection<API> GetAPIs()
+        public async Task<EntityCollection<API>> GetAPIsAsync()
         {
             string endpoint = String.Format("{0}/apis", _api_endpoint);
-            return DoRequest<EntityCollection<API>>(endpoint, RequestMethod.GET);
+            return await DoRequestAsync<EntityCollection<API>>(endpoint, RequestMethod.GET);
         }
 
 
@@ -408,52 +404,52 @@ namespace Fitabase.Azure.ApiManagement
         /// <summary>
         /// Creates a new operation in the API
         /// </summary>
-        public APIOperation CreateAPIOperation(string apiId, APIOperation operation)
+        public async Task<APIOperation> CreateAPIOperationAsync(string apiId, APIOperation operation)
         {
             string endpoint = String.Format("{0}/apis/{1}/operations/{2}",
                                                 _api_endpoint, apiId, operation.Id);
-            DoRequest<APIOperation>(endpoint, RequestMethod.PUT, JsonConvert.SerializeObject(operation));
+            await DoRequestAsync<APIOperation>(endpoint, RequestMethod.PUT, JsonConvert.SerializeObject(operation));
             return operation;
         }
-        public APIOperation CreateAPIOperation(API api, APIOperation operation)
+        public async Task<APIOperation> CreateAPIOperationAsync(API api, APIOperation operation)
         {
-            return CreateAPIOperation(api.Id, operation);
+            return await CreateAPIOperationAsync(api.Id, operation);
         }
 
-        public void UpdateAPIOperation(string apiId, string operationId, APIOperation operation)
+        public async Task UpdateAPIOperationAsync(string apiId, string operationId, APIOperation operation)
         {
             string endpoint = String.Format("{0}/apis/{1}/operations/{2}",
                                                 _api_endpoint, apiId, operationId);
-            DoRequest<APIOperation>(endpoint, RequestMethod.PATCH, JsonConvert.SerializeObject(operation));
+            await DoRequestAsync<APIOperation>(endpoint, RequestMethod.PATCH, JsonConvert.SerializeObject(operation));
         }
 
         /// <summary>
         /// Gets the details of the API Operation specified by its identifier.
         /// </summary>
-        public APIOperation GetAPIOperation(string apiId, string operationId)
+        public async Task<APIOperation> GetAPIOperationAsync(string apiId, string operationId)
         {
             string endpoint = String.Format("{0}/apis/{1}/operations", _api_endpoint, apiId);
-            return GetById<APIOperation>(endpoint, operationId);
+            return await GetByIdAsync<APIOperation>(endpoint, operationId);
 
         }
 
         /// <summary>
         /// Lists a collection of the operations for the specified API.
         /// </summary>
-        public EntityCollection<APIOperation> GetOperationsByAPI(string apiId)
+        public async Task<EntityCollection<APIOperation>> GetOperationsByAPIAsync(string apiId)
         {
             string endpoint = String.Format("{0}/apis/{1}/operations", _api_endpoint, apiId);
-            return DoRequest<EntityCollection<APIOperation>>(endpoint, RequestMethod.GET);
+            return await DoRequestAsync<EntityCollection<APIOperation>>(endpoint, RequestMethod.GET);
         }
 
         /// <summary>
         /// Deletes the specified operation in the API.
         /// </summary>
-        public void DeleteOperation(string apiId, string operationId)
+        public async Task DeleteOperationAsync(string apiId, string operationId)
         {
             string endpoint = String.Format("{0}/apis/{1}/operations/{2}",
                                                 _api_endpoint, apiId, operationId);
-            DoRequest<APIOperation>(endpoint, RequestMethod.DELETE);
+            await DoRequestAsync<APIOperation>(endpoint, RequestMethod.DELETE);
         }
 
 
@@ -473,31 +469,31 @@ namespace Fitabase.Azure.ApiManagement
         /// <summary>
         /// Create a product
         /// </summary>
-        public Product CreateProduct(Product product)
+        public async Task<Product> CreateProductAsync(Product product)
         {
             string endpoint = String.Format("{0}/products/{1}", _api_endpoint, product.Id);
-            DoRequest<Product>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(product));
+            await DoRequestAsync<Product>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(product));
             return product;
         }
 
         /// <summary>
         /// Gets the details of the product specified by its identifier.
         /// </summary>
-        public Product GetProduct(string productId)
+        public async Task<Product> GetProductAsync(string productId)
         {
             string endpoint = String.Format("{0}/products", _api_endpoint);
-            return GetById<Product>(endpoint, productId);
+            return await GetByIdAsync<Product>(endpoint, productId);
         }
 
         /// <summary>
         /// Update a product
         /// </summary>
-        public void UpdateProduct(Product product)
+        public async Task UpdateProductAsync(Product product)
         {
             if (String.IsNullOrWhiteSpace(product.Id))
                 throw new InvalidEntityException("Product's Id is required");
             string endpoint = String.Format("{0}/products/{1}", _api_endpoint, product.Id);
-            DoRequest<Product>(endpoint, RequestMethod.PATCH, JsonConvert.SerializeObject(product));
+            await DoRequestAsync<Product>(endpoint, RequestMethod.PATCH, JsonConvert.SerializeObject(product));
         }
 
 
@@ -505,20 +501,20 @@ namespace Fitabase.Azure.ApiManagement
         /// Delete a product
         /// </summary>
         /// <param name="productId"></param>
-        public void DeleteProduct(string productId)
+        public async Task DeleteProductAsync(string productId)
         {
             string endpoint = String.Format("{0}/products/{1}?deleteSubscriptions=true", _api_endpoint, productId);
-            DoRequest<Product>(endpoint, RequestMethod.DELETE);
+            await DoRequestAsync<Product>(endpoint, RequestMethod.DELETE);
         }
 
 
         /// <summary>
         /// Lists a collection of products in the specified service instance.
         /// </summary>
-        public EntityCollection<Product> GetProducts()
+        public async Task<EntityCollection<Product>> GetProductsAsync()
         {
             string endpoint = String.Format("{0}/products", _api_endpoint);
-            return DoRequest<EntityCollection<Product>>(endpoint, RequestMethod.GET);
+            return await DoRequestAsync<EntityCollection<Product>>(endpoint, RequestMethod.GET);
         }
 
         /// <summary>
@@ -526,11 +522,11 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         /// <param name="productId"></param>
         /// <param name="api"></param>
-        public void AddProductAPI(string productId, string apiId)
+        public async Task AddProductAPIAsync(string productId, string apiId)
         {
             string endpoint = String.Format("{0}/products/{1}/apis/{2}",
                                     _api_endpoint, productId, apiId);
-            DoRequest<API>(endpoint, RequestMethod.PUT);
+            await DoRequestAsync<API>(endpoint, RequestMethod.PUT);
         }
 
         /// <summary>
@@ -538,11 +534,11 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         /// <param name="productId"></param>
         /// <param name="apiId"></param>
-        public void DeleteProductAPI(string productId, string apiId)
+        public async Task DeleteProductAPIAsync(string productId, string apiId)
         {
             string endpoint = String.Format("{0}/products/{1}/apis/{2}",
                                     _api_endpoint, productId, apiId);
-            DoRequest<API>(endpoint, RequestMethod.DELETE);
+            await DoRequestAsync<API>(endpoint, RequestMethod.DELETE);
         }
 
         /// <summary>
@@ -550,11 +546,11 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         /// <param name="productId"></param>
         /// <returns></returns>
-        public EntityCollection<API> GetProductAPIs(string productId)
+        public async Task<EntityCollection<API>> GetProductAPIsAsync(string productId)
         {
             string endpoint = String.Format("{0}/products/{1}/apis",
                                     _api_endpoint, productId);
-            return DoRequest<EntityCollection<API>>(endpoint, RequestMethod.GET);
+            return await DoRequestAsync<EntityCollection<API>>(endpoint, RequestMethod.GET);
         }
 
         /// <summary>
@@ -562,11 +558,11 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         /// <param name="productId"></param>
         /// <returns></returns>
-        public EntityCollection<Subscription> GetProductSubscriptions(string productId)
+        public async Task<EntityCollection<Subscription>> GetProductSubscriptionsAsync(string productId)
         {
             string endpoint = String.Format("{0}/products/{1}/subscriptions",
                                     _api_endpoint, productId);
-            return DoRequest<EntityCollection<Subscription>>(endpoint, RequestMethod.GET);
+            return await DoRequestAsync<EntityCollection<Subscription>>(endpoint, RequestMethod.GET);
         }
 
         /// <summary>
@@ -574,11 +570,11 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         /// <param name="productId"></param>
         /// <param name="groupId"></param>
-        public void AddProductGroup(string productId, string groupId)
+        public async Task AddProductGroupAsync(string productId, string groupId)
         {
             string endpoint = String.Format("{0}/products/{1}/groups/{2}",
                                     _api_endpoint, productId, groupId);
-            DoRequest<API>(endpoint, RequestMethod.PUT);
+            await DoRequestAsync<API>(endpoint, RequestMethod.PUT);
 
         }
 
@@ -587,11 +583,11 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         /// <param name="productId"></param>
         /// <param name="groupId"></param>
-        public void DeleteProductGroup(string productId, string groupId)
+        public async Task DeleteProductGroupAsync(string productId, string groupId)
         {
             string endpoint = String.Format("{0}/products/{1}/groups/{2}",
                                     _api_endpoint, productId, groupId);
-            DoRequest<Group>(endpoint, RequestMethod.DELETE);
+            await DoRequestAsync<Group>(endpoint, RequestMethod.DELETE);
         }
 
         /// <summary>
@@ -599,11 +595,11 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         /// <param name="productId"></param>
         /// <returns></returns>
-        public EntityCollection<Group> GetProductGroups(string productId)
+        public async Task<EntityCollection<Group>> GetProductGroupsAsync(string productId)
         {
             string endpoint = String.Format("{0}/products/{1}/groups",
                                     _api_endpoint, productId);
-            return DoRequest<EntityCollection<Group>>(endpoint, RequestMethod.GET);
+            return await DoRequestAsync<EntityCollection<Group>>(endpoint, RequestMethod.GET);
         }
 
         #endregion
@@ -621,66 +617,66 @@ namespace Fitabase.Azure.ApiManagement
         /// <summary>
         /// Create a group
         /// </summary>
-        public Group CreateGroup(Group group)
+        public async Task<Group> CreateGroupAsync(Group group)
         {
             string endpoint = String.Format("{0}/groups/{1}", _api_endpoint, group.Id);
-            DoRequest<Group>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(group));
+            await DoRequestAsync<Group>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(group));
             return group;
         }
 
         /// <summary>
         /// Gets the details of the group specified by its identifier.
         /// </summary>
-        public Group GetGroup(string groupId)
+        public async Task<Group> GetGroupAsync(string groupId)
         {
             string endpoint = String.Format("{0}/groups", _api_endpoint);
-            return GetById<Group>(endpoint, groupId);
+            return await GetByIdAsync<Group>(endpoint, groupId);
         }
 
         /// <summary>
         /// Add a user to the specified group
         /// </summary>
-        public void AddUserToGroup(string groupId, string userId)
+        public async Task AddUserToGroupAsync(string groupId, string userId)
         {
             string endpoint = String.Format("{0}/groups/{1}/users/{2}", _api_endpoint, groupId, userId);
-            DoRequest<EntityCollection<User>>(endpoint, RequestMethod.PUT);
+            await DoRequestAsync<EntityCollection<User>>(endpoint, RequestMethod.PUT);
         }
 
         /// <summary>
         /// Remove existing user from existing group.
         /// </summary>
-        public void RemoveUserFromGroup(string groupId, string userId)
+        public async Task RemoveUserFromGroupAsync(string groupId, string userId)
         {
 
             string endpoint = String.Format("{0}/groups/{1}/users/{2}", _api_endpoint, groupId, userId);
-            DoRequest<EntityCollection<User>>(endpoint, RequestMethod.DELETE);
+            await DoRequestAsync<EntityCollection<User>>(endpoint, RequestMethod.DELETE);
         }
 
         /// <summary>
         /// Lists a collection of groups
         /// </summary>
-        public EntityCollection<Group> GetGroups()
+        public async Task<EntityCollection<Group>> GetGroupsAsync()
         {
             string endpoint = String.Format("{0}/groups", _api_endpoint);
-            return DoRequest<EntityCollection<Group>>(endpoint, RequestMethod.GET);
+            return await DoRequestAsync<EntityCollection<Group>>(endpoint, RequestMethod.GET);
         }
 
         /// <summary>
         /// Lists a collection of the members of the group, specified by its identifier.
         /// </summary>
-        public EntityCollection<User> GetUsersInGroup(string groupId)
+        public async Task<EntityCollection<User>> GetUsersInGroupAsync(string groupId)
         {
             string endpoint = String.Format("{0}/groups/{1}/users", _api_endpoint, groupId);
-            return DoRequest<EntityCollection<User>>(endpoint, RequestMethod.GET);
+            return await DoRequestAsync<EntityCollection<User>>(endpoint, RequestMethod.GET);
         }
 
         /// <summary>
         /// Deletes specific group of the API Management
         /// </summary>
-        public void DeleteGroup(string groupId)
+        public async Task DeleteGroupAsync(string groupId)
         {
             string endpoint = String.Format("{0}/groups/{1}", _api_endpoint, groupId);
-            DoRequest<Group>(endpoint, RequestMethod.DELETE);
+            await DoRequestAsync<Group>(endpoint, RequestMethod.DELETE);
         }
         #endregion
 
@@ -699,69 +695,69 @@ namespace Fitabase.Azure.ApiManagement
         /// <summary>
         /// Creates or updates the subscription of specified user to the specified product.
         /// </summary>
-        public Subscription CreateSubscription(Subscription subscription)
+        public async Task<Subscription> CreateSubscriptionAsync(Subscription subscription)
         {
             string endpoint = String.Format("{0}/subscriptions/{1}", _api_endpoint, subscription.Id);
-            DoRequest<Subscription>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(subscription));
+            await DoRequestAsync<Subscription>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(subscription));
             return subscription;
         }
 
         /// <summary>
         /// Gets the specified Subscription entity.
         /// </summary>
-        public Subscription GetSubscription(string subscriptionId)
+        public async Task<Subscription> GetSubscriptionAsync(string subscriptionId)
         {
             string endpoint = String.Format("{0}/subscriptions", _api_endpoint);
-            return GetById<Subscription>(endpoint, subscriptionId);
+            return await GetByIdAsync<Subscription>(endpoint, subscriptionId);
         }
 
         /// <summary>
         /// Deletes the specified subscription.
         /// </summary>
-        public void DeleteSubscription(string subscriptionId)
+        public async Task DeleteSubscriptionAsync(string subscriptionId)
         {
             string endpoint = String.Format("{0}/subscriptions/{1}", _api_endpoint, subscriptionId);
-            DoRequest<Subscription>(endpoint, RequestMethod.DELETE);
+            await DoRequestAsync<Subscription>(endpoint, RequestMethod.DELETE);
         }
 
         /// <summary>
         /// Updates the details of a subscription specificied by its identifier.
         /// </summary>
-        public void UpdateSubscription(Subscription subscription)
+        public async Task UpdateSubscriptionAsync(Subscription subscription)
         {
             if (String.IsNullOrWhiteSpace(subscription.Id))
                 throw new InvalidEntityException("Subscription's Id is required");
             string endpoint = String.Format("{0}/subscriptions/{1}", _api_endpoint, subscription.Id);
-            DoRequest<Subscription>(endpoint, RequestMethod.PATCH, JsonConvert.SerializeObject(subscription));
+            await DoRequestAsync<Subscription>(endpoint, RequestMethod.PATCH, JsonConvert.SerializeObject(subscription));
         }
 
         /// <summary>
         /// Lists all subscriptions of the API Management service instance.
         /// </summary>
-        public EntityCollection<Subscription> GetSubscriptions()
+        public async Task<EntityCollection<Subscription>> GetSubscriptionsAsync()
         {
             string endpoint = String.Format("{0}/subscriptions", _api_endpoint);
-            return DoRequest<EntityCollection<Subscription>>(endpoint, RequestMethod.GET);
+            return await DoRequestAsync<EntityCollection<Subscription>>(endpoint, RequestMethod.GET);
         }
 
         /// <summary>
         /// Gernerate subscription primary key
         /// </summary>
         /// <param name="subscriptionId">Subscription credentials which uniquely identify Microsoft Azure subscription</param>
-        public void GeneratePrimaryKey(string subscriptionId)
+        public async Task GeneratePrimaryKeyAsync(string subscriptionId)
         {
             string endPoint = String.Format("{0}/subscriptions/{1}/regeneratePrimaryKey", _api_endpoint, subscriptionId);
-            DoRequest<string>(endPoint, RequestMethod.POST);
+            await DoRequestAsync<string>(endPoint, RequestMethod.POST);
         }
 
         /// <summary>
         /// Generate subscription secondary key
         /// </summary>
         /// <param name="subscriptionId">Subscription credentials which uniquely identify Microsoft Azure subscription</param>
-        public void GenerateSecondaryKey(string subscriptionId)
+        public async Task GenerateSecondaryKeyAsync(string subscriptionId)
         {
             string endPoint = String.Format("{0}/subscriptions/{1}/regenerateSecondaryKey", _api_endpoint, subscriptionId);
-            DoRequest<string>(endPoint, RequestMethod.POST);
+            await DoRequestAsync<string>(endPoint, RequestMethod.POST);
         }
         #endregion
 
@@ -774,29 +770,29 @@ namespace Fitabase.Azure.ApiManagement
         /*********************************************************/
         #region Loggers
 
-        public Logger CreateLogger(Logger logger)
+        public async Task<Logger> CreateLoggerAsync(Logger logger)
         {
             string endpoint = String.Format("{0}/loggers/{1}", _api_endpoint, logger.Id);
-            DoRequest<Logger>(endpoint, RequestMethod.PUT, JsonConvert.SerializeObject(logger));
+            await DoRequestAsync<Logger>(endpoint, RequestMethod.PUT, JsonConvert.SerializeObject(logger));
             return logger;
         }
 
-        public EntityCollection<Logger> GetLoggers()
+        public async Task<EntityCollection<Logger>> GetLoggersAsync()
         {
             string endpoint = String.Format("{0}/loggers", _api_endpoint);
-            return DoRequest<EntityCollection<Logger>>(endpoint);
+            return await DoRequestAsync<EntityCollection<Logger>>(endpoint);
         }
 
-        public Logger GetLogger(string loggerId)
+        public async Task<Logger> GetLoggerAsync(string loggerId)
         {
             string endpoint = String.Format("{0}/loggers", _api_endpoint, loggerId);
-            return GetById<Logger>(endpoint, loggerId);
+            return await GetByIdAsync<Logger>(endpoint, loggerId);
         }
 
-        public void DeleteLogger(string loggerId)
+        public async Task DeleteLoggerAsync(string loggerId)
         {
             string endpoint = String.Format("{0}/loggers/{1}", _api_endpoint, loggerId);
-            DoRequest<Logger>(endpoint, RequestMethod.DELETE);
+            await DoRequestAsync<Logger>(endpoint, RequestMethod.DELETE);
         }
 
         #endregion
