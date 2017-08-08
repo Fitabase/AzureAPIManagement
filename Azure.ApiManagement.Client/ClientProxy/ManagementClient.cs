@@ -185,28 +185,6 @@ namespace Fitabase.Azure.ApiManagement
             return obj;
         }
 
-        public virtual async Task<T> GetByIdAsync<T>(string endpoint, string ID)
-        {
-            string[] splits = ID.Split('_');
-            string entitySignatureName = (splits.Length > 1) ? splits[0] : "entity";
-            try
-            {
-                T entity = await DoRequestAsync<T>(String.Format("{0}/{1}", endpoint, ID));
-                return entity;
-            }
-            catch (HttpResponseException)
-            {
-                string message = String.Format("Unable to find the {0} with ID = {1}", entitySignatureName, ID);
-                var resp = new HttpResponseMessage(HttpStatusCode.NotFound)
-                {
-                    Content = new StringContent(message),
-                    ReasonPhrase = message
-                };
-
-                throw new HttpResponseException(resp);
-            }
-        }
-
         public virtual async Task<string> DoRequestAsync(string endpoint, string method, string body)
         {
             HttpClient client = new HttpClient();
@@ -230,8 +208,30 @@ namespace Fitabase.Azure.ApiManagement
 
             return await response.Content.ReadAsStringAsync();
         }
+        public virtual async Task<T> GetByIdAsync<T>(string endpoint, string ID)
+        {
+            string[] splits = ID.Split('_');
+            string entitySignatureName = (splits.Length > 1) ? splits[0] : "entity";
+            try
+            {
+                T entity = await DoRequestAsync<T>(String.Format("{0}/{1}", endpoint, ID));
+                return entity;
+            }
+            catch (HttpResponseException)
+            {
+                string message = String.Format("Unable to find the {0} with ID = {1}", entitySignatureName, ID);
+                var resp = new HttpResponseMessage(HttpStatusCode.NotFound)
+                {
+                    Content = new StringContent(message),
+                    ReasonPhrase = message
+                };
 
-        
+                throw new HttpResponseException(resp);
+            }
+        }
+
+
+
         #endregion
 
 
