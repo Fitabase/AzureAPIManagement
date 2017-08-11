@@ -1,6 +1,6 @@
 ﻿using Fitabase.Azure.ApiManagement.Model.Exceptions;
-using Fitabase.Azure.ApiManagement.Swagger.Models;
 using Newtonsoft.Json;
+using Swashbuckle.Swagger.Model;
 using System;
 
 namespace Fitabase.Azure.ApiManagement.Swagger
@@ -19,20 +19,24 @@ namespace Fitabase.Azure.ApiManagement.Swagger
             ResourcePath = resourcePath;
         }
 
+
         /// <summary>
-        /// Get Swagger Components from input resource
+        /// Cast json string to SwaggerDocument object
         /// </summary>
-        /// <returns>SwaggerAPIComponent</returns>
-        public SwaggerObject GetSwaggerObject()
+        /// <returns>SwaggerDocument</returns>
+        public SwaggerDocument GetSwaggerObject()
         {
             string json = this.GetSwaggerJson();
-            if(String.IsNullOrWhiteSpace(json))
+
+            if (String.IsNullOrWhiteSpace(json))
             {
                 throw new SwaggerResourceException("Missing json content");
             }
-            return JsonConvert.DeserializeObject<SwaggerObject>(json);
+
+            JsonConverter[] converters = { new ParameterConverter() };
+            SwaggerDocument doc = JsonConvert.DeserializeObject<SwaggerDocument>(json, converters);
+            return doc;
         }
-        
 
 
         /// <summary>

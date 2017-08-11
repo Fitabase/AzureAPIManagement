@@ -1,8 +1,9 @@
 ﻿using Fitabase.Azure.ApiManagement.DataModel.Properties;
 using Fitabase.Azure.ApiManagement.Model;
 using Fitabase.Azure.ApiManagement.Model.Exceptions;
-using Fitabase.Azure.ApiManagement.Swagger.Models;
 using Newtonsoft.Json;
+using Swashbuckle.Swagger.Model;
+using System.Collections.Generic;
 using System.Text;
 
 namespace Fitabase.Azure.ApiManagement
@@ -10,9 +11,9 @@ namespace Fitabase.Azure.ApiManagement
 
     class APISwaggerBuilder
     {
-        private PathData PathData;
+        private PathItem PathData;
 
-        public APISwaggerBuilder(PathData pathdata)
+        public APISwaggerBuilder(PathItem pathdata)
         {
             this.PathData = pathdata;
         }
@@ -27,17 +28,17 @@ namespace Fitabase.Azure.ApiManagement
             if (PathData == null)
                 throw new SwaggerResourceException("PathData is required");
 
-            Parameter[] parameters = GetParameters();
-            if (parameters == null || parameters.Length == 0)
+            IList<IParameter> parameters = GetParameters();
+            if (parameters == null || parameters.Count == 0)
                 return null;
 
-            ParameterContract[] parameterContracts = new ParameterContract[parameters.Length];
+            ParameterContract[] parameterContracts = new ParameterContract[parameters.Count];
 
-            for (int i = 0; i < parameters.Length; i++)
+            for (int i = 0; i < parameters.Count; i++)
             {
                 string json = JsonConvert.SerializeObject(parameters[i]);
                 ParameterContract template = JsonConvert.DeserializeObject<ParameterContract>(json);
-                template.Description = parameters[i].Format;
+                template.Description = parameters[i].Description;
                 parameterContracts[i] = template;
             }
             return parameterContracts;
@@ -49,13 +50,13 @@ namespace Fitabase.Azure.ApiManagement
                 throw new SwaggerResourceException("PathData is required");
 
             StringBuilder builder = new StringBuilder();
-            OperationMethod operationMethod = GetOperationMethod();
+            Operation operationMethod = GetOperationMethod();
             if (operationMethod.Parameters == null)
                 return "";
 
-            Parameter[] parameters = operationMethod.Parameters;
+            IList<IParameter> parameters = operationMethod.Parameters;
            
-            for (int i = 0; i < parameters.Length; i++)
+            for (int i = 0; i < parameters.Count; i++)
             {
                 string pathVariable = parameters[i].Name;
                 builder.Append("/").Append(pathVariable)
@@ -65,7 +66,7 @@ namespace Fitabase.Azure.ApiManagement
         }
 
 
-        public Parameter[] GetParameters()
+        public IList<IParameter> GetParameters()
         {
             if (PathData.Post != null) return PathData.Post.Parameters;
             if (PathData.Get != null) return PathData.Get.Parameters;
@@ -94,7 +95,7 @@ namespace Fitabase.Azure.ApiManagement
         }
 
 
-        public OperationMethod GetOperationMethod()
+        public Operation GetOperationMethod()
         {
             if (PathData == null)
                 throw new SwaggerResourceException("PathData is required");

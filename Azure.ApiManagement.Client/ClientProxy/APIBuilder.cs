@@ -2,9 +2,10 @@
 using Fitabase.Azure.ApiManagement.Model;
 using Fitabase.Azure.ApiManagement.Model.Exceptions;
 using Fitabase.Azure.ApiManagement.Swagger;
-using Fitabase.Azure.ApiManagement.Swagger.Models;
 using Newtonsoft.Json;
+using Swashbuckle.Swagger.Model;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Fitabase.Azure.ApiManagement
 {
@@ -13,10 +14,10 @@ namespace Fitabase.Azure.ApiManagement
     /// </summary>
     public class APIBuilder
     {
-        public SwaggerObject Swagger;
+        public SwaggerDocument Swagger;
 
 
-        public APIBuilder(SwaggerObject swagger)
+        public APIBuilder(SwaggerDocument swagger)
         {
             this.Swagger = swagger;
         }
@@ -45,7 +46,7 @@ namespace Fitabase.Azure.ApiManagement
             string path = GetAPIPath();                     // Get API path from swagger
             string description = Swagger.Info.Description;  // API description
             string serviceUrl = Swagger.Host;               // API service URL form swagger
-            string[] protocols = Swagger.Schemes;
+            string[] protocols = Swagger.Schemes.Cast<string>().ToArray();
 
             AuthenticationSettingsConstract authentication = null;
             SubscriptionKeyParameterNames customNames = null;
@@ -60,7 +61,7 @@ namespace Fitabase.Azure.ApiManagement
                 throw new SwaggerResourceException("Swagger cannot be null");
 
             List<APIOperation> operations = new List<APIOperation>();
-            foreach (KeyValuePair<string, PathData> path in Swagger.Paths)
+            foreach (KeyValuePair<string, PathItem> path in Swagger.Paths)
             {
                 APIOperation apiOperation = GetOperation(path);
                 operations.Add(apiOperation);
@@ -107,10 +108,10 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         /// <param name="paths"></param>
         /// <returns></returns>
-        private List<APIOperation> GetOperations(Dictionary<string, PathData> paths)
+        private List<APIOperation> GetOperations(Dictionary<string, PathItem> paths)
         {
             List<APIOperation> operations = new List<APIOperation>();
-            foreach (KeyValuePair<string, PathData> path in paths)
+            foreach (KeyValuePair<string, PathItem> path in paths)
             {
                 APIOperation apiOperation = GetOperation(path);
                 operations.Add(apiOperation);
@@ -124,12 +125,12 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
-        private APIOperation GetOperation(KeyValuePair<string, PathData> path)
+        private APIOperation GetOperation(KeyValuePair<string, PathItem> path)
         {
-            PathData pathdata = path.Value;
+            PathItem pathdata = path.Value;
             APISwaggerBuilder builder = new APISwaggerBuilder(pathdata);
 
-            OperationMethod pathOperation = builder.GetOperationMethod();
+            Operation pathOperation = builder.GetOperationMethod();
             string operationName = pathOperation.OperationId;
             string urlTemplate = GetOperationnUrl(path.Key) + builder.BuildRestParametersURL();        // Append parameters to the URL
             string description = null;
@@ -169,7 +170,7 @@ namespace Fitabase.Azure.ApiManagement
         }
 
 
-        private List<ResponseContract> GetMethodResponses(OperationMethod operation, RequestMethod method)
+        private List<ResponseContract> GetMethodResponses(Operation operation, RequestMethod method)
         {
             if (operation == null)
                 return null;
