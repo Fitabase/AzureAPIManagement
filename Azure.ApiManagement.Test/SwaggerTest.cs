@@ -35,8 +35,8 @@ namespace Azure.ApiManagement.Test
             UrlPath = urls[0];
             
             _SwaggerReader = new SwaggerUrlReader(UrlPath);
-            _SwaggerObject = _SwaggerReader.GetSwaggerObject();
-            _Client = new ManagementClient(@"C:\Repositories\AzureAPIManagement\Azure.ApiManagement.Test\APIMKeys.json");
+            //_SwaggerObject = _SwaggerReader.GetSwaggerObject();
+            //_Client = new ManagementClient(@"C:\Repositories\AzureAPIManagement\Azure.ApiManagement.Test\APIMKeys.json");
         }
 
 
@@ -46,9 +46,14 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void PublishSwaggerAPI()
         {
-            UrlPath = "localhost:2598/swagger/docs/BodyTrace";
-            APIBuilder builder = APIBuilder.GetBuilder(UrlPath);
-            API api = builder.BuildAPIAndOperations();
+            //_SwaggerReader.GetSwagger();
+            //UrlPath = "localhost:2598/swagger/docs/BodyTrace";
+            //APIBuilder builder = APIBuilder.GetBuilder(UrlPath);
+            //API api = builder.BuildAPIAndOperations();
+
+            SwaggerAPIBuilder builder = SwaggerAPIBuilder.GetBuilder(UrlPath);
+            API api = builder.BuildAPI();
+
         }
 
         #endregion Publish an API

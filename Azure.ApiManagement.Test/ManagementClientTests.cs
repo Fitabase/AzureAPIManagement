@@ -242,7 +242,6 @@ namespace Azure.ApiManagement.Test
 
             APIOperation operation = APIOperation.Create(name, method, urlTemplate, Parameters(), Request(), Responses(), description);
 
-
             #region CREATE
 
             c1 = Client.GetOperationsByAPIAsync(apiId).Result.Count;
@@ -252,6 +251,7 @@ namespace Azure.ApiManagement.Test
 
             #endregion
 
+            /*
             #region RETRIEVE
 
             APIOperation other = Client.GetAPIOperationAsync(apiId, entity.Id).Result;
@@ -336,6 +336,7 @@ namespace Azure.ApiManagement.Test
             c2 = Client.GetOperationsByAPIAsync(apiId).Result.Count;
             Assert.AreEqual(c1 - 1, c2);
             #endregion
+            */
         }
 
 
@@ -404,18 +405,17 @@ namespace Azure.ApiManagement.Test
         public void UpdateOperationParameter()
         {
             string apiId = "api_b8aad5c90425479c9e50c2513bfbc804";
-            string operationId = "operation_ab7e97314cb840eca6cead919d7c003b";
+            string operationId = "operation_be5ecb981a0d43678ae492502c925047";
 
             APIOperation entity = Client.GetAPIOperationAsync(apiId, operationId).Result;
             APIOperationHelper helper = new APIOperationHelper(entity);
 
-
-
-
+            
             List<ParameterContract> parameters = new List<ParameterContract>();
             parameters.Add(ParameterContract.Create("account", "uuid"));
+            parameters.Add(ParameterContract.Create("subscription", "uuid"));
 
-            entity.UrlTemplate = APIOperationHelper.BuildURL(helper.GetOriginalURL(), parameters);
+            entity.UrlTemplate = APIOperationHelper.BuildURL("/get", parameters);
             entity.TemplateParameters = parameters.ToArray();
 
             var task = Client.UpdateAPIOperationAsync(apiId, operationId, entity);
@@ -450,18 +450,10 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void GetAPIOperation()
         {
-            try
-            {
-                string apiId = "api_2ee0f0a800334301b857367980c332c4";
-                string operationId = "operation_9a4eea768ecc48a5be9fcb8f33781189";
-                APIOperation operation = Client.GetAPIOperationAsync(apiId, operationId).Result;
-                Assert.IsNotNull(operation);
-            }
-            catch (HttpResponseException ex)
-            {
-                System.Diagnostics.Debug.WriteLine(ex.Message);
-                System.Diagnostics.Debug.WriteLine(ex.StatusCode);
-            }
+            string apiId = "598e06832f02d3110cf5100b";
+            string operationId = "598e06832f02d30700f1c8f6";
+            APIOperation operation = Client.GetAPIOperationAsync(apiId, operationId).Result;
+            Assert.IsNotNull(operation);
         }
 
         [TestMethod]
