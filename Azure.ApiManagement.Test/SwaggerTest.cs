@@ -1,9 +1,8 @@
 ﻿using Fitabase.Azure.ApiManagement;
 using Fitabase.Azure.ApiManagement.Model;
-using Fitabase.Azure.ApiManagement.Model.Exceptions;
 using Fitabase.Azure.ApiManagement.Swagger;
-using Fitabase.Azure.ApiManagement.Swagger.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -13,8 +12,6 @@ namespace Azure.ApiManagement.Test
     public class SwaggerTest
     {
         private string UrlPath;
-        private AbstractSwaggerReader _SwaggerReader;
-        private SwaggerObject _SwaggerObject;
         private ManagementClient _Client;
 
         [TestInitialize]
@@ -33,10 +30,9 @@ namespace Azure.ApiManagement.Test
                 @"http://localhost:2598/swagger/docs/Values"                // 9
             };
             UrlPath = urls[0];
-            
-            _SwaggerReader = new SwaggerUrlReader(UrlPath);
-            //_SwaggerObject = _SwaggerReader.GetSwaggerObject();
-            //_Client = new ManagementClient(@"C:\Repositories\AzureAPIManagement\Azure.ApiManagement.Test\APIMKeys.json");
+
+            _Client = new ManagementClient(@"C:\Repositories\AzureAPIManagement\Azure.ApiManagement.Test\APIMKeys.json");
+
         }
 
 
@@ -46,17 +42,42 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void PublishSwaggerAPI()
         {
-            //_SwaggerReader.GetSwagger();
-            //UrlPath = "localhost:2598/swagger/docs/BodyTrace";
-            //APIBuilder builder = APIBuilder.GetBuilder(UrlPath);
-            //API api = builder.BuildAPIAndOperations();
+            APIBuilder builder = APIBuilder.GetBuilder(UrlPath);
+            API api = builder.BuildAPIAndOperations();
 
-            SwaggerAPIBuilder builder = SwaggerAPIBuilder.GetBuilder(UrlPath);
-            API api = builder.BuildAPI();
-
+            string json = JsonConvert.SerializeObject(api.Operations, Formatting.None, new JsonSerializerSettings()
+            {
+                NullValueHandling = NullValueHandling.Ignore
+            });
         }
 
         #endregion Publish an API
 
+
+
+        [TestMethod]
+        public void ReadLocalSwaggerFile()
+        {
+            var setting = new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore };
+
+            string filePath = @"C:\Users\inter\Downloads\swagger.json";
+            AbstractSwaggerReader swaggerReader = new SwaggerFileReader(filePath);
+            APIBuilder builder = APIBuilder.GetBuilder(swaggerReader);
+
+            API api = builder.BuildAPIAndOperations();
+
+            List<APIOperation> operations = api.Operations.ToList();
+            List<string> operationIds = new List<string>();
+
+            //string json = JsonConvert.SerializeObject(api.Operations);
+            //json = JsonConvert.SerializeObject(operationIds);
+
+            API entity = _Client.CreateAPIAsync(api).Result;
+            foreach(APIOperation operation in operations)
+            {
+                var task = _Client.CreateAPIOperationAsync(entity, operation);
+                task.Wait();
+            }
+        }
     }
 }

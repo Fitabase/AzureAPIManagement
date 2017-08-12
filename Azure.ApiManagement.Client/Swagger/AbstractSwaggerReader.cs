@@ -33,7 +33,7 @@ namespace Fitabase.Azure.ApiManagement.Swagger
                 throw new SwaggerResourceException("Missing json content");
             }
 
-            JsonConverter[] converters = { new ParameterConverter() };
+            JsonConverter[] converters = { new ParameterConverter(), new SchemeSecurityConverter() };
             SwaggerDocument doc = JsonConvert.DeserializeObject<SwaggerDocument>(json, converters);
             return doc;
         }

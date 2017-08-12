@@ -155,9 +155,9 @@ namespace Azure.ApiManagement.Test
         public void CreateApi()
         {
             int count_v1 = Client.GetAPIsAsync().Result.Count;
-            string name = "abcd";
+            string name = "test";
             string description = "An example to create apis from service";
-            string serviceUrl = "abc.com";
+            string serviceUrl = "test.com";
             string path = "/v4";
             string[] protocols = new string[] { "http", "https" };
 
@@ -172,8 +172,9 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void GetAPI()
         {
-            string apiId = "api_b8aad5c90425479c9e50c2513bfbc804";
+            string apiId = "598e06832f02d3110cf5100b";
             API api = Client.GetAPIAsync(apiId).Result;
+            string json = JsonConvert.SerializeObject(api);
             Assert.IsNotNull(api);
             Assert.AreEqual(api.Id, apiId);
         }
@@ -233,14 +234,14 @@ namespace Azure.ApiManagement.Test
         public void APIOperationLifeCycle()
         {
             long c1, c2;
-            string apiId = "api_b8aad5c90425479c9e50c2513bfbc804";
+            string apiId = "api_577edd5ee62543d297bd5d568af78a82";
 
-            string name = "Operation_v2";
-            RequestMethod method = RequestMethod.GET;
-            string urlTemplate = "/get";
-            string description = "an operation created in the operation";
+            string name = "Operation_3";
+            RequestMethod method = RequestMethod.DELETE;
+            string urlTemplate = "/pet";
+            string description = "post it";
 
-            APIOperation operation = APIOperation.Create(name, method, urlTemplate, Parameters(), Request(), Responses(), description);
+            APIOperation operation = APIOperation.Create(name, method, urlTemplate, Parameters(), null, null, description);
 
             #region CREATE
 
@@ -370,8 +371,7 @@ namespace Azure.ApiManagement.Test
 
             ParameterContract[] parameters =
             {
-                ParameterContract.Create("a", ParameterType.NUMBER.ToString()),
-                ParameterContract.Create("b", ParameterType.NUMBER.ToString())
+                ParameterContract.Create("petId", ParameterType.NUMBER.ToString())
             };
             return parameters;
         }
@@ -459,8 +459,14 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void GetOperationsByAPI()
         {
-            string apiId = "597687442f02d30494230f8c";
+            string apiId = "598e06832f02d3110cf5100b";
             EntityCollection<APIOperation> collection = Client.GetOperationsByAPIAsync(apiId).Result;
+            List<string> operationIds = new List<string>();
+            foreach(APIOperation operation in collection.Values)
+            {
+                //operationIds.Add(operation.Name);
+            }
+            string json = JsonConvert.SerializeObject(operationIds);
             Assert.IsNotNull(collection);
         }
 

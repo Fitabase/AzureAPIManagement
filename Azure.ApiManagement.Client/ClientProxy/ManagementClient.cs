@@ -176,7 +176,7 @@ namespace Fitabase.Azure.ApiManagement
         {
             //var json = DoRequest(endpoint, method.ToString(), body);
             string json = await DoRequestAsync(endpoint, method.ToString(), body);
-
+            System.Diagnostics.Debug.WriteLine(json);
             if (String.IsNullOrWhiteSpace(json))
             {
                 return default(T);

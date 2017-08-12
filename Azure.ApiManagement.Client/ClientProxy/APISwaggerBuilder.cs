@@ -93,7 +93,27 @@ namespace Fitabase.Azure.ApiManagement
 
             throw new SwaggerResourceException("PathData's method is neither [POST, GET, PUT, PATCH, DELETE]");
         }
+        
 
+
+
+        //public List<Operation> GetOperationMethod()
+        //{
+        //    if (PathData == null)
+        //        throw new SwaggerResourceException("PathData is required");
+        //    List<Operation> operations = new List<Operation>();
+
+
+        //    if (PathData.Post != null) operations.Add(PathData.Post);
+        //    if (PathData.Get != null) operations.Add(PathData.Get);
+        //    if (PathData.Patch != null) operations.Add(PathData.Patch);
+        //    if (PathData.Put != null) operations.Add(PathData.Put);
+        //    if (PathData.Delete != null) operations.Add(PathData.Delete);
+        //    if (PathData.Options != null) operations.Add(PathData.Options);
+        //    if (PathData.Head != null) operations.Add(PathData.Head);
+
+        //    return operations;
+        //}
 
         public Operation GetOperationMethod()
         {
