@@ -3,6 +3,7 @@ using Fitabase.Azure.ApiManagement.Model;
 using Fitabase.Azure.ApiManagement.Swagger;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -65,19 +66,42 @@ namespace Azure.ApiManagement.Test
             APIBuilder builder = APIBuilder.GetBuilder(swaggerReader);
 
             API api = builder.BuildAPIAndOperations();
-
-            List<APIOperation> operations = api.Operations.ToList();
-            List<string> operationIds = new List<string>();
+            APIOperation operation = null;
+            foreach (APIOperation o in api.Operations)
+            {
+                if (o.Name == "deletePet")
+                {
+                    string json = JsonConvert.SerializeObject(o);
+                }
+            }
 
             //string json = JsonConvert.SerializeObject(api.Operations);
-            //json = JsonConvert.SerializeObject(operationIds);
 
             API entity = _Client.CreateAPIAsync(api).Result;
-            foreach(APIOperation operation in operations)
+            foreach (APIOperation o in api.Operations)
             {
-                var task = _Client.CreateAPIOperationAsync(entity, operation);
-                task.Wait();
+                try
+                {
+                    APIOperation e = _Client.CreateAPIOperationAsync(entity, o).Result;
+                }
+                catch (Exception)
+                {
+
+                }
             }
+
+            //List<APIOperation> operations = api.Operations.ToList();
+            //List<string> operationIds = new List<string>();
+
+            ////string json = JsonConvert.SerializeObject(api.Operations);
+            ////json = JsonConvert.SerializeObject(operationIds);
+
+            //API entity = _Client.CreateAPIAsync(api).Result;
+            //foreach(APIOperation operation in operations)
+            //{
+            //    var task = _Client.CreateAPIOperationAsync(entity, operation);
+            //    task.Wait();
+            //}
         }
     }
 }
