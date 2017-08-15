@@ -355,7 +355,12 @@ namespace Fitabase.Azure.ApiManagement
                 if (_operation == null)
                     throw new SwaggerResourceException("PathData is required");
 
+                if (_operation.Parameters == null || _operation.Parameters.Count == 0)
+                    return;                                     
+
                 IList<IParameter> parameters = _operation.Parameters;
+
+                
                 foreach (IParameter parameter in parameters)
                 {
                     switch (parameter.In)
@@ -411,10 +416,16 @@ namespace Fitabase.Azure.ApiManagement
                 RepresentationContract[] representations = null;
                 if(this._operation.Consumes != null && this._operation.Consumes.Count > 0)
                 {
-                    
                     representations = new RepresentationContract[]
                     {
                         RepresentationContract.Create(this._operation.Consumes[0], null, null, null, _formDataParameters.ToArray())
+                    };
+                }
+                else if(_formDataParameters.Count > 0)
+                {
+                    representations = new RepresentationContract[]
+                    {
+                        RepresentationContract.Create("application/json", null, null, null, _formDataParameters.ToArray())
                     };
                 }
 
