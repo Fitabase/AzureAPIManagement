@@ -380,8 +380,8 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void UpdateAPIOperation()
         {
-            string apiId = "597687442f02d30494230f8c";
-            string operationId = "597687442f02d31290052fed";
+            string apiId = "598e06832f02d3110cf5100b";
+            string operationId = "598e06832f02d30700f1c8f1";
             APIOperation entity_v1 = Client.GetAPIOperationAsync(apiId, operationId).Result;
 
             APIOperation operation = new APIOperation()
@@ -450,8 +450,8 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void GetAPIOperation()
         {
-            string apiId = "598e06832f02d3110cf5100b";
-            string operationId = "598e06832f02d30700f1c8f6";
+            string apiId = "5991f3b22f02d30bacf57719";
+            string operationId = "5991f3b22f02d30700f1c92d";
             APIOperation operation = Client.GetAPIOperationAsync(apiId, operationId).Result;
             Assert.IsNotNull(operation);
         }
@@ -459,7 +459,7 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void GetOperationsByAPI()
         {
-            string apiId = "598e06832f02d3110cf5100b";
+            string apiId = "5991f3b22f02d30bacf57719";
             EntityCollection<APIOperation> collection = Client.GetOperationsByAPIAsync(apiId).Result;
             List<string> operationIds = new List<string>();
             foreach(APIOperation operation in collection.Values)
