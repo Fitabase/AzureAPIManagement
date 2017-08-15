@@ -167,7 +167,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ClientProxy\ParameterBuilder.cs" />
     <Compile Include="DataModel\Abstract\EntityIdGenerator.cs" />
     <Compile Include="DataModel\Exceptions\SwaggerResourceException.cs" />
     <Compile Include="DataModel\Model\Logger.cs" />
