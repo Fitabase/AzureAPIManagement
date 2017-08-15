@@ -7,6 +7,7 @@ using Swashbuckle.Swagger.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace Fitabase.Azure.ApiManagement
 {
@@ -22,7 +23,7 @@ namespace Fitabase.Azure.ApiManagement
         {
             this._Swagger = swagger;
         }
-        
+
         public static APIBuilder GetBuilder(string swaggerURL)
         {
             AbstractSwaggerReader reader = new SwaggerUrlReader(swaggerURL);
@@ -31,15 +32,15 @@ namespace Fitabase.Azure.ApiManagement
 
         public static APIBuilder GetBuilder(AbstractSwaggerReader reader)
         {
-            if(reader == null)
+            if (reader == null)
             {
                 throw new SwaggerResourceException("Swagger reader cannot be null");
             }
             return new APIBuilder(reader.GetSwaggerObject());
         }
-        
-        
-        
+
+
+
         public API BuildAPIAndOperations()
         {
             API api = new APIMetatDataBuilder(this).BuildAPI();
@@ -83,7 +84,7 @@ namespace Fitabase.Azure.ApiManagement
             }
             return operations;
         }
-        
+
 
         /// <summary>
         /// Compose a swagger path to a API operation
@@ -102,23 +103,23 @@ namespace Fitabase.Azure.ApiManagement
             RequestMethod method = builder.GetRequestMethod();
             ParameterContract[] parameters = builder.BuildeTemplateParameters();
             RequestContract request = GetRequest();
-            ResponseContract[] responses =  GetMethodResponses(pathOperation, method).ToArray();
-            
+            ResponseContract[] responses = GetMethodResponses(pathOperation, method).ToArray();
+
             APIOperation apiOperation = APIOperation.Create(operationName, method, urlTemplate, parameters, request, responses, description);
             return apiOperation;
         }
-        
+
         private RequestContract GetRequest()
-        { 
+        {
             return RequestContract.Create();
         }
-        
+
         private RepresentationContract[] GetRequestRepresent()
         {
             return null;
         }
 
-        
+
         /// <summary>
         /// Remove the api title from the operation name. Prevent duplication on API operation URL
         /// </summary>
@@ -129,7 +130,7 @@ namespace Fitabase.Azure.ApiManagement
             return operationName.ToLower().Replace("/" + _Swagger.Info.Title.ToLower(), "");
         }
 
-        
+
         private string GetSampleData()
         {
             return JsonConvert.SerializeObject(_Swagger.Definitions, Formatting.Indented);
@@ -142,21 +143,21 @@ namespace Fitabase.Azure.ApiManagement
                 return null;
 
             List<ResponseContract> list = new List<ResponseContract>();
-            foreach(KeyValuePair<string, Response> response in operation.Responses)
+            foreach (KeyValuePair<string, Response> response in operation.Responses)
             {
                 string code = response.Key;
                 int statusCode;
                 try
                 {
                     statusCode = int.Parse(code);
-                } catch(FormatException)
+                } catch (FormatException)
                 {
                     continue;   // invalid response code, continue with next response.
                 }
                 string description = response.Value.Description;
 
                 RepresentationContract[] representations = null;
-                if(method == RequestMethod.GET)
+                if (method == RequestMethod.GET)
                     representations = new RepresentationContract[] { GetJsonRepresenation() };
 
                 ResponseContract r = ResponseContract.Create(statusCode, description, representations);
@@ -164,7 +165,7 @@ namespace Fitabase.Azure.ApiManagement
             }
             return list;
         }
-        
+
         private RepresentationContract GetJsonRepresenation()
         {
             return RepresentationContract.Create("application/json", null, _Swagger.Info.Title, GetSampleData(), null);
@@ -238,7 +239,7 @@ namespace Fitabase.Azure.ApiManagement
         class OperationBuilder
         {
             private APIBuilder _builder;
-            
+
             public OperationBuilder(APIBuilder builder)
             {
                 this._builder = builder;
@@ -248,77 +249,286 @@ namespace Fitabase.Azure.ApiManagement
             public HashSet<APIOperation> BuildOperations()
             {
                 HashSet<APIOperation> operations = new HashSet<APIOperation>();
-                foreach(KeyValuePair<string, PathItem> path in _builder._Swagger.Paths)
+                foreach (KeyValuePair<string, PathItem> path in _builder._Swagger.Paths)
                 {
                     string pathKey = path.Key;
                     PathItem pathItem = path.Value;
-                    AddNonNullOperation(operations, BuildOperation(pathKey, pathItem.Get, RequestMethod.GET));
-                    AddNonNullOperation(operations, BuildOperation(pathKey, pathItem.Post, RequestMethod.POST));
-                    AddNonNullOperation(operations, BuildOperation(pathKey, pathItem.Put, RequestMethod.PUT));
-                    AddNonNullOperation(operations, BuildOperation(pathKey, pathItem.Patch, RequestMethod.PATCH));
-                    AddNonNullOperation(operations, BuildOperation(pathKey, pathItem.Delete, RequestMethod.DELETE));
+
+                    if (pathItem.Get != null)
+                    {
+                        operations.Add(new SingleOperationBuilder(pathItem.Get, pathKey).BuildOperation(RequestMethod.GET));
+                    }
+                    if (pathItem.Post != null)
+                    {
+                        operations.Add(new SingleOperationBuilder(pathItem.Post, pathKey).BuildOperation(RequestMethod.POST));
+                    }
+                    if (pathItem.Put != null)
+                    {
+                        operations.Add(new SingleOperationBuilder(pathItem.Put, pathKey).BuildOperation(RequestMethod.PUT));
+                    }
+                    if (pathItem.Patch != null)
+                    {
+                        operations.Add(new SingleOperationBuilder(pathItem.Patch, pathKey).BuildOperation(RequestMethod.PATCH));
+                    }
+                    if (pathItem.Delete != null)
+                    {
+                        operations.Add(new SingleOperationBuilder(pathItem.Delete, pathKey).BuildOperation(RequestMethod.DELETE));
+                    }
                 }
                 return operations;
             }
-            
-            private void AddNonNullOperation(HashSet<APIOperation> operations, APIOperation operation)
+        }
+
+
+        class SingleOperationBuilder
+        {
+            private Operation _operation;
+            private string _baseUrl;
+            private IList<ParameterContract> _pathParameters;
+            private IList<ParameterContract> _queryParameters;
+            private IList<ParameterContract> _headerParameters;
+            private IList<ParameterContract> _formDataParameters;
+
+
+
+            public SingleOperationBuilder(Operation operation, string baseUrl)
             {
-                if (operation != null)
-                    operations.Add(operation);
+                this._operation = operation;
+                this._baseUrl = baseUrl;
+                _pathParameters = new List<ParameterContract>();
+                _queryParameters = new List<ParameterContract>();
+                _headerParameters = new List<ParameterContract>();
+                _formDataParameters = new List<ParameterContract>();
             }
 
-
-            public APIOperation BuildOperation(string urlTemplate, Operation operation, RequestMethod method)
+            public APIOperation BuildOperation(RequestMethod method = RequestMethod.GET)
             {
-                if (operation == null)
-                    return null;
 
-                ParameterContract[] parameters = operation.;
-                RequestContract request = null;
-                ResponseContract[] responses = null;
-                string description = operation.Description;
-                string name = operation.OperationId;
+                if (_operation == null)
+                    return null;
+                PrepareParameterLists();
+
+                string description = _operation.Description;
+                string name = _operation.OperationId;
+                string urlTemplate = _baseUrl + BuildQueryUrl();
+                ParameterContract[] parameters = _pathParameters.Concat(_queryParameters).ToArray();
+                RequestContract request = BuildRequest();
+                ResponseContract[] responses = BuildResponses();
                 return APIOperation.Create(name, method, urlTemplate, parameters, request, responses, description);
             }
 
 
-
-            private ParameterContract[] BuildTemplateParameters(Operation operation)
+            // Ex. URL = /{accountId}/{subscriptionId}
+            private string BuildPathUrl()
             {
-                if (operation == null)
+                StringBuilder builder = new StringBuilder();
+                foreach (ParameterContract p in _pathParameters)
+                {
+                    builder.Append("/{").Append(p.Name).Append("}");
+                }
+                return builder.ToString();
+            }
+
+            // Ex. URL = ?username={username}&pasword={password}
+            private string BuildQueryUrl()
+            {
+                StringBuilder builder = new StringBuilder();
+                for (int i = 0; i < _queryParameters.Count; i++)
+                {
+                    ParameterContract p = _queryParameters.ElementAt(i);
+
+                    if (i == 0) builder.Append("?");
+                    else builder.Append("&");
+
+                    builder.Append(p.Name).Append("={").Append(p.Name).Append("}");
+                }
+                return builder.ToString();
+            }
+
+
+            /// <summary>
+            /// Build Operation's template parameters. Depending on where the parameters, build the template parameters accordingly to it is.
+            /// </summary>
+            /// <returns></returns>
+            private void PrepareParameterLists()
+            {
+                if (_operation == null)
                     throw new SwaggerResourceException("PathData is required");
 
-                IList<IParameter> parameters = operation.Parameters;
-                IList<ParameterContract> parameterContracts = new List<ParameterContract>();
-                foreach(IParameter parameter in parameters)
+                IList<IParameter> parameters = _operation.Parameters;
+                foreach (IParameter parameter in parameters)
                 {
-                    if(parameter.In == "path")
+                    switch (parameter.In)
                     {
-                        NonBodyParameter nonBodyParameter = parameter as NonBodyParameter;
-                        ParameterContract parameterContract = ParameterContract.Create(nonBodyParameter.Name, nonBodyParameter.Type, nonBodyParameter.Description, nonBodyParameter.Default.ToString(), nonBodyParameter.Required);
-                        parameterContracts.Add(parameterContract);
+                        case "path":
+                            _pathParameters.Add(BuildParameter(parameter as NonBodyParameter));
+                            break;
+                        case "query":
+                            _queryParameters.Add(BuildParameter(parameter as NonBodyParameter));
+                            break;
+                        case "header":
+                            _headerParameters.Add(BuildParameter(parameter as NonBodyParameter));
+                            break;
+                        case "body":
+                        case "formData":
+                            _formDataParameters.Add(BuildParameter(parameter as NonBodyParameter));
+                            break;
+                        default:
+                            break;
                     }
                 }
-
-                //if (parameters == null || parameters.Count == 0)
-                //    return null;
-
-                //ParameterContract[] parameterContracts = new ParameterContract[parameters.Count];
-
-                //for (int i = 0; i < parameters.Count; i++)
-                //{
-                //    string json = JsonConvert.SerializeObject(parameters[i]);
-                //    ParameterContract template = JsonConvert.DeserializeObject<ParameterContract>(json);
-                //    template.Description = parameters[i].Description;
-                //    parameterContracts[i] = template;
-                //}
-                return parameterContracts.ToArray();
             }
+
+            private ParameterContract BuildParameter(BodyParameter p)
+            {
+                if (p != null)
+                    return ParameterContract.Create(p.Name, "string", p.Description, null, p.Required);
+                return null;
+            }
+
+            private ParameterContract BuildParameter(NonBodyParameter p)
+            {
+                if (p != null)
+                {
+                    string def = (p.Default != null) ? p.Default.ToString() : null;
+                    return ParameterContract.Create(p.Name, p.Type, p.Description, def, p.Required);
+                }
+                return null;
+            }
+
+            private RequestContract BuildRequest()
+            {
+                if (_operation == null)
+                    throw new SwaggerResourceException("Operation is required");
+
+                RepresentationContract[] representations = null;
+                if(this._operation.Consumes != null && this._operation.Consumes.Count > 0)
+                {
+                    
+                    representations = new RepresentationContract[]
+                    {
+                        RepresentationContract.Create(this._operation.Consumes[0], null, null, null, _formDataParameters.ToArray())
+                    };
+                }
+
+
+                OperationRequestBuilder rBuilder = new OperationRequestBuilder()
+                {
+                    Description = _operation.Description,
+                    Headers = _headerParameters.ToArray(),
+                    //Queries = _queryParameters.ToArray(),
+                    Representations = representations
+                };
+                return rBuilder.BuildRequest();
+            }
+
+
+            // Build operation responses, return null indicates no responses
+            private ResponseContract[] BuildResponses()
+            {
+                if (_operation == null)
+                    throw new SwaggerResourceException("Operation is required");
+                if (_operation.Responses == null || _operation.Responses.Count == 0)
+                {
+                    return null;
+                }
+
+                List<ResponseContract> responseContracts = new List<ResponseContract>();
+                foreach (KeyValuePair<string, Response> response in _operation.Responses)
+                {
+                    ResponseBuilder rBuilder = new ResponseBuilder()
+                    {
+                        _response = response.Value,
+                        _statusCode = response.Key
+                    };
+                    responseContracts.Add(rBuilder.BuildResponse());
+                }
+                return responseContracts.ToArray();
+            }
+
         }
-        
 
         #endregion Operation Builder
 
+
+        #region Operation Request Builder
+        class OperationRequestBuilder {
+
+            public string Description;
+            public ParameterContract[] Headers;
+            public ParameterContract[] Queries;
+            public RepresentationContract[] Representations;
+
+            public RequestContract BuildRequest()
+            {
+                return RequestContract.Create(Description, Headers, Queries, Representations);
+            }
+        }
+    
+        #endregion Operation Request Builder
+
+
+
+
+        #region Operation Response Builder
+        class ResponseBuilder
+        {
+            internal Response _response;
+            internal string _statusCode;
+
+
+            public ResponseContract BuildResponse()
+            {
+                RepresentationContract[] representations = {
+                    RepresentationContract.Create("application/json", null, GetSchemaDefinition(), GetResponseSampleCode(), null)
+                };
+                return ResponseContract.Create(GetStatusCode(), _response.Description, representations);
+            }
+
+
+            private int GetStatusCode()
+            {
+
+                int sCode;
+                try
+                {
+                    sCode = int.Parse(_statusCode);
+                }
+                catch (FormatException)
+                {
+                    string desc = _response.Description.ToLower();
+                    if (desc.Contains("ok") || desc.Contains("successful"))
+                        sCode = 200;
+                    else
+                        sCode = 500;
+
+                }
+                return sCode;
+            }
+
+            private string GetSchemaDefinition()
+            {
+                string def = null;
+                if (_response.Schema != null && _response.Schema.Ref != null)
+                {
+                    string[] schemaRefs = _response.Schema.Ref.Split('/');
+                    def = schemaRefs[schemaRefs.Length - 1];
+                }
+                return def;
+            }
+
+            private string GetResponseSampleCode()
+            {
+                return (_response.Examples != null) ? _response.Examples.ToString() : null;
+            }
+
+            //private RepresentationContract BuildRepresentation(string contentType, string typeName, string sample, ParameterContract[] formParameters, string schemaId = null)
+            //{
+            //    return RepresentationContract.Create(contentType, schemaId, typeName, sample, formParameters);
+            //}
+
+        }
+        #endregion Operation Response Builder
     }
 
 }
