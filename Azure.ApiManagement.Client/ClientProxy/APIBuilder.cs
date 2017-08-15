@@ -382,7 +382,9 @@ namespace Fitabase.Azure.ApiManagement
             private ParameterContract BuildParameter(BodyParameter p)
             {
                 if (p != null)
+                {
                     return ParameterContract.Create(p.Name, "string", p.Description, null, p.Required);
+                }
                 return null;
             }
 
@@ -390,8 +392,11 @@ namespace Fitabase.Azure.ApiManagement
             {
                 if (p != null)
                 {
-                    string def = (p.Default != null) ? p.Default.ToString() : null;
-                    return ParameterContract.Create(p.Name, p.Type, p.Description, def, p.Required);
+                    string defaultValue = (p.Default != null) ? p.Default.ToString() : null;
+                    string description = (p.Format != null) ? "format - " + p.Format + ". " : "";
+                    description += p.Description;
+
+                    return ParameterContract.Create(p.Name, p.Type, description, defaultValue, p.Required);
                 }
                 return null;
             }
