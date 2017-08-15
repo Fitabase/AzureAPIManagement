@@ -370,6 +370,8 @@ namespace Fitabase.Azure.ApiManagement
                             _headerParameters.Add(BuildParameter(parameter as NonBodyParameter));
                             break;
                         case "body":
+                            _formDataParameters.Add(BuildParameter(parameter as BodyParameter));
+                            break;
                         case "formData":
                             _formDataParameters.Add(BuildParameter(parameter as NonBodyParameter));
                             break;
@@ -378,7 +380,7 @@ namespace Fitabase.Azure.ApiManagement
                     }
                 }
             }
-
+            
             private ParameterContract BuildParameter(BodyParameter p)
             {
                 if (p != null)
