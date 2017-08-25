@@ -16,28 +16,32 @@ namespace Fitabase.Azure.ApiManagement
     /// </summary>
     public class APIBuilder
     {
-        public SwaggerDocument _Swagger;
-
-
-        public APIBuilder(SwaggerDocument swagger)
-        {
-            this._Swagger = swagger;
-        }
-
+        #region APIBuilder Initializer
+        private SwaggerDocument _swagger;
+        
+        private APIBuilder() { }
+        
         public static APIBuilder GetBuilder(string swaggerURL)
         {
             AbstractSwaggerReader reader = new SwaggerUrlReader(swaggerURL);
-            return new APIBuilder(reader.GetSwaggerObject());
+            return GetBuilder(reader);
         }
 
         public static APIBuilder GetBuilder(AbstractSwaggerReader reader)
         {
             if (reader == null)
+                throw new SwaggerResourceException("SwaggerReader cannot be null");
+            if (reader.GetSwaggerObject() == null)
+                throw new SwaggerResourceException("SwaggerDocument cannot be null");
+
+            APIBuilder builder = new APIBuilder()
             {
-                throw new SwaggerResourceException("Swagger reader cannot be null");
-            }
-            return new APIBuilder(reader.GetSwaggerObject());
+                _swagger = reader.GetSwaggerObject()
+            };
+            return builder;
         }
+
+        #endregion
 
 
 
@@ -52,11 +56,11 @@ namespace Fitabase.Azure.ApiManagement
 
         private List<APIOperation> BuildOperations()
         {
-            if (_Swagger == null)
+            if (_swagger == null)
                 throw new SwaggerResourceException("Swagger cannot be null");
 
             List<APIOperation> operations = new List<APIOperation>();
-            foreach (KeyValuePair<string, PathItem> path in _Swagger.Paths)
+            foreach (KeyValuePair<string, PathItem> path in _swagger.Paths)
             {
                 APIOperation apiOperation = GetOperation(path);
                 operations.Add(apiOperation);
@@ -64,11 +68,7 @@ namespace Fitabase.Azure.ApiManagement
             return operations;
         }
 
-
-
-
-
-
+        
         /// <summary>
         /// Compose a list of API Operations
         /// </summary>
@@ -127,13 +127,13 @@ namespace Fitabase.Azure.ApiManagement
         /// <returns></returns>
         private string GetOperationnUrl(string operationName)
         {
-            return operationName.ToLower().Replace("/" + _Swagger.Info.Title.ToLower(), "");
+            return operationName.ToLower().Replace("/" + _swagger.Info.Title.ToLower(), "");
         }
 
 
         private string GetSampleData()
         {
-            return JsonConvert.SerializeObject(_Swagger.Definitions, Formatting.Indented);
+            return JsonConvert.SerializeObject(_swagger.Definitions, Formatting.Indented);
         }
 
 
@@ -168,7 +168,7 @@ namespace Fitabase.Azure.ApiManagement
 
         private RepresentationContract GetJsonRepresenation()
         {
-            return RepresentationContract.Create("application/json", null, _Swagger.Info.Title, GetSampleData(), null);
+            return RepresentationContract.Create("application/json", null, _swagger.Info.Title, GetSampleData(), null);
         }
 
         #endregion
@@ -186,14 +186,14 @@ namespace Fitabase.Azure.ApiManagement
 
             public API BuildAPI()
             {
-                if (_builder._Swagger == null)
+                if (_builder._swagger == null)
                     throw new SwaggerResourceException("Swagger cannot be null");
 
                 string name = GetAPIName();                     // Get API name from swagger
                 string path = GetAPIPath();                     // Get API path from swagger
-                string description = _builder._Swagger.Info.Description;  // API description
-                string serviceUrl = _builder._Swagger.Host;               // API service URL form swagger
-                string[] protocols = _builder._Swagger.Schemes.Cast<string>().ToArray();
+                string description = _builder._swagger.Info.Description;  // API description
+                string serviceUrl = _builder._swagger.Host;               // API service URL form swagger
+                string[] protocols = _builder._swagger.Schemes.Cast<string>().ToArray();
 
                 AuthenticationSettingsConstract authentication = null;
                 SubscriptionKeyParameterNames customNames = null;
@@ -210,9 +210,9 @@ namespace Fitabase.Azure.ApiManagement
             /// <returns></returns>
             private string GetAPIPath()
             {
-                if (_builder._Swagger == null)
+                if (_builder._swagger == null)
                     throw new SwaggerResourceException("SwaggerObject is required");
-                return _builder._Swagger.BasePath + "/" + _builder._Swagger.Info.Title.Replace(" ", "");
+                return _builder._swagger.BasePath + "/" + _builder._swagger.Info.Title.Replace(" ", "");
             }
 
 
@@ -223,9 +223,9 @@ namespace Fitabase.Azure.ApiManagement
             /// <returns></returns>
             private string GetAPIName()
             {
-                if (_builder._Swagger == null)
+                if (_builder._swagger == null)
                     throw new SwaggerResourceException("SwaggerObject is required");
-                return _builder._Swagger.Info.Title + _builder._Swagger.BasePath;
+                return _builder._swagger.Info.Title + _builder._swagger.BasePath;
             }
 
 
@@ -249,7 +249,7 @@ namespace Fitabase.Azure.ApiManagement
             public HashSet<APIOperation> BuildOperations()
             {
                 HashSet<APIOperation> operations = new HashSet<APIOperation>();
-                foreach (KeyValuePair<string, PathItem> path in _builder._Swagger.Paths)
+                foreach (KeyValuePair<string, PathItem> path in _builder._swagger.Paths)
                 {
                     string pathKey = path.Key;
                     PathItem pathItem = path.Value;
@@ -390,7 +390,12 @@ namespace Fitabase.Azure.ApiManagement
             {
                 if (p != null)
                 {
-                    return ParameterContract.Create(p.Name, "string", p.Description, null, p.Required);
+                    string type = "string";
+                    if(p.Schema != null && p.Schema.Type != null)
+                    {
+                        type = p.Schema.Type;
+                    }
+                    return ParameterContract.Create(p.Name, type, p.Description, null, p.Required);
                 }
                 return null;
             }
@@ -402,6 +407,14 @@ namespace Fitabase.Azure.ApiManagement
                     string defaultValue = (p.Default != null) ? p.Default.ToString() : null;
                     string description = (p.Format != null) ? "format - " + p.Format + ". " : "";
                     description += p.Description;
+                    
+                    if(p.Type == "array")
+                    {
+                        if (p.Items != null && p.Items.Type != null)
+                        {
+                            description = "array " + p.Items.Type + ". " + description;
+                        }
+                    }
 
                     return ParameterContract.Create(p.Name, p.Type, description, defaultValue, p.Required);
                 }
