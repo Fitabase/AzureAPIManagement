@@ -2,7 +2,6 @@
 using Fitabase.Azure.ApiManagement.Model;
 using Fitabase.Azure.ApiManagement.Model.Exceptions;
 using Fitabase.Azure.ApiManagement.Swagger;
-using Newtonsoft.Json;
 using Swashbuckle.Swagger.Model;
 using System;
 using System.Collections.Generic;
@@ -18,16 +17,17 @@ namespace Fitabase.Azure.ApiManagement
     {
         #region APIBuilder Initializer
         private SwaggerDocument _swagger;
+        private APIBuilderSetting _setting;
         
         private APIBuilder() { }
         
-        public static APIBuilder GetBuilder(string swaggerURL)
+        public static APIBuilder GetBuilder(string swaggerURL, APIBuilderSetting setting = null)
         {
             AbstractSwaggerReader reader = new SwaggerUrlReader(swaggerURL);
-            return GetBuilder(reader);
+            return GetBuilder(reader, setting);
         }
 
-        public static APIBuilder GetBuilder(AbstractSwaggerReader reader)
+        public static APIBuilder GetBuilder(AbstractSwaggerReader reader, APIBuilderSetting setting = null)
         {
             if (reader == null)
                 throw new SwaggerResourceException("SwaggerReader cannot be null");
@@ -36,14 +36,14 @@ namespace Fitabase.Azure.ApiManagement
 
             APIBuilder builder = new APIBuilder()
             {
-                _swagger = reader.GetSwaggerObject()
+                _swagger = reader.GetSwaggerObject(),
+                _setting = (setting == null) ? new APIBuilderSetting() : setting,
             };
             return builder;
         }
 
         #endregion
-
-
+        
 
         public API BuildAPIAndOperations()
         {
@@ -51,129 +51,7 @@ namespace Fitabase.Azure.ApiManagement
             api.Operations = new OperationBuilder(this).BuildOperations();
             return api;
         }
-
-        #region UNKNOWN
-
-        private List<APIOperation> BuildOperations()
-        {
-            if (_swagger == null)
-                throw new SwaggerResourceException("Swagger cannot be null");
-
-            List<APIOperation> operations = new List<APIOperation>();
-            foreach (KeyValuePair<string, PathItem> path in _swagger.Paths)
-            {
-                APIOperation apiOperation = GetOperation(path);
-                operations.Add(apiOperation);
-            }
-            return operations;
-        }
-
         
-        /// <summary>
-        /// Compose a list of API Operations
-        /// </summary>
-        /// <param name="paths"></param>
-        /// <returns></returns>
-        private List<APIOperation> GetOperations(Dictionary<string, PathItem> paths)
-        {
-            List<APIOperation> operations = new List<APIOperation>();
-            foreach (KeyValuePair<string, PathItem> path in paths)
-            {
-                APIOperation apiOperation = GetOperation(path);
-                operations.Add(apiOperation);
-            }
-            return operations;
-        }
-
-
-        /// <summary>
-        /// Compose a swagger path to a API operation
-        /// </summary>
-        /// <param name="path"></param>
-        /// <returns></returns>
-        private APIOperation GetOperation(KeyValuePair<string, PathItem> path)
-        {
-            PathItem pathdata = path.Value;
-            APISwaggerBuilder builder = new APISwaggerBuilder(pathdata);
-
-            Operation pathOperation = builder.GetOperationMethod();
-            string operationName = pathOperation.OperationId;
-            string urlTemplate = GetOperationnUrl(path.Key) + builder.BuildRestParametersURL();        // Append parameters to the URL
-            string description = null;
-            RequestMethod method = builder.GetRequestMethod();
-            ParameterContract[] parameters = builder.BuildeTemplateParameters();
-            RequestContract request = GetRequest();
-            ResponseContract[] responses = GetMethodResponses(pathOperation, method).ToArray();
-
-            APIOperation apiOperation = APIOperation.Create(operationName, method, urlTemplate, parameters, request, responses, description);
-            return apiOperation;
-        }
-
-        private RequestContract GetRequest()
-        {
-            return RequestContract.Create();
-        }
-
-        private RepresentationContract[] GetRequestRepresent()
-        {
-            return null;
-        }
-
-
-        /// <summary>
-        /// Remove the api title from the operation name. Prevent duplication on API operation URL
-        /// </summary>
-        /// <param name="operationName"></param>
-        /// <returns></returns>
-        private string GetOperationnUrl(string operationName)
-        {
-            return operationName.ToLower().Replace("/" + _swagger.Info.Title.ToLower(), "");
-        }
-
-
-        private string GetSampleData()
-        {
-            return JsonConvert.SerializeObject(_swagger.Definitions, Formatting.Indented);
-        }
-
-
-        private List<ResponseContract> GetMethodResponses(Operation operation, RequestMethod method)
-        {
-            if (operation == null)
-                return null;
-
-            List<ResponseContract> list = new List<ResponseContract>();
-            foreach (KeyValuePair<string, Response> response in operation.Responses)
-            {
-                string code = response.Key;
-                int statusCode;
-                try
-                {
-                    statusCode = int.Parse(code);
-                } catch (FormatException)
-                {
-                    continue;   // invalid response code, continue with next response.
-                }
-                string description = response.Value.Description;
-
-                RepresentationContract[] representations = null;
-                if (method == RequestMethod.GET)
-                    representations = new RepresentationContract[] { GetJsonRepresenation() };
-
-                ResponseContract r = ResponseContract.Create(statusCode, description, representations);
-                list.Add(r);
-            }
-            return list;
-        }
-
-        private RepresentationContract GetJsonRepresenation()
-        {
-            return RepresentationContract.Create("application/json", null, _swagger.Info.Title, GetSampleData(), null);
-        }
-
-        #endregion
-
-
         #region API Metadata Builder
         class APIMetatDataBuilder
         {
@@ -184,16 +62,20 @@ namespace Fitabase.Azure.ApiManagement
                 this._builder = builder;
             }
 
+            /// <summary>
+            /// Build a new api from swagger document
+            /// </summary>
+            /// <returns>An API</returns>
             public API BuildAPI()
             {
                 if (_builder._swagger == null)
                     throw new SwaggerResourceException("Swagger cannot be null");
 
-                string name = GetAPIName();                     // Get API name from swagger
-                string path = GetAPIPath();                     // Get API path from swagger
-                string description = _builder._swagger.Info.Description;  // API description
-                string serviceUrl = _builder._swagger.Host;               // API service URL form swagger
-                string[] protocols = _builder._swagger.Schemes.Cast<string>().ToArray();
+                string   name = GetAPIName();                     // Get API name from swagger
+                string   path = GetAPIPath();                     // Get API path from swagger
+                string   description = _builder._swagger.Info.Description;  // API description
+                string   serviceUrl  = _builder._swagger.Host;              // API service URL form swagger
+                string[] protocols   = _builder._swagger.Schemes.Cast<string>().ToArray();
 
                 AuthenticationSettingsConstract authentication = null;
                 SubscriptionKeyParameterNames customNames = null;
@@ -204,32 +86,50 @@ namespace Fitabase.Azure.ApiManagement
 
 
             /// <summary>
-            /// Provide a API path from swagger. The API path will likely append to host
-            /// Ex. /v1/bodytrace with title = bodytrace, basepath = /v1
+            /// Return the API path from swagger. The API path will likely append to 
+            /// host; hence the API
+            /// Ex. apiPath = /v1/bodytrace where title = bodytrace, basepath = /v1
             /// </summary>
-            /// <returns></returns>
+            /// <returns>The API path </returns>
             private string GetAPIPath()
             {
                 if (_builder._swagger == null)
-                    throw new SwaggerResourceException("SwaggerObject is required");
-                return _builder._swagger.BasePath + "/" + _builder._swagger.Info.Title.Replace(" ", "");
+                    throw new SwaggerResourceException("Swagger is required");
+                string version = _builder._swagger.BasePath.Replace("/", "");
+                string path    = _builder._swagger.Info.Title.Replace(" ", "");
+
+                if (_builder._setting.API_PathOnly)
+                    return path;
+                if (_builder._setting.API_PathThenVersion)
+                    return String.Format("/{0}/{1}", path, version);
+                else
+                    return String.Format("/{0}/{1}", version, path);
             }
 
-
+            
             /// <summary>
-            /// Provide a (unique) API name from swagger
-            /// Ex. bodytrace/v1 with title = bodytrace, basepath = /v1
+            /// Return a (unique) API name from swagger. The API's name is appended
+            /// with the basepath (or api's version) to provide an unique API name 
+            /// betweeen different API versions
+            /// 
+            /// Ex. bodytrace/v1 where title = bodytrace, basepath = /v1
             /// </summary>
-            /// <returns></returns>
+            /// <returns>an unique API name</returns>
             private string GetAPIName()
             {
                 if (_builder._swagger == null)
-                    throw new SwaggerResourceException("SwaggerObject is required");
-                return _builder._swagger.Info.Title + _builder._swagger.BasePath;
+                    throw new SwaggerResourceException("Swagger is required");
+
+                string name    = _builder._swagger.Info.Title;
+                string version = _builder._swagger.BasePath.Replace("/", "");
+
+                if (_builder._setting.API_NameOnly)
+                    return _builder._swagger.Info.Title;
+                if (_builder._setting.API_NameThenVersion)
+                    return String.Format("{0}/{1}", name, version);
+                else
+                 return String.Format("{0}/{1}", version, name);
             }
-
-
-
         }
         #endregion
 
@@ -245,13 +145,16 @@ namespace Fitabase.Azure.ApiManagement
                 this._builder = builder;
             }
 
-
+            /// <summary>
+            /// Build api operations from swagger document. 
+            /// </summary>
+            /// <returns>A set of api operations</returns>
             public HashSet<APIOperation> BuildOperations()
             {
                 HashSet<APIOperation> operations = new HashSet<APIOperation>();
                 foreach (KeyValuePair<string, PathItem> path in _builder._swagger.Paths)
                 {
-                    string pathKey = path.Key;
+                    string pathKey    = path.Key;
                     PathItem pathItem = path.Value;
 
                     if (pathItem.Get != null)
@@ -289,31 +192,35 @@ namespace Fitabase.Azure.ApiManagement
             private IList<ParameterContract> _headerParameters;
             private IList<ParameterContract> _formDataParameters;
 
-
-
             public SingleOperationBuilder(Operation operation, string baseUrl)
             {
                 this._operation = operation;
                 this._baseUrl = baseUrl;
-                _pathParameters = new List<ParameterContract>();
-                _queryParameters = new List<ParameterContract>();
-                _headerParameters = new List<ParameterContract>();
+                _pathParameters     = new List<ParameterContract>();
+                _queryParameters    = new List<ParameterContract>();
+                _headerParameters   = new List<ParameterContract>();
                 _formDataParameters = new List<ParameterContract>();
             }
 
+            /// <summary>
+            /// Build an APIOperation from a swagger operation
+            /// </summary>
+            /// <param name="method"></param>
+            /// <returns>An APIOperation</returns>
             public APIOperation BuildOperation(RequestMethod method = RequestMethod.GET)
             {
-
                 if (_operation == null)
                     return null;
+
                 PrepareParameterLists();
 
+                string name        = _operation.OperationId;              
                 string description = _operation.Description;
-                string name = _operation.OperationId;
                 string urlTemplate = _baseUrl + BuildQueryUrl();
+
                 ParameterContract[] parameters = _pathParameters.Concat(_queryParameters).ToArray();
-                RequestContract request = BuildRequest();
-                ResponseContract[] responses = BuildResponses();
+                ResponseContract[]  responses  = BuildResponses();
+                RequestContract     request    = BuildRequest();
                 return APIOperation.Create(name, method, urlTemplate, parameters, request, responses, description);
             }
 
@@ -495,7 +402,7 @@ namespace Fitabase.Azure.ApiManagement
                 return RequestContract.Create(Description, Headers, Queries, Representations);
             }
         }
-    
+        
         #endregion Operation Request Builder
 
 

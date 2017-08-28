@@ -21,6 +21,8 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>
+    </DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -167,6 +169,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ClientProxy\APIBuilderSetting.cs" />
     <Compile Include="DataModel\Abstract\EntityIdGenerator.cs" />
     <Compile Include="DataModel\Exceptions\SwaggerResourceException.cs" />
     <Compile Include="DataModel\Model\Logger.cs" />
