@@ -155,9 +155,9 @@ namespace Azure.ApiManagement.Test
         public void CreateApi()
         {
             int count_v1 = Client.GetAPIsAsync().Result.Count;
-            string name = "test";
+            string name = "staging-zing";
             string description = "An example to create apis from service";
-            string serviceUrl = "test.com";
+            string serviceUrl = "fitabase-staging.net";
             string path = "/v4";
             string[] protocols = new string[] { "http", "https" };
 
@@ -238,10 +238,10 @@ namespace Azure.ApiManagement.Test
 
             string name = "Operation_3";
             RequestMethod method = RequestMethod.DELETE;
-            string urlTemplate = "/pet";
+            string urlTemplate = "/pet/{petId}";
             string description = "post it";
 
-            APIOperation operation = APIOperation.Create(name, method, urlTemplate, Parameters(), null, null, description);
+            APIOperation operation = APIOperation.Create(name, method, urlTemplate, Parameters(), Request(), Responses(), description);
 
             #region CREATE
 
@@ -450,8 +450,8 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void GetAPIOperation()
         {
-            string apiId = "5991f3b22f02d30bacf57719";
-            string operationId = "5991f3b22f02d30700f1c92d";
+            string apiId = "api_577edd5ee62543d297bd5d568af78a82";
+            string operationId = "operation_6854477750384abe9bc70efb9415b938";
             APIOperation operation = Client.GetAPIOperationAsync(apiId, operationId).Result;
             Assert.IsNotNull(operation);
         }
@@ -669,11 +669,43 @@ namespace Azure.ApiManagement.Test
             Assert.AreEqual(count_v1 - 1, count_v2);
         }
 
+        [TestMethod]
+        public void GetProductPolicy()
+        {
+            string productId = "5870184f9898000087060001";
+            var o = Client.GetProductPolicyAsync(productId);
+        }
+        
+        [TestMethod]
+        public void CheckProductPolicy()
+        {
+            string productId = "5956a9b92f02d30b88dfad7d";
+            var a = Client.CheckProductPolicyAsync(productId);
+        }
+
+        [TestMethod]
+        public void SetProductPolicy()
+        {
+            string productId = "5956a9b92f02d30b88dfad7d";
+            string policy = "";
+            var b = Client.SetProductPolicyAsync(productId, policy);
+        }
+
+        [TestMethod]
+        public void DeleteProductPolicy()
+        {
+            string productId = "5956a9b92f02d30b88dfad7d";
+            var b = Client.DeleteProductPolicyAsync(productId);
+        }
+
 
         #endregion Product TestCases
 
 
 
+
+
+        
 
 
 

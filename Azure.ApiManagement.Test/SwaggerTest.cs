@@ -5,7 +5,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Azure.ApiManagement.Test
 {
@@ -36,6 +35,45 @@ namespace Azure.ApiManagement.Test
 
         }
 
+        #region Test APIBuilder
+        [TestMethod]
+        public void BuildSwaggerWithSwaggerReader()
+        {
+            string urlPath = @"http://localhost:2598/swagger/docs/BodyTrace";
+            AbstractSwaggerReader swaggerReader = new SwaggerUrlReader(urlPath);
+            APIBuilder builder = APIBuilder.GetBuilder(swaggerReader);
+            Assert.IsNotNull(builder);
+        }
+
+        [TestMethod]
+        public void BuildSwaggerWithURL()
+        {
+            string urlPath = @"http://localhost:2598/swagger/docs/BodyTrace";
+            APIBuilder builder = APIBuilder.GetBuilder(urlPath);
+            Assert.IsNotNull(builder);
+        }
+
+        [TestMethod]
+        public void BuildAPIWithSwaggerReader()
+        {
+            string urlPath = @"http://localhost:2598/swagger/docs/BatchExport";
+            AbstractSwaggerReader swaggerReader = new SwaggerUrlReader(urlPath);
+            APIBuilder builder = APIBuilder.GetBuilder(swaggerReader);
+            API api = builder.BuildAPIAndOperations();
+            Assert.IsNotNull(api);
+            Assert.IsNotNull(api.Id);
+            Assert.IsNotNull(api.Operations);
+            Assert.IsTrue(api.Operations.Count > 0);
+        }
+
+        [TestMethod]
+        public void GetSwaggerJson()
+        {
+            string urlPath = @"http://localhost:2598/swagger/docs/BodyTrace";
+            string json = APIBuilder.GetSwaggerJson(urlPath);
+        }
+
+        #endregion Test APIBuilder
 
 
         #region Publish an API
@@ -66,17 +104,6 @@ namespace Azure.ApiManagement.Test
             APIBuilder builder = APIBuilder.GetBuilder(swaggerReader);
 
             API api = builder.BuildAPIAndOperations();
-            APIOperation operation = null;
-            foreach (APIOperation o in api.Operations)
-            {
-                if (o.Name == "deletePet")
-                {
-                    string json = JsonConvert.SerializeObject(o);
-                }
-            }
-
-            //string json = JsonConvert.SerializeObject(api.Operations);
-
             API entity = _Client.CreateAPIAsync(api).Result;
             foreach (APIOperation o in api.Operations)
             {
@@ -89,19 +116,40 @@ namespace Azure.ApiManagement.Test
 
                 }
             }
+        }
 
-            //List<APIOperation> operations = api.Operations.ToList();
-            //List<string> operationIds = new List<string>();
 
-            ////string json = JsonConvert.SerializeObject(api.Operations);
-            ////json = JsonConvert.SerializeObject(operationIds);
 
-            //API entity = _Client.CreateAPIAsync(api).Result;
-            //foreach(APIOperation operation in operations)
-            //{
-            //    var task = _Client.CreateAPIOperationAsync(entity, operation);
-            //    task.Wait();
-            //}
+        
+
+
+
+        [TestMethod]
+        public void ReadLocalOperation()
+        {
+
+            string filePath = @"C:\Users\inter\Downloads\swaggerOperation.json";
+            AbstractSwaggerReader swaggerReader = new SwaggerFileReader(filePath);
+            APIBuilder builder = APIBuilder.GetBuilder(swaggerReader);
+
+            ICollection<APIOperation> operations = builder.BuildAPIAndOperations().Operations;
+
+
+            string apiId = "api_577edd5ee62543d297bd5d568af78a82";
+            API entity = _Client.GetAPIAsync(apiId).Result;
+            string json = JsonConvert.SerializeObject(entity.Operations);
+            foreach (APIOperation o in operations)
+            {
+                try
+                {
+                    APIOperation e = _Client.CreateAPIOperationAsync(entity, o).Result;
+                }
+                catch (Exception)
+                {
+
+                }
+            }
+
         }
     }
 }
