@@ -2,6 +2,7 @@
 using Fitabase.Azure.ApiManagement.Model;
 using Fitabase.Azure.ApiManagement.Model.Exceptions;
 using Fitabase.Azure.ApiManagement.Swagger;
+using Newtonsoft.Json;
 using Swashbuckle.Swagger.Model;
 using System;
 using System.Collections.Generic;
@@ -11,22 +12,35 @@ using System.Text;
 namespace Fitabase.Azure.ApiManagement
 {
     /// <summary>
-    /// This class is used to compose a Swagger object to a API object
+    /// This class is used to compose a Swagger Document object to a API and APIOperations objects
     /// </summary>
     public class APIBuilder
     {
         #region APIBuilder Initializer
-        private SwaggerDocument _swagger;
-        private APIBuilderSetting _setting;
+        private SwaggerDocument _swagger { get; set; }
+        private APIBuilderSetting _setting { get; set; }
         
         private APIBuilder() { }
         
+        /// <summary>
+        /// Get an API Builder. The builder is used to build an API and operations.
+        /// </summary>
+        /// <param name="swaggerURL"></param>
+        /// <param name="setting"></param>
+        /// <returns></returns>
         public static APIBuilder GetBuilder(string swaggerURL, APIBuilderSetting setting = null)
         {
             AbstractSwaggerReader reader = new SwaggerUrlReader(swaggerURL);
             return GetBuilder(reader, setting);
         }
 
+
+        /// <summary>
+        /// Create an API builder. The builder is used to build API and operations out of SwaggerDocument.
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="setting"></param>
+        /// <returns>API builder</returns>
         public static APIBuilder GetBuilder(AbstractSwaggerReader reader, APIBuilderSetting setting = null)
         {
             if (reader == null)
@@ -42,9 +56,38 @@ namespace Fitabase.Azure.ApiManagement
             return builder;
         }
 
-        #endregion
-        
 
+        /// <summary>
+        /// TODO Remove This. Intentionally used to debug in FitabaseWeb.
+        /// </summary>
+        /// <param name="swaggerURL"></param>
+        /// <returns></returns>
+        public static string GetSwaggerJson(string swaggerURL)
+        {
+            AbstractSwaggerReader reader = new SwaggerUrlReader(swaggerURL);
+            return JsonConvert.SerializeObject(reader.GetSwaggerObject(), new JsonSerializerSettings()
+            {
+                NullValueHandling = NullValueHandling.Ignore
+            });
+        }
+
+        /// <summary>
+        /// TODO Remove this method latter. This methid is itentionally used to debug in FitabaseWeb
+        /// </summary>
+        /// <returns></returns>
+        public string GetDebugString()
+        {
+            return "Debug string in Azure.APImanagement";
+        }
+
+
+        #endregion
+
+
+        /// <summary>
+        /// Build API and its operations from the resource.
+        /// </summary>
+        /// <returns></returns>
         public API BuildAPIAndOperations()
         {
             API api = new APIMetatDataBuilder(this).BuildAPI();
@@ -52,7 +95,13 @@ namespace Fitabase.Azure.ApiManagement
             return api;
         }
         
+
+
+
         #region API Metadata Builder
+        /// <summary>
+        /// This helper class is used to build a API from the API builder.
+        /// </summary>
         class APIMetatDataBuilder
         {
             private APIBuilder _builder;
@@ -71,17 +120,26 @@ namespace Fitabase.Azure.ApiManagement
                 if (_builder._swagger == null)
                     throw new SwaggerResourceException("Swagger cannot be null");
 
-                string   name = GetAPIName();                     // Get API name from swagger
-                string   path = GetAPIPath();                     // Get API path from swagger
+                string   name = GetAPIName();                               // Get API name from swagger
+                string   path = GetAPIPath();                               // Get API path from swagger
                 string   description = _builder._swagger.Info.Description;  // API description
                 string   serviceUrl  = _builder._swagger.Host;              // API service URL form swagger
                 string[] protocols   = _builder._swagger.Schemes.Cast<string>().ToArray();
 
-                AuthenticationSettingsConstract authentication = null;
+                AuthenticationSettingsConstract authentication = GetAuthenticationSettingConstract();
                 SubscriptionKeyParameterNames customNames = null;
 
                 API api = API.Create(name, serviceUrl, path, protocols, description, authentication, customNames);
                 return api;
+            }
+            
+            /// <summary>
+            /// TODO build Authentication
+            /// </summary>
+            /// <returns></returns>
+            private AuthenticationSettingsConstract GetAuthenticationSettingConstract()
+            {
+                return null;
             }
 
 
@@ -182,7 +240,9 @@ namespace Fitabase.Azure.ApiManagement
             }
         }
 
-
+        /// <summary>
+        /// This class is used to build a single API operation out of a SwaggerDocument Path
+        /// </summary>
         class SingleOperationBuilder
         {
             private Operation _operation;
