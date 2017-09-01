@@ -75,7 +75,7 @@ namespace Fitabase.Azure.ApiManagement
         /// TODO Remove this method latter. This methid is itentionally used to debug in FitabaseWeb
         /// </summary>
         /// <returns></returns>
-        public string GetDebugString()
+        public static string GetDebugString()
         {
             return "Debug string in Azure.APImanagement";
         }
