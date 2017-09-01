@@ -5,6 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Azure.ApiManagement.Test
 {
@@ -81,14 +82,17 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void PublishSwaggerAPI()
         {
-            APIBuilder builder = APIBuilder.GetBuilder(UrlPath);
+            string url = @"http://localhost:2598/swagger/docs/BatchExport";
+            APIBuilder builder = APIBuilder.GetBuilder(url);
             API api = builder.BuildAPIAndOperations();
-
-            string json = JsonConvert.SerializeObject(api.Operations, Formatting.None, new JsonSerializerSettings()
-            {
-                NullValueHandling = NullValueHandling.Ignore
-            });
+            var entity = _Client.CreateAPIAsync(api).Result;
+            Assert.IsNotNull(entity);
+            var operation = api.Operations.ToList().ElementAt(0);
+            string json = JsonConvert.SerializeObject(operation);
+            var a=  _Client.CreateAPIOperationAsync(entity, operation).Result;
+            
         }
+        
 
         #endregion Publish an API
 

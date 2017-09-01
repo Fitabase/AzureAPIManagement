@@ -3,18 +3,8 @@ using Fitabase.Azure.ApiManagement;
 using Fitabase.Azure.ApiManagement.Model;
 using System;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using System.IO;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System.Collections;
 using System.Collections.Generic;
 using Fitabase.Azure.ApiManagement.DataModel.Properties;
-using Fitabase.Azure.ApiManagement.Model.Exceptions;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
 
 namespace Azure.ApiManagement.Test
 {
@@ -22,10 +12,6 @@ namespace Azure.ApiManagement.Test
     public class ManagementClientTests
     {
         protected ManagementClient Client { get; set; }
-
-        public static string API_DOC = @"C:\Users\inter\Desktop\FitabaseAPI\Azure\api.json";
-        public static string API_OPERATION_DOC = @"C:\Users\inter\Desktop\FitabaseAPI\Azure\apioperation.json";
-
 
 
         [TestInitialize]
@@ -148,8 +134,7 @@ namespace Azure.ApiManagement.Test
         /*********************************************************/
 
         #region API TestCases
-
-
+            
 
         [TestMethod]
         public void CreateApi()
@@ -163,8 +148,8 @@ namespace Azure.ApiManagement.Test
 
             API newAPI = API.Create(name, serviceUrl, path, protocols, description);
             API api = Client.CreateAPIAsync(newAPI).Result;
-            int count_v2 = Client.GetAPIsAsync().Result.Count;
             Assert.IsNotNull(api.Id);
+            int count_v2 = Client.GetAPIsAsync().Result.Count;
             Assert.AreEqual(count_v1 + 1, count_v2);
         }
 
@@ -172,13 +157,11 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void GetAPI()
         {
-            string apiId = "598e06832f02d3110cf5100b";
+            string apiId = "59a9a0682f02d308c8fef6b5";
             API api = Client.GetAPIAsync(apiId).Result;
-            string json = JsonConvert.SerializeObject(api);
             Assert.IsNotNull(api);
             Assert.AreEqual(api.Id, apiId);
         }
-
 
         [TestMethod]
         public void ApiCollection()
@@ -234,7 +217,7 @@ namespace Azure.ApiManagement.Test
         public void APIOperationLifeCycle()
         {
             long c1, c2;
-            string apiId = "api_577edd5ee62543d297bd5d568af78a82";
+            string apiId = "api_96c8b0b79c9342f7a42f56795c92fd1d";
 
             string name = "Operation_3";
             RequestMethod method = RequestMethod.DELETE;
@@ -242,6 +225,7 @@ namespace Azure.ApiManagement.Test
             string description = "post it";
 
             APIOperation operation = APIOperation.Create(name, method, urlTemplate, Parameters(), Request(), Responses(), description);
+
 
             #region CREATE
 
@@ -461,12 +445,6 @@ namespace Azure.ApiManagement.Test
         {
             string apiId = "5991f3b22f02d30bacf57719";
             EntityCollection<APIOperation> collection = Client.GetOperationsByAPIAsync(apiId).Result;
-            List<string> operationIds = new List<string>();
-            foreach(APIOperation operation in collection.Values)
-            {
-                //operationIds.Add(operation.Name);
-            }
-            string json = JsonConvert.SerializeObject(operationIds);
             Assert.IsNotNull(collection);
         }
 
