@@ -8,6 +8,7 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Fitabase.Azure.ApiManagement
@@ -135,7 +136,7 @@ namespace Fitabase.Azure.ApiManagement
         }
 
 
-        protected virtual HttpRequestMessage GetRequest(String method, string uri, string body = null)
+        protected virtual HttpRequestMessage GetRequest(String method, string uri, string body)
         {
             string endpointURI = GetFormatedEndpoint(uri);
             string token = Utility.CreateSharedAccessToken(_serviceId, _accessToken, DateTime.UtcNow.AddDays(1));
@@ -168,14 +169,19 @@ namespace Fitabase.Azure.ApiManagement
 
             return request;
         }
-        
+
 
         #region Generic Requests
-
-        public virtual async Task<T> DoRequestAsync<T>(string endpoint, RequestMethod method = RequestMethod.GET, string body = null)
+        
+        public virtual async Task<T> DoRequestAsync<T>(string endpoint, RequestMethod request, CancellationToken cancellationToken = default(CancellationToken))
         {
-            //var json = DoRequest(endpoint, method.ToString(), body);
-            string json = await DoRequestAsync(endpoint, method.ToString(), body);
+            return await DoRequestAsync<T>(endpoint, request, null, cancellationToken);
+        }
+
+        public virtual async Task<T> DoRequestAsync<T>(string endpoint, RequestMethod method, string body, 
+                                                        CancellationToken cancellationToken = default(CancellationToken))
+        {
+            string json = await DoRequestAsync(endpoint, method.ToString(), body, cancellationToken);
             if (String.IsNullOrWhiteSpace(json))
             {
                 return default(T);
@@ -183,14 +189,36 @@ namespace Fitabase.Azure.ApiManagement
             T obj = JsonConvert.DeserializeObject<T>(json);
             return obj;
         }
+        
 
-        public virtual async Task<string> DoRequestAsync(string endpoint, string method, string body)
+
+        public virtual async Task<string> DoRequestAsync(string endpoint, string method, string body, CancellationToken cancellationToken)
         {
-            HttpClient client = new HttpClient();
-            HttpRequestMessage request = GetRequest(method, endpoint, body);
-            HttpResponseMessage response = await client.SendAsync(request);
-            string result = await OnHandleResponseAsync(response);
-            return result;
+            HttpClient httpClient = null;
+            HttpRequestMessage request = null;
+            HttpResponseMessage response = null;
+            try
+            {
+                httpClient = new HttpClient();
+                request = GetRequest(method, endpoint, body);
+                response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancellationToken);
+                string result = await OnHandleResponseAsync(response);
+                return result;
+            } finally
+            {
+                // Cleanup
+                if (request != null)
+                {
+                    request.Dispose();
+                    request = null;
+                }
+
+                if (httpClient != null)
+                {
+                    httpClient.Dispose();
+                    httpClient = null;
+                }
+            }
         }
 
 
@@ -207,13 +235,13 @@ namespace Fitabase.Azure.ApiManagement
 
             return await response.Content.ReadAsStringAsync();
         }
-        public virtual async Task<T> GetByIdAsync<T>(string endpoint, string ID)
+        public virtual async Task<T> GetByIdAsync<T>(string endpoint, string ID, CancellationToken cancellationToken = default(CancellationToken))
         {
             string[] splits = ID.Split('_');
             string entitySignatureName = (splits.Length > 1) ? splits[0] : "entity";
             try
             {
-                T entity = await DoRequestAsync<T>(String.Format("{0}/{1}", endpoint, ID));
+                T entity = await DoRequestAsync<T>(String.Format("{0}/{1}", endpoint, ID), RequestMethod.GET, cancellationToken);
                 return entity;
             }
             catch (HttpResponseException)
@@ -235,6 +263,36 @@ namespace Fitabase.Azure.ApiManagement
 
 
 
+        public string GetRequestOperationSignature(string operation, string salt, string delegationValidationKey,
+            string returnUrl = null, string productId = null, string userId = null, string subscriptionId = null)
+        {
+            var encoder = new System.Security.Cryptography.HMACSHA512(Convert.FromBase64String(delegationValidationKey));
+            string signature;
+
+            switch (operation)
+            {
+                case "SignIn":
+                    signature = Convert.ToBase64String(encoder.ComputeHash(Encoding.UTF8.GetBytes(salt + "\n" + returnUrl)));
+                    break;
+                case "Subscribe":
+                    signature = Convert.ToBase64String(encoder.ComputeHash(Encoding.UTF8.GetBytes(salt + "\n" + productId + "\n" + userId)));
+                    break;
+                case "Unsubscribe":
+                    signature = Convert.ToBase64String(encoder.ComputeHash(Encoding.UTF8.GetBytes(salt + "\n" + subscriptionId)));
+                    break;
+                case "ChangeProfile":
+                case "ChangePassword":
+                case "SignOut":
+                    signature = Convert.ToBase64String(encoder.ComputeHash(Encoding.UTF8.GetBytes(salt + "\n" + userId)));
+                    break;
+                default:
+                    signature = "";
+                    break;
+            }
+
+            return signature;
+        }
+
 
         /*********************************************************/
         /************************  USER  *************************/
@@ -246,86 +304,86 @@ namespace Fitabase.Azure.ApiManagement
         /// Retrieves a redirection URL containing an authentication 
         /// token for signing a given user into the developer portal.
         /// </summary>
-        public async Task<SsoUrl> GenerateSsoURLAsync(string userId)
+        public async Task<SsoUrl> GenerateSsoURLAsync(string userId, CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/users/{1}/generateSsoUrl", _api_endpoint, userId);
-            return await DoRequestAsync<SsoUrl>(endpoint, RequestMethod.POST);
+            return await DoRequestAsync<SsoUrl>(endpoint, RequestMethod.POST, cancellationToken);
         }
 
         /// <summary>
         /// Create a new user model
         /// </summary>
-        public async Task<User> CreateUserAsync(User user)
+        public async Task<User> CreateUserAsync(User user, CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/users/{1}", _api_endpoint, user.Id);
-            await DoRequestAsync<User>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(user));
+            await DoRequestAsync<User>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(user), cancellationToken);
             return user;
         }
 
         /// <summary>
         ///  Retrieve a specific user model of a given id
         /// </summary>
-        public async Task<User> GetUserAsync(string userId)
+        public async Task<User> GetUserAsync(string userId, CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/users", _api_endpoint);
-            return await GetByIdAsync<User>(endpoint, userId);
+            return await GetByIdAsync<User>(endpoint, userId, cancellationToken);
         }
 
 
         /// <summary>
         /// Delete a specific user model of a given id
         /// </summary>
-        public async Task DeleteUserAsync(string userId)
+        public async Task DeleteUserAsync(string userId, CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/users/{1}", _api_endpoint, userId);
-            await DoRequestAsync<User>(endpoint, RequestMethod.DELETE);
+            await DoRequestAsync<User>(endpoint, RequestMethod.DELETE, cancellationToken);
         }
 
         /// <summary>
         /// Delete user's subscriptions
         /// </summary>
-        public async Task DeleteUserWithSubscriptionsAsync(string userId)
+        public async Task DeleteUserWithSubscriptionsAsync(string userId, CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/users/{1}?deleteSubscriptions=true", _api_endpoint, userId);
-            await DoRequestAsync<User>(endpoint, RequestMethod.DELETE);
+            await DoRequestAsync<User>(endpoint, RequestMethod.DELETE, cancellationToken);
         }
 
         /// <summary>
         /// Retrieve all user models
         /// </summary>
-        public async Task<EntityCollection<User>> GetUsersAsync()
+        public async Task<EntityCollection<User>> GetUsersAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/users", _api_endpoint);
-            return await DoRequestAsync<EntityCollection<User>>(endpoint);
+            return await DoRequestAsync<EntityCollection<User>>(endpoint, RequestMethod.GET, cancellationToken);
         }
 
         /// <summary>
         /// Retrieve a list of subscriptions by the user
         /// </summary>
-        public async Task<EntityCollection<Subscription>> GetUserSubscriptionAsync(string userId)
+        public async Task<EntityCollection<Subscription>> GetUserSubscriptionAsync(string userId, CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/users/{1}/subscriptions", _api_endpoint, userId);
-            return await DoRequestAsync<EntityCollection<Subscription>>(endpoint, RequestMethod.GET);
+            return await DoRequestAsync<EntityCollection<Subscription>>(endpoint, RequestMethod.GET, cancellationToken);
         }
 
         /// <summary>
         /// Retrieve a list of groups that the specific user belongs to
         /// </summary>
-        public async Task<EntityCollection<Group>> GetUserGroupsAsync(string userId)
+        public async Task<EntityCollection<Group>> GetUserGroupsAsync(string userId, CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/users/{1}/groups", _api_endpoint, userId);
-            return await DoRequestAsync<EntityCollection<Group>>(endpoint, RequestMethod.GET);
+            return await DoRequestAsync<EntityCollection<Group>>(endpoint, RequestMethod.GET, cancellationToken);
         }
 
         /// <summary>
         /// Update a specific user model
         /// </summary>
-        public async Task UpdateUserAsync(User user)
+        public async Task UpdateUserAsync(User user, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (String.IsNullOrWhiteSpace(user.Id))
                 throw new InvalidEntityException("User's Id is required");
             string endpoint = String.Format("{0}/users/{1}", _api_endpoint, user.Id);
-            await DoRequestAsync<User>(endpoint, RequestMethod.PATCH, JsonConvert.SerializeObject(user));
+            await DoRequestAsync<User>(endpoint, RequestMethod.PATCH, JsonConvert.SerializeObject(user), cancellationToken);
         }
 
         #endregion
@@ -344,46 +402,46 @@ namespace Fitabase.Azure.ApiManagement
         /// <summary>
         /// Creates new API of the API Management service instance.
         /// </summary>
-        public async Task<API> CreateAPIAsync(API api)
+        public async Task<API> CreateAPIAsync(API api, CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/apis/{1}", _api_endpoint, api.Id);
-            await DoRequestAsync<API>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(api));
+            await DoRequestAsync<API>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(api), cancellationToken);
             return api;
         }
 
         /// <summary>
         /// Gets the details of the API specified by its identifier.
         /// </summary>
-        public async Task<API> GetAPIAsync(string apiId)
+        public async Task<API> GetAPIAsync(string apiId, CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/apis", _api_endpoint);
-            return await GetByIdAsync<API>(endpoint, apiId);
+            return await GetByIdAsync<API>(endpoint, apiId, cancellationToken);
         }
 
         /// <summary>
         /// Deletes the specified API of the API Management service instance.
         /// </summary>
-        public async Task DeleteAPIAsync(string apiId)
+        public async Task DeleteAPIAsync(string apiId, CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/apis/{1}", _api_endpoint, apiId);
-            await DoRequestAsync<API>(endpoint, RequestMethod.DELETE);
+            await DoRequestAsync<API>(endpoint, RequestMethod.DELETE, cancellationToken);
         }
 
-        public async Task UpdateAPIAsync(API api)
+        public async Task UpdateAPIAsync(API api, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (String.IsNullOrWhiteSpace(api.Id))
                 throw new InvalidEntityException("API's Id is required");
             string endpoint = String.Format("{0}/apis/{1}", _api_endpoint, api.Id);
-            await DoRequestAsync<API>(endpoint, RequestMethod.PATCH, JsonConvert.SerializeObject(api));
+            await DoRequestAsync<API>(endpoint, RequestMethod.PATCH, JsonConvert.SerializeObject(api), cancellationToken);
         }
 
         /// <summary>
         /// Lists all APIs of the API Management service instance.
         /// </summary>
-        public async Task<EntityCollection<API>> GetAPIsAsync()
+        public async Task<EntityCollection<API>> GetAPIsAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/apis", _api_endpoint);
-            return await DoRequestAsync<EntityCollection<API>>(endpoint, RequestMethod.GET);
+            return await DoRequestAsync<EntityCollection<API>>(endpoint, RequestMethod.GET, cancellationToken);
         }
 
 
@@ -403,52 +461,52 @@ namespace Fitabase.Azure.ApiManagement
         /// <summary>
         /// Creates a new operation in the API
         /// </summary>
-        public async Task<APIOperation> CreateAPIOperationAsync(string apiId, APIOperation operation)
+        public async Task<APIOperation> CreateAPIOperationAsync(string apiId, APIOperation operation, CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/apis/{1}/operations/{2}",
                                                 _api_endpoint, apiId, operation.Id);
-            await DoRequestAsync<APIOperation>(endpoint, RequestMethod.PUT, JsonConvert.SerializeObject(operation));
+            await DoRequestAsync<APIOperation>(endpoint, RequestMethod.PUT, JsonConvert.SerializeObject(operation), cancellationToken);
             return operation;
         }
-        public async Task<APIOperation> CreateAPIOperationAsync(API api, APIOperation operation)
+        public async Task<APIOperation> CreateAPIOperationAsync(API api, APIOperation operation, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return await CreateAPIOperationAsync(api.Id, operation);
+            return await CreateAPIOperationAsync(api.Id, operation, cancellationToken);
         }
 
-        public async Task UpdateAPIOperationAsync(string apiId, string operationId, APIOperation operation)
+        public async Task UpdateAPIOperationAsync(string apiId, string operationId, APIOperation operation, CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/apis/{1}/operations/{2}",
                                                 _api_endpoint, apiId, operationId);
-            await DoRequestAsync<APIOperation>(endpoint, RequestMethod.PATCH, JsonConvert.SerializeObject(operation));
+            await DoRequestAsync<APIOperation>(endpoint, RequestMethod.PATCH, JsonConvert.SerializeObject(operation), cancellationToken);
         }
 
         /// <summary>
         /// Gets the details of the API Operation specified by its identifier.
         /// </summary>
-        public async Task<APIOperation> GetAPIOperationAsync(string apiId, string operationId)
+        public async Task<APIOperation> GetAPIOperationAsync(string apiId, string operationId, CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/apis/{1}/operations", _api_endpoint, apiId);
-            return await GetByIdAsync<APIOperation>(endpoint, operationId);
+            return await GetByIdAsync<APIOperation>(endpoint, operationId, cancellationToken);
 
         }
 
         /// <summary>
         /// Lists a collection of the operations for the specified API.
         /// </summary>
-        public async Task<EntityCollection<APIOperation>> GetOperationsByAPIAsync(string apiId)
+        public async Task<EntityCollection<APIOperation>> GetOperationsByAPIAsync(string apiId, CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/apis/{1}/operations", _api_endpoint, apiId);
-            return await DoRequestAsync<EntityCollection<APIOperation>>(endpoint, RequestMethod.GET);
+            return await DoRequestAsync<EntityCollection<APIOperation>>(endpoint, RequestMethod.GET, cancellationToken);
         }
 
         /// <summary>
         /// Deletes the specified operation in the API.
         /// </summary>
-        public async Task DeleteOperationAsync(string apiId, string operationId)
+        public async Task DeleteOperationAsync(string apiId, string operationId, CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/apis/{1}/operations/{2}",
                                                 _api_endpoint, apiId, operationId);
-            await DoRequestAsync<APIOperation>(endpoint, RequestMethod.DELETE);
+            await DoRequestAsync<APIOperation>(endpoint, RequestMethod.DELETE, cancellationToken);
         }
 
 
@@ -468,31 +526,31 @@ namespace Fitabase.Azure.ApiManagement
         /// <summary>
         /// Create a product
         /// </summary>
-        public async Task<Product> CreateProductAsync(Product product)
+        public async Task<Product> CreateProductAsync(Product product, CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/products/{1}", _api_endpoint, product.Id);
-            await DoRequestAsync<Product>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(product));
+            await DoRequestAsync<Product>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(product), cancellationToken);
             return product;
         }
 
         /// <summary>
         /// Gets the details of the product specified by its identifier.
         /// </summary>
-        public async Task<Product> GetProductAsync(string productId)
+        public async Task<Product> GetProductAsync(string productId, CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/products", _api_endpoint);
-            return await GetByIdAsync<Product>(endpoint, productId);
+            return await GetByIdAsync<Product>(endpoint, productId, cancellationToken);
         }
 
         /// <summary>
         /// Update a product
         /// </summary>
-        public async Task UpdateProductAsync(Product product)
+        public async Task UpdateProductAsync(Product product, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (String.IsNullOrWhiteSpace(product.Id))
                 throw new InvalidEntityException("Product's Id is required");
             string endpoint = String.Format("{0}/products/{1}", _api_endpoint, product.Id);
-            await DoRequestAsync<Product>(endpoint, RequestMethod.PATCH, JsonConvert.SerializeObject(product));
+            await DoRequestAsync<Product>(endpoint, RequestMethod.PATCH, JsonConvert.SerializeObject(product), cancellationToken);
         }
 
 
@@ -500,20 +558,20 @@ namespace Fitabase.Azure.ApiManagement
         /// Delete a product
         /// </summary>
         /// <param name="productId"></param>
-        public async Task DeleteProductAsync(string productId)
+        public async Task DeleteProductAsync(string productId, CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/products/{1}?deleteSubscriptions=true", _api_endpoint, productId);
-            await DoRequestAsync<Product>(endpoint, RequestMethod.DELETE);
+            await DoRequestAsync<Product>(endpoint, RequestMethod.DELETE, cancellationToken);
         }
 
 
         /// <summary>
         /// Lists a collection of products in the specified service instance.
         /// </summary>
-        public async Task<EntityCollection<Product>> GetProductsAsync()
+        public async Task<EntityCollection<Product>> GetProductsAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/products", _api_endpoint);
-            return await DoRequestAsync<EntityCollection<Product>>(endpoint, RequestMethod.GET);
+            return await DoRequestAsync<EntityCollection<Product>>(endpoint, RequestMethod.GET, cancellationToken);
         }
 
         /// <summary>
@@ -521,11 +579,11 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         /// <param name="productId"></param>
         /// <param name="api"></param>
-        public async Task AddProductAPIAsync(string productId, string apiId)
+        public async Task AddProductAPIAsync(string productId, string apiId, CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/products/{1}/apis/{2}",
                                     _api_endpoint, productId, apiId);
-            await DoRequestAsync<API>(endpoint, RequestMethod.PUT);
+            await DoRequestAsync<API>(endpoint, RequestMethod.PUT, cancellationToken);
         }
 
         /// <summary>
@@ -533,11 +591,11 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         /// <param name="productId"></param>
         /// <param name="apiId"></param>
-        public async Task DeleteProductAPIAsync(string productId, string apiId)
+        public async Task DeleteProductAPIAsync(string productId, string apiId, CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/products/{1}/apis/{2}",
                                     _api_endpoint, productId, apiId);
-            await DoRequestAsync<API>(endpoint, RequestMethod.DELETE);
+            await DoRequestAsync<API>(endpoint, RequestMethod.DELETE, cancellationToken);
         }
 
         /// <summary>
@@ -545,11 +603,11 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         /// <param name="productId"></param>
         /// <returns></returns>
-        public async Task<EntityCollection<API>> GetProductAPIsAsync(string productId)
+        public async Task<EntityCollection<API>> GetProductAPIsAsync(string productId, CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/products/{1}/apis",
                                     _api_endpoint, productId);
-            return await DoRequestAsync<EntityCollection<API>>(endpoint, RequestMethod.GET);
+            return await DoRequestAsync<EntityCollection<API>>(endpoint, RequestMethod.GET, cancellationToken);
         }
 
         /// <summary>
@@ -557,11 +615,11 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         /// <param name="productId"></param>
         /// <returns></returns>
-        public async Task<EntityCollection<Subscription>> GetProductSubscriptionsAsync(string productId)
+        public async Task<EntityCollection<Subscription>> GetProductSubscriptionsAsync(string productId, CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/products/{1}/subscriptions",
                                     _api_endpoint, productId);
-            return await DoRequestAsync<EntityCollection<Subscription>>(endpoint, RequestMethod.GET);
+            return await DoRequestAsync<EntityCollection<Subscription>>(endpoint, RequestMethod.GET, cancellationToken);
         }
 
         /// <summary>
@@ -569,11 +627,11 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         /// <param name="productId"></param>
         /// <param name="groupId"></param>
-        public async Task AddProductGroupAsync(string productId, string groupId)
+        public async Task AddProductGroupAsync(string productId, string groupId, CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/products/{1}/groups/{2}",
                                     _api_endpoint, productId, groupId);
-            await DoRequestAsync<API>(endpoint, RequestMethod.PUT);
+            await DoRequestAsync<API>(endpoint, RequestMethod.PUT, cancellationToken);
 
         }
 
@@ -582,11 +640,11 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         /// <param name="productId"></param>
         /// <param name="groupId"></param>
-        public async Task DeleteProductGroupAsync(string productId, string groupId)
+        public async Task DeleteProductGroupAsync(string productId, string groupId, CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/products/{1}/groups/{2}",
                                     _api_endpoint, productId, groupId);
-            await DoRequestAsync<Group>(endpoint, RequestMethod.DELETE);
+            await DoRequestAsync<Group>(endpoint, RequestMethod.DELETE, cancellationToken);
         }
 
         /// <summary>
@@ -594,15 +652,82 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         /// <param name="productId"></param>
         /// <returns></returns>
-        public async Task<EntityCollection<Group>> GetProductGroupsAsync(string productId)
+        public async Task<EntityCollection<Group>> GetProductGroupsAsync(string productId, CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/products/{1}/groups",
                                     _api_endpoint, productId);
-            return await DoRequestAsync<EntityCollection<Group>>(endpoint, RequestMethod.GET);
+            return await DoRequestAsync<EntityCollection<Group>>(endpoint, RequestMethod.GET, cancellationToken);
         }
+
 
         #endregion
 
+        #region Product Policy Configuration
+
+        /// <summary>
+        /// Gets the policy configuration for the specified product.
+        /// </summary>
+        /// <exception cref="HttpResponseException">Thrown on invalid operation.</exception>
+        /// <param name="productId">Product identifier.</param>
+        /// <returns></returns>
+        public async Task<string> GetProductPolicyAsync(string productId, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if (String.IsNullOrEmpty(productId))
+                throw new ArgumentException("productId is required");
+
+            var endpoint = String.Format("{0}/products/{1}/policy", _api_endpoint, productId);
+            return await DoRequestAsync<string>(endpoint, RequestMethod.GET, cancellationToken);
+        }
+
+
+        /// <summary>
+        /// Determines if policy configuration is attached to the specified product.
+        /// </summary>
+        /// <exception cref="HttpResponseException">Thrown on invalid operation.</exception>
+        /// <param name="productId">Product identifier.</param>
+        /// <returns></returns>
+        public async Task<bool> CheckProductPolicyAsync(string productId, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if (String.IsNullOrEmpty(productId))
+                throw new ArgumentException("productId is required");
+
+            var endpoint = String.Format("{0}/products/{1}/policy", _api_endpoint, productId);
+            return await DoRequestAsync<bool>(endpoint, RequestMethod.HEAD, cancellationToken);
+        }
+
+        /// <summary>
+        /// Sets the policy configuration for the specified product.
+        /// https://msdn.microsoft.com/en-us/library/azure/dn776336.aspx#SetPolicy
+        /// </summary>
+        /// <exception cref="HttpResponseException">Thrown on invalid operation.</exception>
+        /// <param name="productId">Product identifier.</param>
+        /// <param name="policy">Policy content (xml).</param>
+        /// <returns></returns>
+        public Task<bool> SetProductPolicyAsync(string productId, string policy, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if (String.IsNullOrEmpty(productId))
+                throw new ArgumentException("productId is required");
+
+            var endpoint = String.Format("{0}/products/{1}/policy", _api_endpoint, productId);
+            return DoRequestAsync<bool>(endpoint, RequestMethod.PUT, policy, cancellationToken);
+        }
+
+        /// <summary>
+        /// Removes the policy configuration for the specified product.
+        /// </summary>
+        /// <exception cref="HttpResponseException">Thrown on invalid operation.</exception>
+        /// <param name="productId">Product identifier.</param>
+        /// <returns></returns>
+        public Task<bool> DeleteProductPolicyAsync(string productId, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if (String.IsNullOrEmpty(productId))
+                throw new ArgumentException("productId is required");
+
+            var endpoint = String.Format("{0}/products/{1}/policy", _api_endpoint, productId);
+            return DoRequestAsync<bool>(endpoint, RequestMethod.DELETE, cancellationToken);
+        }
+
+        #endregion
 
 
 
@@ -616,66 +741,66 @@ namespace Fitabase.Azure.ApiManagement
         /// <summary>
         /// Create a group
         /// </summary>
-        public async Task<Group> CreateGroupAsync(Group group)
+        public async Task<Group> CreateGroupAsync(Group group, CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/groups/{1}", _api_endpoint, group.Id);
-            await DoRequestAsync<Group>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(group));
+            await DoRequestAsync<Group>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(group), cancellationToken);
             return group;
         }
 
         /// <summary>
         /// Gets the details of the group specified by its identifier.
         /// </summary>
-        public async Task<Group> GetGroupAsync(string groupId)
+        public async Task<Group> GetGroupAsync(string groupId, CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/groups", _api_endpoint);
-            return await GetByIdAsync<Group>(endpoint, groupId);
+            return await GetByIdAsync<Group>(endpoint, groupId, cancellationToken);
         }
 
         /// <summary>
         /// Add a user to the specified group
         /// </summary>
-        public async Task AddUserToGroupAsync(string groupId, string userId)
+        public async Task AddUserToGroupAsync(string groupId, string userId, CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/groups/{1}/users/{2}", _api_endpoint, groupId, userId);
-            await DoRequestAsync<EntityCollection<User>>(endpoint, RequestMethod.PUT);
+            await DoRequestAsync<EntityCollection<User>>(endpoint, RequestMethod.PUT, cancellationToken);
         }
 
         /// <summary>
         /// Remove existing user from existing group.
         /// </summary>
-        public async Task RemoveUserFromGroupAsync(string groupId, string userId)
+        public async Task RemoveUserFromGroupAsync(string groupId, string userId, CancellationToken cancellationToken = default(CancellationToken))
         {
 
             string endpoint = String.Format("{0}/groups/{1}/users/{2}", _api_endpoint, groupId, userId);
-            await DoRequestAsync<EntityCollection<User>>(endpoint, RequestMethod.DELETE);
+            await DoRequestAsync<EntityCollection<User>>(endpoint, RequestMethod.DELETE, cancellationToken);
         }
 
         /// <summary>
         /// Lists a collection of groups
         /// </summary>
-        public async Task<EntityCollection<Group>> GetGroupsAsync()
+        public async Task<EntityCollection<Group>> GetGroupsAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/groups", _api_endpoint);
-            return await DoRequestAsync<EntityCollection<Group>>(endpoint, RequestMethod.GET);
+            return await DoRequestAsync<EntityCollection<Group>>(endpoint, RequestMethod.GET, cancellationToken);
         }
 
         /// <summary>
         /// Lists a collection of the members of the group, specified by its identifier.
         /// </summary>
-        public async Task<EntityCollection<User>> GetUsersInGroupAsync(string groupId)
+        public async Task<EntityCollection<User>> GetUsersInGroupAsync(string groupId, CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/groups/{1}/users", _api_endpoint, groupId);
-            return await DoRequestAsync<EntityCollection<User>>(endpoint, RequestMethod.GET);
+            return await DoRequestAsync<EntityCollection<User>>(endpoint, RequestMethod.GET, cancellationToken);
         }
 
         /// <summary>
         /// Deletes specific group of the API Management
         /// </summary>
-        public async Task DeleteGroupAsync(string groupId)
+        public async Task DeleteGroupAsync(string groupId, CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/groups/{1}", _api_endpoint, groupId);
-            await DoRequestAsync<Group>(endpoint, RequestMethod.DELETE);
+            await DoRequestAsync<Group>(endpoint, RequestMethod.DELETE, cancellationToken);
         }
         #endregion
 
@@ -694,69 +819,69 @@ namespace Fitabase.Azure.ApiManagement
         /// <summary>
         /// Creates or updates the subscription of specified user to the specified product.
         /// </summary>
-        public async Task<Subscription> CreateSubscriptionAsync(Subscription subscription)
+        public async Task<Subscription> CreateSubscriptionAsync(Subscription subscription, CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/subscriptions/{1}", _api_endpoint, subscription.Id);
-            await DoRequestAsync<Subscription>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(subscription));
+            await DoRequestAsync<Subscription>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(subscription), cancellationToken);
             return subscription;
         }
 
         /// <summary>
         /// Gets the specified Subscription entity.
         /// </summary>
-        public async Task<Subscription> GetSubscriptionAsync(string subscriptionId)
+        public async Task<Subscription> GetSubscriptionAsync(string subscriptionId, CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/subscriptions", _api_endpoint);
-            return await GetByIdAsync<Subscription>(endpoint, subscriptionId);
+            return await GetByIdAsync<Subscription>(endpoint, subscriptionId, cancellationToken);
         }
 
         /// <summary>
         /// Deletes the specified subscription.
         /// </summary>
-        public async Task DeleteSubscriptionAsync(string subscriptionId)
+        public async Task DeleteSubscriptionAsync(string subscriptionId, CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/subscriptions/{1}", _api_endpoint, subscriptionId);
-            await DoRequestAsync<Subscription>(endpoint, RequestMethod.DELETE);
+            await DoRequestAsync<Subscription>(endpoint, RequestMethod.DELETE, cancellationToken);
         }
 
         /// <summary>
         /// Updates the details of a subscription specificied by its identifier.
         /// </summary>
-        public async Task UpdateSubscriptionAsync(Subscription subscription)
+        public async Task UpdateSubscriptionAsync(Subscription subscription, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (String.IsNullOrWhiteSpace(subscription.Id))
                 throw new InvalidEntityException("Subscription's Id is required");
             string endpoint = String.Format("{0}/subscriptions/{1}", _api_endpoint, subscription.Id);
-            await DoRequestAsync<Subscription>(endpoint, RequestMethod.PATCH, JsonConvert.SerializeObject(subscription));
+            await DoRequestAsync<Subscription>(endpoint, RequestMethod.PATCH, JsonConvert.SerializeObject(subscription), cancellationToken);
         }
 
         /// <summary>
         /// Lists all subscriptions of the API Management service instance.
         /// </summary>
-        public async Task<EntityCollection<Subscription>> GetSubscriptionsAsync()
+        public async Task<EntityCollection<Subscription>> GetSubscriptionsAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/subscriptions", _api_endpoint);
-            return await DoRequestAsync<EntityCollection<Subscription>>(endpoint, RequestMethod.GET);
+            return await DoRequestAsync<EntityCollection<Subscription>>(endpoint, RequestMethod.GET, cancellationToken);
         }
 
         /// <summary>
         /// Gernerate subscription primary key
         /// </summary>
         /// <param name="subscriptionId">Subscription credentials which uniquely identify Microsoft Azure subscription</param>
-        public async Task GeneratePrimaryKeyAsync(string subscriptionId)
+        public async Task GeneratePrimaryKeyAsync(string subscriptionId, CancellationToken cancellationToken = default(CancellationToken))
         {
             string endPoint = String.Format("{0}/subscriptions/{1}/regeneratePrimaryKey", _api_endpoint, subscriptionId);
-            await DoRequestAsync<string>(endPoint, RequestMethod.POST);
+            await DoRequestAsync<string>(endPoint, RequestMethod.POST, cancellationToken);
         }
 
         /// <summary>
         /// Generate subscription secondary key
         /// </summary>
         /// <param name="subscriptionId">Subscription credentials which uniquely identify Microsoft Azure subscription</param>
-        public async Task GenerateSecondaryKeyAsync(string subscriptionId)
+        public async Task GenerateSecondaryKeyAsync(string subscriptionId, CancellationToken cancellationToken = default(CancellationToken))
         {
             string endPoint = String.Format("{0}/subscriptions/{1}/regenerateSecondaryKey", _api_endpoint, subscriptionId);
-            await DoRequestAsync<string>(endPoint, RequestMethod.POST);
+            await DoRequestAsync<string>(endPoint, RequestMethod.POST, cancellationToken);
         }
         #endregion
 
@@ -769,29 +894,29 @@ namespace Fitabase.Azure.ApiManagement
         /*********************************************************/
         #region Loggers
 
-        public async Task<Logger> CreateLoggerAsync(Logger logger)
+        public async Task<Logger> CreateLoggerAsync(Logger logger, CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/loggers/{1}", _api_endpoint, logger.Id);
-            await DoRequestAsync<Logger>(endpoint, RequestMethod.PUT, JsonConvert.SerializeObject(logger));
+            await DoRequestAsync<Logger>(endpoint, RequestMethod.PUT, JsonConvert.SerializeObject(logger), cancellationToken);
             return logger;
         }
 
-        public async Task<EntityCollection<Logger>> GetLoggersAsync()
+        public async Task<EntityCollection<Logger>> GetLoggersAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/loggers", _api_endpoint);
-            return await DoRequestAsync<EntityCollection<Logger>>(endpoint);
+            return await DoRequestAsync<EntityCollection<Logger>>(endpoint, RequestMethod.GET, cancellationToken);
         }
 
-        public async Task<Logger> GetLoggerAsync(string loggerId)
+        public async Task<Logger> GetLoggerAsync(string loggerId, CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/loggers", _api_endpoint, loggerId);
-            return await GetByIdAsync<Logger>(endpoint, loggerId);
+            return await GetByIdAsync<Logger>(endpoint, loggerId, cancellationToken);
         }
 
-        public async Task DeleteLoggerAsync(string loggerId)
+        public async Task DeleteLoggerAsync(string loggerId, CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/loggers/{1}", _api_endpoint, loggerId);
-            await DoRequestAsync<Logger>(endpoint, RequestMethod.DELETE);
+            await DoRequestAsync<Logger>(endpoint, RequestMethod.DELETE, cancellationToken);
         }
 
         #endregion
