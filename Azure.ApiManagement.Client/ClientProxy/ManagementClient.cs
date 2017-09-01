@@ -1044,42 +1044,5 @@ namespace Fitabase.Azure.ApiManagement
             await DoRequestAsync<string>(endPoint, RequestMethod.POST, cancellationToken);
         }
         #endregion
-
-
-
-
-
-        /*********************************************************/
-        /**********************  LOGGERs  ************************/
-        /*********************************************************/
-        #region Loggers
-
-        public async Task<Logger> CreateLoggerAsync(Logger logger, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            string endpoint = String.Format("{0}/loggers/{1}", _api_endpoint, logger.Id);
-            await DoRequestAsync<Logger>(endpoint, RequestMethod.PUT, JsonConvert.SerializeObject(logger), cancellationToken);
-            return logger;
-        }
-
-        public async Task<EntityCollection<Logger>> GetLoggersAsync(CancellationToken cancellationToken = default(CancellationToken))
-        {
-            string endpoint = String.Format("{0}/loggers", _api_endpoint);
-            return await DoRequestAsync<EntityCollection<Logger>>(endpoint, RequestMethod.GET, cancellationToken);
-        }
-
-        public async Task<Logger> GetLoggerAsync(string loggerId, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            string endpoint = String.Format("{0}/loggers", _api_endpoint, loggerId);
-            return await GetByIdAsync<Logger>(endpoint, loggerId, cancellationToken);
-        }
-
-        public async Task DeleteLoggerAsync(string loggerId, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            string endpoint = String.Format("{0}/loggers/{1}", _api_endpoint, loggerId);
-            await DoRequestAsync<Logger>(endpoint, RequestMethod.DELETE, cancellationToken);
-        }
-
-        #endregion
-
     }
 }
