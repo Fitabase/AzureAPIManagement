@@ -306,6 +306,9 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         public async Task<SsoUrl> GenerateSsoURLAsync(string userId, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if (String.IsNullOrEmpty(userId))
+                throw new ArgumentException("userId is required");
+
             string endpoint = String.Format("{0}/users/{1}/generateSsoUrl", _api_endpoint, userId);
             return await DoRequestAsync<SsoUrl>(endpoint, RequestMethod.POST, cancellationToken);
         }
@@ -315,6 +318,11 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         public async Task<User> CreateUserAsync(User user, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if (user == null)
+                throw new InvalidEntityException("user is required");
+            if (String.IsNullOrEmpty(user.Id))
+                throw new InvalidEntityException("userId is required");
+
             string endpoint = String.Format("{0}/users/{1}", _api_endpoint, user.Id);
             await DoRequestAsync<User>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(user), cancellationToken);
             return user;
@@ -325,6 +333,9 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         public async Task<User> GetUserAsync(string userId, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if (string.IsNullOrEmpty(userId))
+                throw new InvalidEntityException("userId is required");
+
             string endpoint = String.Format("{0}/users", _api_endpoint);
             return await GetByIdAsync<User>(endpoint, userId, cancellationToken);
         }
@@ -335,6 +346,9 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         public async Task DeleteUserAsync(string userId, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if (String.IsNullOrEmpty(userId))
+                throw new InvalidEntityException("userId is required");
+
             string endpoint = String.Format("{0}/users/{1}", _api_endpoint, userId);
             await DoRequestAsync<User>(endpoint, RequestMethod.DELETE, cancellationToken);
         }
@@ -344,6 +358,9 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         public async Task DeleteUserWithSubscriptionsAsync(string userId, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if (String.IsNullOrEmpty(userId))
+                throw new InvalidEntityException("userId is required");
+
             string endpoint = String.Format("{0}/users/{1}?deleteSubscriptions=true", _api_endpoint, userId);
             await DoRequestAsync<User>(endpoint, RequestMethod.DELETE, cancellationToken);
         }
@@ -362,6 +379,9 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         public async Task<EntityCollection<Subscription>> GetUserSubscriptionAsync(string userId, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if (String.IsNullOrEmpty(userId))
+                throw new InvalidEntityException("userId is required");
+
             string endpoint = String.Format("{0}/users/{1}/subscriptions", _api_endpoint, userId);
             return await DoRequestAsync<EntityCollection<Subscription>>(endpoint, RequestMethod.GET, cancellationToken);
         }
@@ -371,6 +391,9 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         public async Task<EntityCollection<Group>> GetUserGroupsAsync(string userId, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if (String.IsNullOrEmpty(userId))
+                throw new InvalidEntityException("userId is required");
+
             string endpoint = String.Format("{0}/users/{1}/groups", _api_endpoint, userId);
             return await DoRequestAsync<EntityCollection<Group>>(endpoint, RequestMethod.GET, cancellationToken);
         }
@@ -380,8 +403,11 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         public async Task UpdateUserAsync(User user, CancellationToken cancellationToken = default(CancellationToken))
         {
-            if (String.IsNullOrWhiteSpace(user.Id))
-                throw new InvalidEntityException("User's Id is required");
+            if (user == null)
+                throw new InvalidEntityException("user is required");
+            if (String.IsNullOrEmpty(user.Id))
+                throw new InvalidEntityException("userId is required");
+
             string endpoint = String.Format("{0}/users/{1}", _api_endpoint, user.Id);
             await DoRequestAsync<User>(endpoint, RequestMethod.PATCH, JsonConvert.SerializeObject(user), cancellationToken);
         }
@@ -404,6 +430,11 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         public async Task<API> CreateAPIAsync(API api, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if (api == null)
+                throw new InvalidEntityException("API is required");
+            if (String.IsNullOrEmpty(api.Id))
+                throw new InvalidEntityException("apiId is required");
+
             string endpoint = String.Format("{0}/apis/{1}", _api_endpoint, api.Id);
             await DoRequestAsync<API>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(api), cancellationToken);
             return api;
@@ -414,6 +445,9 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         public async Task<API> GetAPIAsync(string apiId, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if (String.IsNullOrEmpty(apiId))
+                throw new InvalidEntityException("apiId is required");
+
             string endpoint = String.Format("{0}/apis", _api_endpoint);
             return await GetByIdAsync<API>(endpoint, apiId, cancellationToken);
         }
@@ -423,14 +457,20 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         public async Task DeleteAPIAsync(string apiId, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if (String.IsNullOrEmpty(apiId))
+                throw new InvalidEntityException("apiId is required");
+
             string endpoint = String.Format("{0}/apis/{1}", _api_endpoint, apiId);
             await DoRequestAsync<API>(endpoint, RequestMethod.DELETE, cancellationToken);
         }
 
         public async Task UpdateAPIAsync(API api, CancellationToken cancellationToken = default(CancellationToken))
         {
-            if (String.IsNullOrWhiteSpace(api.Id))
-                throw new InvalidEntityException("API's Id is required");
+            if (api == null)
+                throw new InvalidEntityException("API is required");
+            if (String.IsNullOrEmpty(api.Id))
+                throw new InvalidEntityException("apiId is required");
+
             string endpoint = String.Format("{0}/apis/{1}", _api_endpoint, api.Id);
             await DoRequestAsync<API>(endpoint, RequestMethod.PATCH, JsonConvert.SerializeObject(api), cancellationToken);
         }
@@ -463,6 +503,13 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         public async Task<APIOperation> CreateAPIOperationAsync(string apiId, APIOperation operation, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if (String.IsNullOrEmpty(apiId))
+                throw new InvalidEntityException("apiId is required");
+            if (operation == null)
+                throw new InvalidEntityException("operation is required");
+            if (String.IsNullOrEmpty(operation.Id))
+                throw new InvalidEntityException("operationId is required");
+
             string endpoint = String.Format("{0}/apis/{1}/operations/{2}",
                                                 _api_endpoint, apiId, operation.Id);
             await DoRequestAsync<APIOperation>(endpoint, RequestMethod.PUT, JsonConvert.SerializeObject(operation), cancellationToken);
@@ -470,11 +517,25 @@ namespace Fitabase.Azure.ApiManagement
         }
         public async Task<APIOperation> CreateAPIOperationAsync(API api, APIOperation operation, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if (api == null)
+                throw new InvalidEntityException("API is required");
+            if (String.IsNullOrEmpty(api.Id))
+                throw new InvalidEntityException("apiId is required");
+            if (operation == null)
+                throw new InvalidEntityException("operation is required");
+            if (String.IsNullOrEmpty(operation.Id))
+                throw new InvalidEntityException("operationId is required");
+
             return await CreateAPIOperationAsync(api.Id, operation, cancellationToken);
         }
 
         public async Task UpdateAPIOperationAsync(string apiId, string operationId, APIOperation operation, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if (String.IsNullOrEmpty(apiId))
+                throw new InvalidEntityException("apiId is required");
+            if (String.IsNullOrEmpty(operationId))
+                throw new InvalidEntityException("operationId is required");
+
             string endpoint = String.Format("{0}/apis/{1}/operations/{2}",
                                                 _api_endpoint, apiId, operationId);
             await DoRequestAsync<APIOperation>(endpoint, RequestMethod.PATCH, JsonConvert.SerializeObject(operation), cancellationToken);
@@ -485,6 +546,11 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         public async Task<APIOperation> GetAPIOperationAsync(string apiId, string operationId, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if (String.IsNullOrEmpty(apiId))
+                throw new InvalidEntityException("apiId is required");
+            if (String.IsNullOrEmpty(operationId))
+                throw new InvalidEntityException("operationId is required");
+
             string endpoint = String.Format("{0}/apis/{1}/operations", _api_endpoint, apiId);
             return await GetByIdAsync<APIOperation>(endpoint, operationId, cancellationToken);
 
@@ -495,6 +561,9 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         public async Task<EntityCollection<APIOperation>> GetOperationsByAPIAsync(string apiId, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if (String.IsNullOrEmpty(apiId))
+                throw new InvalidEntityException("apiId is required");
+
             string endpoint = String.Format("{0}/apis/{1}/operations", _api_endpoint, apiId);
             return await DoRequestAsync<EntityCollection<APIOperation>>(endpoint, RequestMethod.GET, cancellationToken);
         }
@@ -504,6 +573,11 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         public async Task DeleteOperationAsync(string apiId, string operationId, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if (String.IsNullOrEmpty(apiId))
+                throw new InvalidEntityException("apiId is required");
+            if (String.IsNullOrEmpty(operationId))
+                throw new InvalidEntityException("operationId is required");
+
             string endpoint = String.Format("{0}/apis/{1}/operations/{2}",
                                                 _api_endpoint, apiId, operationId);
             await DoRequestAsync<APIOperation>(endpoint, RequestMethod.DELETE, cancellationToken);
@@ -528,6 +602,11 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         public async Task<Product> CreateProductAsync(Product product, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if (product == null)
+                throw new InvalidEntityException("product is required");
+            if (String.IsNullOrEmpty(product.Id))
+                throw new InvalidEntityException("productId is required");
+
             string endpoint = String.Format("{0}/products/{1}", _api_endpoint, product.Id);
             await DoRequestAsync<Product>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(product), cancellationToken);
             return product;
@@ -538,6 +617,9 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         public async Task<Product> GetProductAsync(string productId, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if (String.IsNullOrEmpty(productId))
+                throw new InvalidEntityException("productId is required");
+
             string endpoint = String.Format("{0}/products", _api_endpoint);
             return await GetByIdAsync<Product>(endpoint, productId, cancellationToken);
         }
@@ -547,8 +629,11 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         public async Task UpdateProductAsync(Product product, CancellationToken cancellationToken = default(CancellationToken))
         {
-            if (String.IsNullOrWhiteSpace(product.Id))
-                throw new InvalidEntityException("Product's Id is required");
+            if (product == null)
+                throw new InvalidEntityException("product is required");
+            if (String.IsNullOrEmpty(product.Id))
+                throw new InvalidEntityException("productId is required");
+
             string endpoint = String.Format("{0}/products/{1}", _api_endpoint, product.Id);
             await DoRequestAsync<Product>(endpoint, RequestMethod.PATCH, JsonConvert.SerializeObject(product), cancellationToken);
         }
@@ -560,6 +645,9 @@ namespace Fitabase.Azure.ApiManagement
         /// <param name="productId"></param>
         public async Task DeleteProductAsync(string productId, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if (String.IsNullOrEmpty(productId))
+                throw new InvalidEntityException("productId is required");
+
             string endpoint = String.Format("{0}/products/{1}?deleteSubscriptions=true", _api_endpoint, productId);
             await DoRequestAsync<Product>(endpoint, RequestMethod.DELETE, cancellationToken);
         }
@@ -581,6 +669,11 @@ namespace Fitabase.Azure.ApiManagement
         /// <param name="api"></param>
         public async Task AddProductAPIAsync(string productId, string apiId, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if (String.IsNullOrEmpty(productId))
+                throw new InvalidEntityException("productId is required");
+            if (string.IsNullOrEmpty(apiId))
+                throw new InvalidEntityException("apiId is required");
+
             string endpoint = String.Format("{0}/products/{1}/apis/{2}",
                                     _api_endpoint, productId, apiId);
             await DoRequestAsync<API>(endpoint, RequestMethod.PUT, cancellationToken);
@@ -593,6 +686,11 @@ namespace Fitabase.Azure.ApiManagement
         /// <param name="apiId"></param>
         public async Task DeleteProductAPIAsync(string productId, string apiId, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if (String.IsNullOrEmpty(productId))
+                throw new InvalidEntityException("productId is required");
+            if (string.IsNullOrEmpty(apiId))
+                throw new InvalidEntityException("apiId is required");
+
             string endpoint = String.Format("{0}/products/{1}/apis/{2}",
                                     _api_endpoint, productId, apiId);
             await DoRequestAsync<API>(endpoint, RequestMethod.DELETE, cancellationToken);
@@ -605,6 +703,9 @@ namespace Fitabase.Azure.ApiManagement
         /// <returns></returns>
         public async Task<EntityCollection<API>> GetProductAPIsAsync(string productId, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if (String.IsNullOrEmpty(productId))
+                throw new InvalidEntityException("productId is required");
+
             string endpoint = String.Format("{0}/products/{1}/apis",
                                     _api_endpoint, productId);
             return await DoRequestAsync<EntityCollection<API>>(endpoint, RequestMethod.GET, cancellationToken);
@@ -617,6 +718,9 @@ namespace Fitabase.Azure.ApiManagement
         /// <returns></returns>
         public async Task<EntityCollection<Subscription>> GetProductSubscriptionsAsync(string productId, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if (String.IsNullOrEmpty(productId))
+                throw new InvalidEntityException("productId is required");
+
             string endpoint = String.Format("{0}/products/{1}/subscriptions",
                                     _api_endpoint, productId);
             return await DoRequestAsync<EntityCollection<Subscription>>(endpoint, RequestMethod.GET, cancellationToken);
@@ -629,6 +733,11 @@ namespace Fitabase.Azure.ApiManagement
         /// <param name="groupId"></param>
         public async Task AddProductGroupAsync(string productId, string groupId, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if (String.IsNullOrEmpty(productId))
+                throw new InvalidEntityException("productId is required");
+            if (string.IsNullOrEmpty(groupId))
+                throw new InvalidEntityException("groupId is required");
+
             string endpoint = String.Format("{0}/products/{1}/groups/{2}",
                                     _api_endpoint, productId, groupId);
             await DoRequestAsync<API>(endpoint, RequestMethod.PUT, cancellationToken);
@@ -642,6 +751,11 @@ namespace Fitabase.Azure.ApiManagement
         /// <param name="groupId"></param>
         public async Task DeleteProductGroupAsync(string productId, string groupId, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if (String.IsNullOrEmpty(productId))
+                throw new InvalidEntityException("productId is required");
+            if (string.IsNullOrEmpty(groupId))
+                throw new InvalidEntityException("groupId is required");
+
             string endpoint = String.Format("{0}/products/{1}/groups/{2}",
                                     _api_endpoint, productId, groupId);
             await DoRequestAsync<Group>(endpoint, RequestMethod.DELETE, cancellationToken);
@@ -654,6 +768,9 @@ namespace Fitabase.Azure.ApiManagement
         /// <returns></returns>
         public async Task<EntityCollection<Group>> GetProductGroupsAsync(string productId, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if (String.IsNullOrEmpty(productId))
+                throw new InvalidEntityException("productId is required");
+
             string endpoint = String.Format("{0}/products/{1}/groups",
                                     _api_endpoint, productId);
             return await DoRequestAsync<EntityCollection<Group>>(endpoint, RequestMethod.GET, cancellationToken);
@@ -743,6 +860,11 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         public async Task<Group> CreateGroupAsync(Group group, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if (group == null)
+                throw new InvalidEntityException("group is required");
+            if (String.IsNullOrEmpty(group.Id))
+                throw new InvalidEntityException("groupId is required");
+
             string endpoint = String.Format("{0}/groups/{1}", _api_endpoint, group.Id);
             await DoRequestAsync<Group>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(group), cancellationToken);
             return group;
@@ -753,6 +875,9 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         public async Task<Group> GetGroupAsync(string groupId, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if (String.IsNullOrEmpty(groupId))
+                throw new InvalidEntityException("groupId is required");
+
             string endpoint = String.Format("{0}/groups", _api_endpoint);
             return await GetByIdAsync<Group>(endpoint, groupId, cancellationToken);
         }
@@ -762,6 +887,11 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         public async Task AddUserToGroupAsync(string groupId, string userId, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if (String.IsNullOrEmpty(groupId))
+                throw new InvalidEntityException("groupId is required");
+            if (String.IsNullOrEmpty(userId))
+                throw new InvalidEntityException("userId is required");
+
             string endpoint = String.Format("{0}/groups/{1}/users/{2}", _api_endpoint, groupId, userId);
             await DoRequestAsync<EntityCollection<User>>(endpoint, RequestMethod.PUT, cancellationToken);
         }
@@ -771,6 +901,10 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         public async Task RemoveUserFromGroupAsync(string groupId, string userId, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if (String.IsNullOrEmpty(groupId))
+                throw new InvalidEntityException("groupId is required");
+            if (String.IsNullOrEmpty(userId))
+                throw new InvalidEntityException("userId is required");
 
             string endpoint = String.Format("{0}/groups/{1}/users/{2}", _api_endpoint, groupId, userId);
             await DoRequestAsync<EntityCollection<User>>(endpoint, RequestMethod.DELETE, cancellationToken);
@@ -790,6 +924,9 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         public async Task<EntityCollection<User>> GetUsersInGroupAsync(string groupId, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if (String.IsNullOrEmpty(groupId))
+                throw new InvalidEntityException("groupId is required");
+
             string endpoint = String.Format("{0}/groups/{1}/users", _api_endpoint, groupId);
             return await DoRequestAsync<EntityCollection<User>>(endpoint, RequestMethod.GET, cancellationToken);
         }
@@ -799,6 +936,9 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         public async Task DeleteGroupAsync(string groupId, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if (String.IsNullOrEmpty(groupId))
+                throw new InvalidEntityException("groupId is required");
+
             string endpoint = String.Format("{0}/groups/{1}", _api_endpoint, groupId);
             await DoRequestAsync<Group>(endpoint, RequestMethod.DELETE, cancellationToken);
         }
@@ -821,6 +961,11 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         public async Task<Subscription> CreateSubscriptionAsync(Subscription subscription, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if (subscription == null)
+                throw new InvalidEntityException("subscription is required");
+            if (String.IsNullOrEmpty(subscription.Id))
+                throw new InvalidEntityException("subscriptionId is required");
+
             string endpoint = String.Format("{0}/subscriptions/{1}", _api_endpoint, subscription.Id);
             await DoRequestAsync<Subscription>(endpoint, RequestMethod.PUT, Utility.SerializeToJson(subscription), cancellationToken);
             return subscription;
@@ -831,6 +976,9 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         public async Task<Subscription> GetSubscriptionAsync(string subscriptionId, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if (String.IsNullOrEmpty(subscriptionId))
+                throw new InvalidEntityException("subscriptionId is required");
+
             string endpoint = String.Format("{0}/subscriptions", _api_endpoint);
             return await GetByIdAsync<Subscription>(endpoint, subscriptionId, cancellationToken);
         }
@@ -840,6 +988,9 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         public async Task DeleteSubscriptionAsync(string subscriptionId, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if (String.IsNullOrEmpty(subscriptionId))
+                throw new InvalidEntityException("subscriptionId is required");
+
             string endpoint = String.Format("{0}/subscriptions/{1}", _api_endpoint, subscriptionId);
             await DoRequestAsync<Subscription>(endpoint, RequestMethod.DELETE, cancellationToken);
         }
@@ -849,8 +1000,11 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         public async Task UpdateSubscriptionAsync(Subscription subscription, CancellationToken cancellationToken = default(CancellationToken))
         {
-            if (String.IsNullOrWhiteSpace(subscription.Id))
-                throw new InvalidEntityException("Subscription's Id is required");
+            if (subscription == null)
+                throw new InvalidEntityException("subscription is required");
+            if (String.IsNullOrEmpty(subscription.Id))
+                throw new InvalidEntityException("subscriptionId is required");
+
             string endpoint = String.Format("{0}/subscriptions/{1}", _api_endpoint, subscription.Id);
             await DoRequestAsync<Subscription>(endpoint, RequestMethod.PATCH, JsonConvert.SerializeObject(subscription), cancellationToken);
         }
@@ -870,6 +1024,9 @@ namespace Fitabase.Azure.ApiManagement
         /// <param name="subscriptionId">Subscription credentials which uniquely identify Microsoft Azure subscription</param>
         public async Task GeneratePrimaryKeyAsync(string subscriptionId, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if (String.IsNullOrEmpty(subscriptionId))
+                throw new InvalidEntityException("subscriptionId is required");
+
             string endPoint = String.Format("{0}/subscriptions/{1}/regeneratePrimaryKey", _api_endpoint, subscriptionId);
             await DoRequestAsync<string>(endPoint, RequestMethod.POST, cancellationToken);
         }
@@ -880,6 +1037,9 @@ namespace Fitabase.Azure.ApiManagement
         /// <param name="subscriptionId">Subscription credentials which uniquely identify Microsoft Azure subscription</param>
         public async Task GenerateSecondaryKeyAsync(string subscriptionId, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if (String.IsNullOrEmpty(subscriptionId))
+                throw new InvalidEntityException("subscriptionId is required");
+
             string endPoint = String.Format("{0}/subscriptions/{1}/regenerateSecondaryKey", _api_endpoint, subscriptionId);
             await DoRequestAsync<string>(endPoint, RequestMethod.POST, cancellationToken);
         }
