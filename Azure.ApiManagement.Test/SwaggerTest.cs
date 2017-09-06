@@ -67,13 +67,6 @@ namespace Azure.ApiManagement.Test
             Assert.IsTrue(api.Operations.Count > 0);
         }
 
-        [TestMethod]
-        public void GetSwaggerJson()
-        {
-            string urlPath = @"http://localhost:2598/swagger/docs/BodyTrace";
-            string json = APIBuilder.GetSwaggerJson(urlPath);
-        }
-
         #endregion Test APIBuilder
 
 
@@ -82,15 +75,16 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void PublishSwaggerAPI()
         {
-            string url = @"http://localhost:2598/swagger/docs/BatchExport";
+            string url = @"http://localhost:2598/swagger/docs/Values";
             APIBuilder builder = APIBuilder.GetBuilder(url);
             API api = builder.BuildAPIAndOperations();
             var entity = _Client.CreateAPIAsync(api).Result;
             Assert.IsNotNull(entity);
-            var operation = api.Operations.ToList().ElementAt(0);
-            string json = JsonConvert.SerializeObject(operation);
-            var a=  _Client.CreateAPIOperationAsync(entity, operation).Result;
-            
+            foreach(var operation in api.Operations)
+            {
+                var entityOperation = _Client.CreateAPIOperationAsync(entity, operation).Result;
+                Assert.IsNotNull(entityOperation);
+            }
         }
         
 
