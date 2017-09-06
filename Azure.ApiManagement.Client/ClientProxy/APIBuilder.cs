@@ -2,8 +2,6 @@
 using Fitabase.Azure.ApiManagement.Model;
 using Fitabase.Azure.ApiManagement.Model.Exceptions;
 using Fitabase.Azure.ApiManagement.Swagger;
-using Newtonsoft.Json;
-using Swashbuckle.Swagger.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -55,32 +53,7 @@ namespace Fitabase.Azure.ApiManagement
             };
             return builder;
         }
-
-
-        /// <summary>
-        /// TODO Remove This. Intentionally used to debug in FitabaseWeb.
-        /// </summary>
-        /// <param name="swaggerURL"></param>
-        /// <returns></returns>
-        public static string GetSwaggerJson(string swaggerURL)
-        {
-            AbstractSwaggerReader reader = new SwaggerUrlReader(swaggerURL);
-            return JsonConvert.SerializeObject(reader.GetSwaggerObject(), new JsonSerializerSettings()
-            {
-                NullValueHandling = NullValueHandling.Ignore
-            });
-        }
-
-        /// <summary>
-        /// TODO Remove this method latter. This methid is itentionally used to debug in FitabaseWeb
-        /// </summary>
-        /// <returns></returns>
-        public static string GetDebugString()
-        {
-            return "Debug string in Azure.APImanagement";
-        }
-
-
+        
         #endregion
 
 
