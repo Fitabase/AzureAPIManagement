@@ -75,7 +75,7 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void PublishSwaggerAPI()
         {
-            string url = @"http://localhost:2598/swagger/docs/Values";
+            string url = @"http://localhost:2598/swagger/docs/Profiles";
             APIBuilder builder = APIBuilder.GetBuilder(url);
             API api = builder.BuildAPIAndOperations();
             var entity = _Client.CreateAPIAsync(api).Result;
