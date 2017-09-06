@@ -57,7 +57,7 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void BuildAPIWithSwaggerReader()
         {
-            string urlPath = @"http://localhost:2598/swagger/docs/BatchExport";
+            string urlPath = @"http://localhost:2598/swagger/docs/Echo";
             AbstractSwaggerReader swaggerReader = new SwaggerUrlReader(urlPath);
             APIBuilder builder = APIBuilder.GetBuilder(swaggerReader);
             API api = builder.BuildAPIAndOperations();
