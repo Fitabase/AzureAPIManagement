@@ -1,6 +1,5 @@
 ﻿using Fitabase.Azure.ApiManagement.Model.Exceptions;
 using Newtonsoft.Json;
-using Swashbuckle.Swagger.Model;
 using System;
 
 namespace Fitabase.Azure.ApiManagement.Swagger
