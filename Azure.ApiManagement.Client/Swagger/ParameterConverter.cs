@@ -1,7 +1,6 @@
 ﻿using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Swashbuckle.Swagger.Model;
 
 namespace Fitabase.Azure.ApiManagement.Swagger
 {
