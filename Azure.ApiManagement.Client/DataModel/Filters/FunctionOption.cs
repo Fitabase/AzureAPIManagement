@@ -23,7 +23,16 @@ namespace Fitabase.Azure.ApiManagement.DataModel.Filters
 
 		[Description("endswith")]
 		END_WITH
-		
+		,
+		[Description("not contains")]
+		NOT_CONTAINS
+		,
+		[Description("not startswith")]
+		NOT_START_WITH
+		,
+		[Description("not endswith")]
+		NOT_END_WITH
+
 	}
 
 	public static class FunctionOptionExtension
