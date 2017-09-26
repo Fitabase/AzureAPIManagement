@@ -7,9 +7,11 @@ using System.Threading.Tasks;
 
 namespace Fitabase.Azure.ApiManagement.Filters
 {
-    public class QueryFilter
+	/// <summary>
+	/// This class preresents a filter on query APIM resources
+	/// </summary>
+    public class QueryFilterExpression
     {
-		//public FilterQueryExpression Filter { get; set; }
 		public FilterExpression Filter { get; set; }
 		public int? Skip { get; set; }
 		public int? Top { get; set; }

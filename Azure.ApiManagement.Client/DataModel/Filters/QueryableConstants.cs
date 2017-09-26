@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace Fitabase.Azure.ApiManagement.DataModel.Filters
 {
-	public class FilterQueryConstants
+	/// <summary>
+	/// Defines constants field that can be filterd in the request
+	/// </summary>
+	public class QueryableConstants
 	{
 
 		/// <summary>

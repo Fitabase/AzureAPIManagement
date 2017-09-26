@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace Fitabase.Azure.ApiManagement.DataModel.Filters
 {
+	/// <summary>
+	/// This class represents operation options that can be performed in filter
+	/// </summary>
 	public enum OperationOption
 	{
 		[Description("ge")]

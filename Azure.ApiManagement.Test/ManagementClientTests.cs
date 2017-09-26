@@ -14,7 +14,7 @@ namespace Azure.ApiManagement.Test
     public class ManagementClientTests
     {
         protected ManagementClient Client { get; set; }
-		private QueryFilter filter;
+		private QueryFilterExpression filter;
 
 
         [TestInitialize]
@@ -22,7 +22,7 @@ namespace Azure.ApiManagement.Test
         {
             Client = new ManagementClient(@"C:\Repositories\AzureAPIManagement\Azure.ApiManagement.Test\APIMKeys.json");
 
-			filter = new QueryFilter()
+			filter = new QueryFilterExpression()
 			{
 				Skip = 1,
 			};
@@ -205,9 +205,9 @@ namespace Azure.ApiManagement.Test
 		[TestMethod]
 		public void TestApiCollection_FilterByApiName()
 		{
-			QueryFilter filter = new QueryFilter()
+			QueryFilterExpression filter = new QueryFilterExpression()
 			{
-				Filter = new OperationFilterExpression(OperationOption.GT, new QueryKeyValuePair(FilterQueryConstants.Api.Id, "api_08e0084f4fe243aeb6ae04452b3fa4c3"))
+				Filter = new OperationFilterExpression(OperationOption.GT, new QueryKeyValuePair(QueryableConstants.Api.Id, "api_08e0084f4fe243aeb6ae04452b3fa4c3"))
 			};
 
 			EntityCollection<API> collection = Client.GetAPIsAsync(filter).Result;
@@ -218,7 +218,7 @@ namespace Azure.ApiManagement.Test
 		[TestMethod]
 		public void TestApiCollection_FilterByApiPath()
 		{
-			QueryFilter filter = new QueryFilter()
+			QueryFilterExpression filter = new QueryFilterExpression()
 			{
 				Filter = new FunctionFilterExpression(FunctionOption.CONTAINS, new QueryKeyValuePair("path", "values"))
 			};
@@ -232,7 +232,7 @@ namespace Azure.ApiManagement.Test
 		[TestMethod]
 		public void TestApiCollection_FilterByApiServiceUrl()
 		{
-			QueryFilter filter = new QueryFilter()
+			QueryFilterExpression filter = new QueryFilterExpression()
 			{
 				Filter = new FunctionFilterExpression(FunctionOption.CONTAINS, new QueryKeyValuePair("path", "v1")),
 				Skip = 1
@@ -526,9 +526,9 @@ namespace Azure.ApiManagement.Test
 		[TestMethod]
 		public void TestApiOperationCollectionWithFilter()
 		{
-			QueryFilter filter = new QueryFilter()
+			QueryFilterExpression filter = new QueryFilterExpression()
 			{
-				Filter = new OperationFilterExpression(OperationOption.EQ, new QueryKeyValuePair(FilterQueryConstants.Operation.Method, "post")),
+				Filter = new OperationFilterExpression(OperationOption.EQ, new QueryKeyValuePair(QueryableConstants.Operation.Method, "post")),
 				Skip = 1
 			};
 

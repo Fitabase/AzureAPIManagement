@@ -288,7 +288,7 @@ namespace Azure.ApiManagement.Test
 		public void TestQueryFilter()
 		{
 
-			QueryFilter filter = new QueryFilter()
+			QueryFilterExpression filter = new QueryFilterExpression()
 			{
 				Filter = new FunctionFilterExpression(FunctionOption.CONTAINS, new QueryKeyValuePair("name", "value")),
 				Skip = 1,
@@ -302,7 +302,7 @@ namespace Azure.ApiManagement.Test
 		[TestMethod]
 		public void TestQueryFilterWithSkipFilter()
 		{
-			QueryFilter filter = new QueryFilter()
+			QueryFilterExpression filter = new QueryFilterExpression()
 			{
 				Skip = 1
 			};
@@ -314,7 +314,7 @@ namespace Azure.ApiManagement.Test
 		[TestMethod]
 		public void TestQueryFilterWithTopFilter()
 		{
-			QueryFilter filter = new QueryFilter()
+			QueryFilterExpression filter = new QueryFilterExpression()
 			{
 				Top = 1
 			};
@@ -327,7 +327,7 @@ namespace Azure.ApiManagement.Test
 		public void TestQueryFilterWithEmptyFilter()
 		{
 
-			QueryFilter filter = new QueryFilter();
+			QueryFilterExpression filter = new QueryFilterExpression();
 			string result = filter.GetFilterQuery();
 			Assert.AreEqual(result, "");
 		}
