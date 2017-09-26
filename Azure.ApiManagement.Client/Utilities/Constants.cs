@@ -45,7 +45,10 @@ namespace Fitabase.Azure.ApiManagement
                 internal static readonly string VersionQuery = "api-version";
 
                 internal static readonly string FilterQuery = "$filter";
-            }
+
+				internal static readonly string SkipFilterQuery = "$skip";
+				internal static readonly string TopFilterQuery = "$top";
+			}
 
             internal static class Versions
             {
@@ -54,6 +57,7 @@ namespace Fitabase.Azure.ApiManagement
 
             internal static class Headers
             {
+                internal static readonly string Authorization = "Authorization";
                 internal static readonly string ETagMatch = "If-Match";
             }
         }

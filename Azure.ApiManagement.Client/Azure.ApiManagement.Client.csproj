@@ -58,6 +58,10 @@
     <Compile Include="ClientProxy\APIBuilderSetting.cs" />
     <Compile Include="DataModel\Abstract\EntityIdGenerator.cs" />
     <Compile Include="DataModel\Exceptions\SwaggerResourceException.cs" />
+    <Compile Include="DataModel\Filters\FilterQueryConstants.cs" />
+    <Compile Include="DataModel\Filters\FunctionFilterExpression.cs" />
+    <Compile Include="DataModel\Filters\FunctionOption.cs" />
+    <Compile Include="DataModel\Filters\OperationOption.cs" />
     <Compile Include="DataModel\Model\Logger.cs" />
     <Compile Include="DataModel\Model\UserIdentity.cs" />
     <Compile Include="DataModel\ResponseContract.cs" />
@@ -93,6 +97,10 @@
     <Compile Include="Swagger\SwaggerFileReader.cs" />
     <Compile Include="Swagger\SwaggerUrlReader.cs" />
     <Compile Include="Utilities\Constants.cs" />
+    <Compile Include="DataModel\Filters\OperationFilterExpression.cs" />
+    <Compile Include="DataModel\Filters\QueryFilter.cs" />
+    <Compile Include="DataModel\Filters\FilterExpression.cs" />
+    <Compile Include="DataModel\Filters\QueryKeyValuePair.cs" />
     <Compile Include="Utilities\Utility.cs" />
     <Compile Include="Utilities\Validator.cs" />
   </ItemGroup>

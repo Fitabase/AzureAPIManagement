@@ -1,6 +1,7 @@
 ﻿using Fitabase.Azure.ApiManagement.DataModel.Properties;
 using Fitabase.Azure.ApiManagement.Model;
 using Fitabase.Azure.ApiManagement.Model.Exceptions;
+using Fitabase.Azure.ApiManagement.Filters;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -118,19 +119,16 @@ namespace Fitabase.Azure.ApiManagement
             {
                 if (url.Contains("?"))
                 {
-                    if (url.EndsWith("?"))
+                    if (!url.EndsWith("?"))
                     {
-                        builder.Append("api-version=").Append(_apiVersion);
-                    }
-                    else
-                    {
-                        builder.Append("&api-version=").Append(_apiVersion);
+                        builder.Append("&");
                     }
                 }
                 else
                 {
-                    builder.Append("?api-version=").Append(_apiVersion);
+                    builder.Append("?");
                 }
+                builder.Append(Constants.ApiManagement.Url.VersionQuery).Append("=").Append(_apiVersion);
             }
             return builder.ToString();
         }
@@ -150,21 +148,21 @@ namespace Fitabase.Azure.ApiManagement
             {
                 if (body != null)
                 {
-                    content = new StringContent(body, Encoding.UTF8, "application/json");
+                    content = new StringContent(body, Encoding.UTF8, Constants.MimeTypes.ApplicationJson);
                 }
             }
             else if (method == RequestMethod.PATCH.ToString())
             {
-                content = new StringContent(body, Encoding.UTF8, "application/json");
-                request.Headers.Add("If-Match", "*");
+                content = new StringContent(body, Encoding.UTF8, Constants.MimeTypes.ApplicationJson);
+                request.Headers.Add(Constants.ApiManagement.Headers.ETagMatch, "*");
             }
             else if (method == RequestMethod.DELETE.ToString())
             {
-                request.Headers.Add("If-Match", "*");
+                request.Headers.Add(Constants.ApiManagement.Headers.ETagMatch, "*");
             }
 
-            request.Headers.Add("Authorization", Constants.ApiManagement.AccessToken + " " + token);
-            request.Headers.Add("api-version", _apiVersion);
+            request.Headers.Add(Constants.ApiManagement.Headers.Authorization, Constants.ApiManagement.AccessToken + " " + token);
+            request.Headers.Add(Constants.ApiManagement.Url.VersionQuery, _apiVersion);
             request.Content = content;
 
             return request;
@@ -235,7 +233,8 @@ namespace Fitabase.Azure.ApiManagement
 
             return await response.Content.ReadAsStringAsync();
         }
-        public virtual async Task<T> GetByIdAsync<T>(string endpoint, string ID, CancellationToken cancellationToken = default(CancellationToken))
+
+		public virtual async Task<T> GetByIdAsync<T>(string endpoint, string ID, CancellationToken cancellationToken = default(CancellationToken))
         {
             string[] splits = ID.Split('_');
             string entitySignatureName = (splits.Length > 1) ? splits[0] : "entity";
@@ -368,34 +367,42 @@ namespace Fitabase.Azure.ApiManagement
         /// <summary>
         /// Retrieve all user models
         /// </summary>
-        public async Task<EntityCollection<User>> GetUsersAsync(CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<EntityCollection<User>> GetUsersAsync(QueryFilter filter = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/users", _api_endpoint);
+			if (filter != null)
+				endpoint = string.Format("{0}?{1}", endpoint, filter.GetFilterQuery());
             return await DoRequestAsync<EntityCollection<User>>(endpoint, RequestMethod.GET, cancellationToken);
         }
 
         /// <summary>
         /// Retrieve a list of subscriptions by the user
         /// </summary>
-        public async Task<EntityCollection<Subscription>> GetUserSubscriptionAsync(string userId, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<EntityCollection<Subscription>> GetUserSubscriptionAsync(string userId, QueryFilter filter = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (String.IsNullOrEmpty(userId))
                 throw new InvalidEntityException("userId is required");
 
             string endpoint = String.Format("{0}/users/{1}/subscriptions", _api_endpoint, userId);
-            return await DoRequestAsync<EntityCollection<Subscription>>(endpoint, RequestMethod.GET, cancellationToken);
+
+			if (filter != null)
+				endpoint = string.Format("{0}?{1}", endpoint, filter.GetFilterQuery());
+
+			return await DoRequestAsync<EntityCollection<Subscription>>(endpoint, RequestMethod.GET, cancellationToken);
         }
 
         /// <summary>
         /// Retrieve a list of groups that the specific user belongs to
         /// </summary>
-        public async Task<EntityCollection<Group>> GetUserGroupsAsync(string userId, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<EntityCollection<Group>> GetUserGroupsAsync(string userId, QueryFilter filter = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (String.IsNullOrEmpty(userId))
                 throw new InvalidEntityException("userId is required");
 
             string endpoint = String.Format("{0}/users/{1}/groups", _api_endpoint, userId);
-            return await DoRequestAsync<EntityCollection<Group>>(endpoint, RequestMethod.GET, cancellationToken);
+			if (filter != null)
+				endpoint = string.Format("{0}?{1}", endpoint, filter.GetFilterQuery());
+			return await DoRequestAsync<EntityCollection<Group>>(endpoint, RequestMethod.GET, cancellationToken);
         }
 
         /// <summary>
@@ -478,10 +485,13 @@ namespace Fitabase.Azure.ApiManagement
         /// <summary>
         /// Lists all APIs of the API Management service instance.
         /// </summary>
-        public async Task<EntityCollection<API>> GetAPIsAsync(CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<EntityCollection<API>> GetAPIsAsync(QueryFilter filter = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/apis", _api_endpoint);
-            return await DoRequestAsync<EntityCollection<API>>(endpoint, RequestMethod.GET, cancellationToken);
+
+			if (filter != null)
+				endpoint = string.Format("{0}?{1}", endpoint, filter.GetFilterQuery());
+			return await DoRequestAsync<EntityCollection<API>>(endpoint, RequestMethod.GET, cancellationToken);
         }
 
 
@@ -559,13 +569,16 @@ namespace Fitabase.Azure.ApiManagement
         /// <summary>
         /// Lists a collection of the operations for the specified API.
         /// </summary>
-        public async Task<EntityCollection<APIOperation>> GetOperationsByAPIAsync(string apiId, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<EntityCollection<APIOperation>> GetOperationsByAPIAsync(string apiId, QueryFilter filter = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (String.IsNullOrEmpty(apiId))
                 throw new InvalidEntityException("apiId is required");
 
             string endpoint = String.Format("{0}/apis/{1}/operations", _api_endpoint, apiId);
-            return await DoRequestAsync<EntityCollection<APIOperation>>(endpoint, RequestMethod.GET, cancellationToken);
+
+			if (filter != null)
+				endpoint = string.Format("{0}?{1}", endpoint, filter.GetFilterQuery());
+			return await DoRequestAsync<EntityCollection<APIOperation>>(endpoint, RequestMethod.GET, cancellationToken);
         }
 
         /// <summary>
@@ -656,10 +669,12 @@ namespace Fitabase.Azure.ApiManagement
         /// <summary>
         /// Lists a collection of products in the specified service instance.
         /// </summary>
-        public async Task<EntityCollection<Product>> GetProductsAsync(CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<EntityCollection<Product>> GetProductsAsync(QueryFilter filter = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/products", _api_endpoint);
-            return await DoRequestAsync<EntityCollection<Product>>(endpoint, RequestMethod.GET, cancellationToken);
+			if (filter != null)
+				endpoint = string.Format("{0}?{1}", endpoint, filter.GetFilterQuery());
+			return await DoRequestAsync<EntityCollection<Product>>(endpoint, RequestMethod.GET, cancellationToken);
         }
 
         /// <summary>
@@ -701,14 +716,17 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         /// <param name="productId"></param>
         /// <returns></returns>
-        public async Task<EntityCollection<API>> GetProductAPIsAsync(string productId, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<EntityCollection<API>> GetProductAPIsAsync(string productId, QueryFilter filter = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (String.IsNullOrEmpty(productId))
                 throw new InvalidEntityException("productId is required");
 
             string endpoint = String.Format("{0}/products/{1}/apis",
                                     _api_endpoint, productId);
-            return await DoRequestAsync<EntityCollection<API>>(endpoint, RequestMethod.GET, cancellationToken);
+			if (filter != null)
+				endpoint = string.Format("{0}?{1}", endpoint, filter.GetFilterQuery());
+
+			return await DoRequestAsync<EntityCollection<API>>(endpoint, RequestMethod.GET, cancellationToken);
         }
 
         /// <summary>
@@ -716,14 +734,17 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         /// <param name="productId"></param>
         /// <returns></returns>
-        public async Task<EntityCollection<Subscription>> GetProductSubscriptionsAsync(string productId, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<EntityCollection<Subscription>> GetProductSubscriptionsAsync(string productId, QueryFilter filter = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (String.IsNullOrEmpty(productId))
                 throw new InvalidEntityException("productId is required");
 
             string endpoint = String.Format("{0}/products/{1}/subscriptions",
                                     _api_endpoint, productId);
-            return await DoRequestAsync<EntityCollection<Subscription>>(endpoint, RequestMethod.GET, cancellationToken);
+
+			if (filter != null)
+				endpoint = string.Format("{0}?{1}", endpoint, filter.GetFilterQuery());
+			return await DoRequestAsync<EntityCollection<Subscription>>(endpoint, RequestMethod.GET, cancellationToken);
         }
 
         /// <summary>
@@ -766,14 +787,18 @@ namespace Fitabase.Azure.ApiManagement
         /// </summary>
         /// <param name="productId"></param>
         /// <returns></returns>
-        public async Task<EntityCollection<Group>> GetProductGroupsAsync(string productId, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<EntityCollection<Group>> GetProductGroupsAsync(string productId, QueryFilter filter = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (String.IsNullOrEmpty(productId))
                 throw new InvalidEntityException("productId is required");
 
             string endpoint = String.Format("{0}/products/{1}/groups",
                                     _api_endpoint, productId);
-            return await DoRequestAsync<EntityCollection<Group>>(endpoint, RequestMethod.GET, cancellationToken);
+
+			if (filter != null)
+				endpoint = string.Format("{0}?{1}", endpoint, filter.GetFilterQuery());
+
+			return await DoRequestAsync<EntityCollection<Group>>(endpoint, RequestMethod.GET, cancellationToken);
         }
 
 
@@ -913,22 +938,28 @@ namespace Fitabase.Azure.ApiManagement
         /// <summary>
         /// Lists a collection of groups
         /// </summary>
-        public async Task<EntityCollection<Group>> GetGroupsAsync(CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<EntityCollection<Group>> GetGroupsAsync(QueryFilter filter = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/groups", _api_endpoint);
-            return await DoRequestAsync<EntityCollection<Group>>(endpoint, RequestMethod.GET, cancellationToken);
+			if (filter != null)
+				endpoint = string.Format("{0}?{1}", endpoint, filter.GetFilterQuery());
+			return await DoRequestAsync<EntityCollection<Group>>(endpoint, RequestMethod.GET, cancellationToken);
         }
 
         /// <summary>
         /// Lists a collection of the members of the group, specified by its identifier.
         /// </summary>
-        public async Task<EntityCollection<User>> GetUsersInGroupAsync(string groupId, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<EntityCollection<User>> GetUsersInGroupAsync(string groupId, QueryFilter filter = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (String.IsNullOrEmpty(groupId))
                 throw new InvalidEntityException("groupId is required");
 
             string endpoint = String.Format("{0}/groups/{1}/users", _api_endpoint, groupId);
-            return await DoRequestAsync<EntityCollection<User>>(endpoint, RequestMethod.GET, cancellationToken);
+
+			if (filter != null)
+				endpoint = string.Format("{0}?{1}", endpoint, filter.GetFilterQuery());
+
+			return await DoRequestAsync<EntityCollection<User>>(endpoint, RequestMethod.GET, cancellationToken);
         }
 
         /// <summary>
@@ -1012,10 +1043,14 @@ namespace Fitabase.Azure.ApiManagement
         /// <summary>
         /// Lists all subscriptions of the API Management service instance.
         /// </summary>
-        public async Task<EntityCollection<Subscription>> GetSubscriptionsAsync(CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<EntityCollection<Subscription>> GetSubscriptionsAsync(QueryFilter filter = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             string endpoint = String.Format("{0}/subscriptions", _api_endpoint);
-            return await DoRequestAsync<EntityCollection<Subscription>>(endpoint, RequestMethod.GET, cancellationToken);
+
+			if (filter != null)
+				endpoint = string.Format("{0}?{1}", endpoint, filter.GetFilterQuery());
+
+			return await DoRequestAsync<EntityCollection<Subscription>>(endpoint, RequestMethod.GET, cancellationToken);
         }
 
         /// <summary>

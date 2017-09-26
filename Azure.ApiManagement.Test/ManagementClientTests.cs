@@ -5,6 +5,8 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using Fitabase.Azure.ApiManagement.DataModel.Properties;
+using Fitabase.Azure.ApiManagement.Filters;
+using Fitabase.Azure.ApiManagement.DataModel.Filters;
 
 namespace Azure.ApiManagement.Test
 {
@@ -12,12 +14,18 @@ namespace Azure.ApiManagement.Test
     public class ManagementClientTests
     {
         protected ManagementClient Client { get; set; }
+		private QueryFilter filter;
 
 
         [TestInitialize]
         public void SetUp()
         {
             Client = new ManagementClient(@"C:\Repositories\AzureAPIManagement\Azure.ApiManagement.Test\APIMKeys.json");
+
+			filter = new QueryFilter()
+			{
+				Skip = 1,
+			};
         }
 
  
@@ -49,8 +57,14 @@ namespace Azure.ApiManagement.Test
             EntityCollection<User> userCollection = Client.GetUsersAsync().Result;
             Assert.IsNotNull(userCollection);
             Assert.AreEqual(userCollection.Count, userCollection.Values.Count);
-        }
 
+			// Test with filter
+			userCollection = Client.GetUsersAsync(filter).Result;
+			Assert.IsNotNull(userCollection);
+			Assert.IsTrue(userCollection.Count > userCollection.Values.Count);
+		}
+
+	
         [TestMethod]
         public void GetUser()
         {
@@ -66,17 +80,32 @@ namespace Azure.ApiManagement.Test
             string userId = "66da331f7a1c49d98ac8a4ad136c7c64";
             EntityCollection<Subscription> collection = Client.GetUserSubscriptionAsync(userId).Result;
             Assert.IsNotNull(collection);
-        }
+			Assert.AreEqual(collection.Count, collection.Values.Count);
 
-        [TestMethod]
-        public void GetUserGroup()
-        {
-            string userId = "user_bef163ba98af433c917914dd4c208115";
-            EntityCollection<Group> collection = Client.GetUserGroupsAsync(userId).Result;
-            Assert.IsNotNull(collection);
-        }
+			// Test With filter
+			collection = Client.GetUserSubscriptionAsync(userId, filter).Result;
+			Assert.IsNotNull(collection);
+			Assert.IsTrue(collection.Count > collection.Values.Count);
+		}
 
-        [TestMethod]
+
+
+
+		[TestMethod]
+		public void GetUserGroup()
+		{
+			string userId = "1";
+			EntityCollection<Group> collection = Client.GetUserGroupsAsync(userId).Result;
+			Assert.IsNotNull(collection);
+			Assert.AreEqual(collection.Count, collection.Values.Count);
+
+			// With Filter
+			collection = Client.GetUserGroupsAsync(userId, filter).Result;
+			Assert.IsNotNull(collection);
+			Assert.IsTrue(collection.Count > collection.Values.Count);
+		}
+
+		[TestMethod]
         public void DeleteUser()
         {
             int count_v1 = Client.GetUsersAsync().Result.Count;
@@ -166,12 +195,54 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void ApiCollection()
         {
-            EntityCollection<API> apis = Client.GetAPIsAsync().Result;
-            Assert.IsNotNull(apis);
-            Assert.IsTrue(apis.Count > 0);
-        }
+            EntityCollection<API> collection = Client.GetAPIsAsync().Result;
+            Assert.IsNotNull(collection);
+            Assert.IsTrue(collection.Count > 0);
 
-        [TestMethod]
+		}
+
+
+		[TestMethod]
+		public void TestApiCollection_FilterByApiName()
+		{
+			QueryFilter filter = new QueryFilter()
+			{
+				Filter = new OperationFilterExpression(OperationOption.GT, new QueryKeyValuePair(FilterQueryConstants.Api.Id, "api_08e0084f4fe243aeb6ae04452b3fa4c3"))
+			};
+
+			EntityCollection<API> collection = Client.GetAPIsAsync(filter).Result;
+			Assert.IsNotNull(collection);
+		}
+
+
+		[TestMethod]
+		public void TestApiCollection_FilterByApiPath()
+		{
+			QueryFilter filter = new QueryFilter()
+			{
+				Filter = new FunctionFilterExpression(FunctionOption.CONTAINS, new QueryKeyValuePair("path", "values"))
+			};
+
+			EntityCollection<API> collection = Client.GetAPIsAsync(filter).Result;
+			Assert.IsNotNull(collection);
+		}
+
+
+
+		[TestMethod]
+		public void TestApiCollection_FilterByApiServiceUrl()
+		{
+			QueryFilter filter = new QueryFilter()
+			{
+				Filter = new FunctionFilterExpression(FunctionOption.CONTAINS, new QueryKeyValuePair("path", "v1")),
+				Skip = 1
+			};
+
+			EntityCollection<API> collection = Client.GetAPIsAsync(filter).Result;
+			Assert.IsNotNull(collection);
+		}
+
+		[TestMethod]
         public void DeleteAPI()
         {
             int count_v1 = Client.GetAPIsAsync().Result.Count;
@@ -440,16 +511,32 @@ namespace Azure.ApiManagement.Test
             Assert.IsNotNull(operation);
         }
 
-        [TestMethod]
-        public void GetOperationsByAPI()
-        {
-            string apiId = "5991f3b22f02d30bacf57719";
-            EntityCollection<APIOperation> collection = Client.GetOperationsByAPIAsync(apiId).Result;
-            Assert.IsNotNull(collection);
-        }
+		[TestMethod]
+		public void GetOperationsByAPI()
+		{
+			string apiId = "59a9a0682f02d308c8fef6b5";
+			EntityCollection<APIOperation> collection = Client.GetOperationsByAPIAsync(apiId).Result;
+			Assert.IsNotNull(collection);
+			Assert.AreEqual(collection.Count, collection.Values.Count);
+			
+		}
 
 
-        [TestMethod]
+
+		[TestMethod]
+		public void TestApiOperationCollectionWithFilter()
+		{
+			QueryFilter filter = new QueryFilter()
+			{
+				Filter = new OperationFilterExpression(OperationOption.EQ, new QueryKeyValuePair(FilterQueryConstants.Operation.Method, "post")),
+				Skip = 1
+			};
+
+			string apiId = "59a9a0682f02d308c8fef6b5";
+			EntityCollection<APIOperation> collection = Client.GetOperationsByAPIAsync(apiId, filter).Result;
+		}
+
+		[TestMethod]
 
         public void DelteAPIOperation()
         {
@@ -569,9 +656,15 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void ProductCollection()
         {
-            EntityCollection<Product> products = Client.GetProductsAsync().Result;
-            Assert.IsNotNull(products);
-        }
+            EntityCollection<Product> collection = Client.GetProductsAsync().Result;
+            Assert.IsNotNull(collection);
+			Assert.AreEqual(collection.Count, collection.Values.Count);
+
+			// With filter
+			collection = Client.GetProductsAsync(filter).Result;
+			Assert.IsTrue(collection.Count > collection.Values.Count);
+
+		}
 
 
         [TestMethod]
@@ -580,7 +673,12 @@ namespace Azure.ApiManagement.Test
             string productId = "5956a9b92f02d30b88dfad7d";
             EntityCollection<Subscription> collection = Client.GetProductSubscriptionsAsync(productId).Result;
             Assert.IsNotNull(collection);
-        }
+			Assert.AreEqual(collection.Count, collection.Values.Count);
+
+			// With filter
+			collection = Client.GetProductSubscriptionsAsync(productId, filter).Result;
+			Assert.IsTrue(collection.Count > collection.Values.Count);
+		}
 
 
         [TestMethod]
@@ -589,7 +687,12 @@ namespace Azure.ApiManagement.Test
             string productId = "5956a9b92f02d30b88dfad7d";
             EntityCollection<API> collection = Client.GetProductAPIsAsync(productId).Result;
             Assert.IsNotNull(collection);
-        }
+			Assert.AreEqual(collection.Count, collection.Values.Count);
+
+			// With filter
+			collection = Client.GetProductAPIsAsync(productId, filter).Result;
+			Assert.IsTrue(collection.Count > collection.Values.Count);
+		}
         [TestMethod]
         public void AddProductApi()
         {
@@ -623,7 +726,12 @@ namespace Azure.ApiManagement.Test
             string productId = "5956a9b92f02d30b88dfad7d";
             EntityCollection<Group> collection = Client.GetProductGroupsAsync(productId).Result;
             Assert.IsNotNull(collection);
-        }
+			Assert.AreEqual(collection.Count, collection.Values.Count);
+
+			// With Filter
+			collection = Client.GetProductGroupsAsync(productId, filter).Result;
+			Assert.IsTrue(collection.Count > collection.Values.Count);
+		}
         [TestMethod]
         public void AddProductGroup()
         {
@@ -744,7 +852,12 @@ namespace Azure.ApiManagement.Test
         {
             EntityCollection<Subscription> collection = Client.GetSubscriptionsAsync().Result;
             Assert.IsNotNull(collection);
-        }
+			Assert.AreEqual(collection.Count, collection.Values.Count);
+
+			// With Filter
+			collection = Client.GetSubscriptionsAsync(filter).Result;
+			Assert.IsTrue(collection.Count > collection.Values.Count);
+		}
 
         [TestMethod]
         public void GetSubscription()
@@ -828,7 +941,12 @@ namespace Azure.ApiManagement.Test
         {
             EntityCollection<Group> collection = Client.GetGroupsAsync().Result;
             Assert.IsNotNull(collection);
-        }
+			Assert.AreEqual(collection.Count, collection.Values.Count);
+
+			// With filter
+			collection = Client.GetGroupsAsync(filter).Result;
+			Assert.IsTrue(collection.Count > collection.Values.Count);
+		}
 
         [TestMethod]
         public void GetGroupUsers()
@@ -836,7 +954,12 @@ namespace Azure.ApiManagement.Test
             string groupId = "5870184f9898000087020002";
             EntityCollection<User> collection = Client.GetUsersInGroupAsync(groupId).Result;
             Assert.IsNotNull(collection);
-        }
+			Assert.AreEqual(collection.Count, collection.Values.Count);
+
+			// With filter
+			collection = Client.GetUsersInGroupAsync(groupId, filter).Result;
+			Assert.IsTrue(collection.Count > collection.Values.Count);
+		}
 
 
         [TestMethod]
