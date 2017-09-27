@@ -9,19 +9,19 @@ namespace Fitabase.Azure.ApiManagement.Swagger
 {
 	public class AuthorizedSwaggerUrlReader : AbstractSwaggerReader
 	{
-		public ApimOption ApimOption { get; private set; }
+		public List<KeyValuePair<string, string>> HeaderOptions { get; private set; }
 		
-		public AuthorizedSwaggerUrlReader(string url, ApimOption header) : base(url)
+		public AuthorizedSwaggerUrlReader(string url, List<KeyValuePair<string, string>> headerOptions) : base(url)
         {
-			ApimOption = header;
+			HeaderOptions = headerOptions;
 		}
 
 		private HttpRequestMessage OnHandleRequest()
 		{
 			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, this.ResourcePath);
-			foreach (KeyValuePair<HeaderOption, string> pair in ApimOption.Headers)
+			foreach (var pair in HeaderOptions)
 			{
-				request.Headers.Add(pair.Key.ToDescriptionString(), pair.Value);
+				request.Headers.Add(pair.Key, pair.Value);
 			}
 
 			return request;
@@ -38,8 +38,6 @@ namespace Fitabase.Azure.ApiManagement.Swagger
 			try
 			{
 				httpClient = new HttpClient();
-				//request = new HttpRequestMessage(HttpMethod.Get, this.ResourcePath);
-				//request.Headers.Add("Ocp-Apim-Subscription-Key", "362453116f0948dea2461856d29b310f");
 				request = OnHandleRequest();
 
 				response = httpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead).Result;

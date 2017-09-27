@@ -40,8 +40,11 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void BuildSwaggerWithSwaggerReader()
         {
-            string urlPath = @"http://localhost:2598/swagger/docs/BodyTrace";
-            AbstractSwaggerReader swaggerReader = new SwaggerUrlReader(urlPath);
+            string urlPath = @"https://fitabasedev.azure-api.net/swagger/DailyActivity";
+			List<KeyValuePair<string, string>> headerList = new List<KeyValuePair<string, string>>();
+			headerList.Add(new KeyValuePair<string, string>("Ocp-Apim-Subscription-Key", "362453116f0948dea2461856d29b310f"));
+			
+			AbstractSwaggerReader swaggerReader = new AuthorizedSwaggerUrlReader(urlPath, headerList);
             APIBuilder builder = APIBuilder.GetBuilder(swaggerReader);
             Assert.IsNotNull(builder);
         }

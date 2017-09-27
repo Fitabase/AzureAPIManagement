@@ -88,9 +88,7 @@
     <Compile Include="DataModel\Model\Product.cs" />
     <Compile Include="DataModel\ParameterContract.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Swagger\ApimOption.cs" />
     <Compile Include="Swagger\AuthorizedSwaggerUrlReader.cs" />
-    <Compile Include="Swagger\HeaderOption.cs" />
     <Compile Include="Swagger\JsonCreationConverter.cs" />
     <Compile Include="Swagger\AbstractSwaggerReader.cs" />
     <Compile Include="ClientProxy\APIBuilder.cs" />

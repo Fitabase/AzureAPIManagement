@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using Fitabase.Azure.ApiManagement.DataModel.Properties;
 using Fitabase.Azure.ApiManagement.Filters;
 using Fitabase.Azure.ApiManagement.DataModel.Filters;
+using Newtonsoft.Json;
 
 namespace Azure.ApiManagement.Test
 {
@@ -198,6 +199,7 @@ namespace Azure.ApiManagement.Test
             EntityCollection<API> collection = Client.GetAPIsAsync().Result;
             Assert.IsNotNull(collection);
             Assert.IsTrue(collection.Count > 0);
+			string json = JsonConvert.SerializeObject(collection);
 
 		}
 
@@ -220,11 +222,13 @@ namespace Azure.ApiManagement.Test
 		{
 			QueryFilterExpression filter = new QueryFilterExpression()
 			{
-				Filter = new FunctionFilterExpression(FunctionOption.CONTAINS, new QueryKeyValuePair("path", "values"))
+				Filter = new FunctionFilterExpression(FunctionOption.CONTAINS, new QueryKeyValuePair(QueryableConstants.Api.Name, "(Staging)"))
 			};
 
 			EntityCollection<API> collection = Client.GetAPIsAsync(filter).Result;
 			Assert.IsNotNull(collection);
+
+			string json = JsonConvert.SerializeObject(collection);
 		}
 
 
@@ -505,8 +509,8 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void GetAPIOperation()
         {
-            string apiId = "api_577edd5ee62543d297bd5d568af78a82";
-            string operationId = "operation_6854477750384abe9bc70efb9415b938";
+            string apiId = "admin-swagger";
+            string operationId = "59c9a6155882b5cb2db3ba41";
             APIOperation operation = Client.GetAPIOperationAsync(apiId, operationId).Result;
             Assert.IsNotNull(operation);
         }
