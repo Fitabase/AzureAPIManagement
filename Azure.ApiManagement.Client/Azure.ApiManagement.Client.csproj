@@ -62,6 +62,7 @@
     <Compile Include="DataModel\Filters\FunctionFilterExpression.cs" />
     <Compile Include="DataModel\Filters\FunctionOption.cs" />
     <Compile Include="DataModel\Filters\OperationOption.cs" />
+    <Compile Include="DataModel\Model\APIRevision.cs" />
     <Compile Include="DataModel\Model\Logger.cs" />
     <Compile Include="DataModel\Model\UserIdentity.cs" />
     <Compile Include="DataModel\ResponseContract.cs" />

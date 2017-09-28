@@ -170,10 +170,10 @@ namespace Azure.ApiManagement.Test
         public void CreateApi()
         {
             int count_v1 = Client.GetAPIsAsync().Result.Count;
-            string name = "staging-zing";
+            string name = "Test FitabaseAPI staging";
             string description = "An example to create apis from service";
             string serviceUrl = "fitabase-staging.net";
-            string path = "/v4";
+            string path = "/v1";
             string[] protocols = new string[] { "http", "https" };
 
             API newAPI = API.Create(name, serviceUrl, path, protocols, description);
@@ -184,14 +184,39 @@ namespace Azure.ApiManagement.Test
         }
 
 
-        [TestMethod]
-        public void GetAPI()
-        {
-            string apiId = "59a9a0682f02d308c8fef6b5";
-            API api = Client.GetAPIAsync(apiId).Result;
-            Assert.IsNotNull(api);
-            Assert.AreEqual(api.Id, apiId);
-        }
+  //      [TestMethod]
+  //      public void GetAPI()
+  //      {
+  //          //string apiId = "api_7d1d97fd4cce41c09b5d0c703be89d15;rev=2";
+		//	string apiId = "api_7d1d97fd4cce41c09b5d0c703be89d15";
+		//	string revision = "2";
+		//	API api = Client.GetAPIAsync(apiId, revision).Result;
+		//	Assert.IsNotNull(api);
+		//	Assert.AreEqual(api.ApiRevision, revision);
+		//	Assert.AreEqual(api.Id, apiId);
+		//	string json = JsonConvert.SerializeObject(api);
+
+		//}
+		
+
+		[TestMethod]
+		public void UpdateAPIName()
+		{
+			string apiId = "api_7d1d97fd4cce41c09b5d0c703be89d15";
+			string revision = "1";
+			API api = Client.GetAPIAsync(apiId, revision).Result;
+			//api.ApiRevision = "2";
+			//api.IsCurrent = false;
+
+			api.Name = "other name";
+			api.IsCurrent = false;
+			api.ApiRevision = "2";
+
+			var task = Client.UpdateAPIAsync(api);
+			api = Client.GetAPIAsync(apiId).Result;
+			string json = JsonConvert.SerializeObject(api);
+		}
+
 
         [TestMethod]
         public void ApiCollection()

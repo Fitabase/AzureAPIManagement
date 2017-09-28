@@ -11,6 +11,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Fitabase.Azure.ApiManagement.DataModel.Model;
 
 namespace Fitabase.Azure.ApiManagement
 {
@@ -447,15 +448,22 @@ namespace Fitabase.Azure.ApiManagement
             return api;
         }
 
-        /// <summary>
-        /// Gets the details of the API specified by its identifier.
-        /// </summary>
-        public async Task<API> GetAPIAsync(string apiId, CancellationToken cancellationToken = default(CancellationToken))
+		/// <summary>
+		/// Gets the details of the API specified by its identifier.
+		/// </summary>
+		
+		public async Task<API> GetAPIAsync(string apiId, string revision = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (String.IsNullOrEmpty(apiId))
                 throw new InvalidEntityException("apiId is required");
 
             string endpoint = String.Format("{0}/apis", _api_endpoint);
+			if (!string.IsNullOrWhiteSpace(revision))
+			{
+				if (!apiId.Contains(";rev=")) {									// Ensure that that the api revision has not included in the API.
+					apiId = string.Format("{0};rev={1}", apiId, revision);
+				}
+			}
             return await GetByIdAsync<API>(endpoint, apiId, cancellationToken);
         }
 
@@ -495,23 +503,31 @@ namespace Fitabase.Azure.ApiManagement
         }
 
 
-        #endregion
+		public async Task<EntityCollection<APIRevision>> GetApiRevisions(string apiId)
+		{
+			string endpoint = String.Format("{0}/apis/{1}/revisions", _api_endpoint, apiId);
+			return await DoRequestAsync<EntityCollection<APIRevision>>(endpoint, RequestMethod.GET, null);
+		}
+
+		
+
+		#endregion
 
 
 
 
 
-        /*********************************************************/
-        /******************   API OPERATIONS  ********************/
-        /*********************************************************/
+		/*********************************************************/
+		/******************   API OPERATIONS  ********************/
+		/*********************************************************/
 
-        #region API Operations
+		#region API Operations
 
 
-        /// <summary>
-        /// Creates a new operation in the API
-        /// </summary>
-        public async Task<APIOperation> CreateAPIOperationAsync(string apiId, APIOperation operation, CancellationToken cancellationToken = default(CancellationToken))
+		/// <summary>
+		/// Creates a new operation in the API
+		/// </summary>
+		public async Task<APIOperation> CreateAPIOperationAsync(string apiId, APIOperation operation, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (String.IsNullOrEmpty(apiId))
                 throw new InvalidEntityException("apiId is required");
@@ -574,7 +590,7 @@ namespace Fitabase.Azure.ApiManagement
             if (String.IsNullOrEmpty(apiId))
                 throw new InvalidEntityException("apiId is required");
 
-            string endpoint = String.Format("{0}/apis/{1}/operations", _api_endpoint, apiId);
+			string endpoint = String.Format("{0}/apis/{1}/operations", _api_endpoint, apiId);
 
 			if (filter != null)
 				endpoint = string.Format("{0}?{1}", endpoint, filter.GetFilterQuery());
