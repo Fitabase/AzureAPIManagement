@@ -11,7 +11,6 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Fitabase.Azure.ApiManagement.DataModel.Model;
 
 namespace Fitabase.Azure.ApiManagement
 {

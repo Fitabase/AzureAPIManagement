@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Fitabase.Azure.ApiManagement.DataModel.Model
+namespace Fitabase.Azure.ApiManagement.Model
 {
 	public class APIRevision : EntityBase
 	{

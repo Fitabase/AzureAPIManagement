@@ -1,14 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Fitabase.Azure.ApiManagement;
 using Fitabase.Azure.ApiManagement.Model;
-using System;
-using System.Linq;
-using System.Collections.Generic;
 using Fitabase.Azure.ApiManagement.DataModel.Properties;
-using Fitabase.Azure.ApiManagement.Filters;
-using Fitabase.Azure.ApiManagement.DataModel.Filters;
 using Newtonsoft.Json;
-using Fitabase.Azure.ApiManagement.DataModel.Model;
 
 namespace Azure.ApiManagement.Test
 {
