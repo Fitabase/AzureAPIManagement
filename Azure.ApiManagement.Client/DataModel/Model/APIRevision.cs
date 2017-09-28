@@ -10,7 +10,7 @@ namespace Fitabase.Azure.ApiManagement.DataModel.Model
 {
 	public class APIRevision : EntityBase
 	{
-		protected override string UriIdFormat => throw new NotImplementedException();
+		protected override string UriIdFormat => "";
 
 		public string RevisionId
 		{
