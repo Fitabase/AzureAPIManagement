@@ -7,7 +7,7 @@
     <ProjectGuid>{E8EF2D86-AEAD-4D44-9909-0E5B2641A139}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SmallStepsLabs.Azure.ApiManagement</RootNamespace>
+    <RootNamespace>Fitabase.Azure.ApiManagement</RootNamespace>
     <AssemblyName>SmallStepsLabs.Azure.ApiManagement.Client</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -21,6 +21,8 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>
+    </DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -31,17 +33,19 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.8.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Net.Http.Formatting, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Net.Http.WebRequest" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -51,24 +55,59 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ClientProxy\APIBuilderSetting.cs" />
+    <Compile Include="DataModel\Abstract\EntityIdGenerator.cs" />
+    <Compile Include="DataModel\Exceptions\SwaggerResourceException.cs" />
+    <Compile Include="DataModel\Filters\QueryableConstants.cs" />
+    <Compile Include="DataModel\Filters\FunctionFilterExpression.cs" />
+    <Compile Include="DataModel\Filters\FunctionOption.cs" />
+    <Compile Include="DataModel\Filters\OperationOption.cs" />
+    <Compile Include="DataModel\Model\APIRevision.cs" />
+    <Compile Include="DataModel\Model\Logger.cs" />
+    <Compile Include="DataModel\Model\UserIdentity.cs" />
+    <Compile Include="DataModel\ResponseContract.cs" />
+    <Compile Include="DataModel\Properties\Documents.cs" />
+    <Compile Include="DataModel\Properties\ParameterType.cs" />
     <Compile Include="DataModel\Exceptions\InvalidEntityException.cs" />
-    <Compile Include="DataModel\Model\Enums.cs" />
+    <Compile Include="DataModel\Properties\Enums.cs" />
+    <Compile Include="DataModel\Model\APIOperation.cs" />
+    <Compile Include="DataModel\Model\Property.cs" />
+    <Compile Include="DataModel\Model\Report.cs" />
     <Compile Include="DataModel\Model\SsoUrl.cs" />
     <Compile Include="DataModel\Model\Subscription.cs" />
+    <Compile Include="DataModel\Model\Tenant.cs" />
     <Compile Include="DataModel\Model\User.cs" />
+    <Compile Include="DataModel\Properties\RequestMethod.cs" />
+    <Compile Include="DataModel\RepresentationContract.cs" />
+    <Compile Include="DataModel\RequestContract.cs" />
     <Compile Include="DataModel\Result\EntityCollection.cs" />
     <Compile Include="DataModel\Model\Group.cs" />
     <Compile Include="DataModel\Model\API.cs" />
     <Compile Include="DataModel\Abstract\EntityBase.cs" />
     <Compile Include="DataModel\Exceptions\HttpResponseException.cs" />
     <Compile Include="ClientProxy\ManagementClient.cs" />
-    <Compile Include="ClientProxy\ClientBase.cs" />
     <Compile Include="DataModel\Model\Product.cs" />
+    <Compile Include="DataModel\ParameterContract.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Swagger\AuthorizedSwaggerUrlReader.cs" />
+    <Compile Include="Swagger\JsonCreationConverter.cs" />
+    <Compile Include="Swagger\AbstractSwaggerReader.cs" />
+    <Compile Include="ClientProxy\APIBuilder.cs" />
+    <Compile Include="Swagger\ParameterConverter.cs" />
+    <Compile Include="Swagger\SchemeSecurityConverter.cs" />
+    <Compile Include="Swagger\SwaggerDocument.cs" />
+    <Compile Include="Swagger\SwaggerFileReader.cs" />
+    <Compile Include="Swagger\SwaggerUrlReader.cs" />
     <Compile Include="Utilities\Constants.cs" />
+    <Compile Include="DataModel\Filters\OperationFilterExpression.cs" />
+    <Compile Include="DataModel\Filters\QueryFilterExpression.cs" />
+    <Compile Include="DataModel\Filters\FilterExpression.cs" />
+    <Compile Include="DataModel\Filters\QueryKeyValuePair.cs" />
     <Compile Include="Utilities\Utility.cs" />
+    <Compile Include="Utilities\Validator.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />

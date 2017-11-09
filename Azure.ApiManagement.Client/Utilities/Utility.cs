@@ -6,6 +6,7 @@ using System.Globalization;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using Fitabase.Azure.ApiManagement.Model.Exceptions;
 
 namespace Fitabase.Azure.ApiManagement
 {

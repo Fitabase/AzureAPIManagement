@@ -2,8 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Net.Http;
 
-namespace Fitabase.Azure.ApiManagement.Model
+namespace Fitabase.Azure.ApiManagement.Model.Exceptions
 {
     /// <summary>
     /// Represents the result of an failed service operation
@@ -11,23 +12,46 @@ namespace Fitabase.Azure.ApiManagement.Model
     /// </summary>
     public class HttpResponseException : Exception
     {
-        /// <summary>
-        /// The error body containing the details of the error.
-        /// </summary>
-        [JsonProperty("error")]
-        public ErrorData Error { get; set; }
 
-        public HttpStatusCode StatusCode { get; set; }
-
-        public override string Message
+        public ErrorResponse ErrorResponse
         {
             get
             {
-                if (this.Error != null)
-                    return this.Error.Message;
-                else return String.Empty;
+                return JsonConvert.DeserializeObject<ErrorResponse>(Message);
             }
         }
+        public HttpStatusCode StatusCode { get; set; }
+
+
+        public HttpResponseException(string message, Exception exception, HttpStatusCode statusCode) 
+                : base(message, exception)
+        {
+            this.StatusCode = statusCode;
+        }
+
+        public HttpResponseException(string message, HttpStatusCode statusCode): base(message)
+        {
+            this.StatusCode = statusCode;
+        }
+
+        public HttpResponseException(HttpResponseMessage resp) : base(resp.ReasonPhrase)
+        {
+            this.StatusCode = resp.StatusCode;
+        }
+        
+
+
+        //public HttpResponseException(SerializationInfo info, StreamingContext context) : base(info, context) {}
+
+        
+    }
+
+    [JsonObject(MemberSerialization.OptIn)]
+    public class ErrorResponse
+    {
+        [JsonProperty("error")]
+        public ErrorData ErrorData { get; set; }
+
     }
 
     /// <summary>

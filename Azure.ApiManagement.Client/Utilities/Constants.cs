@@ -9,9 +9,34 @@ namespace Fitabase.Azure.ApiManagement
 {
     internal static class Constants
     {
+        internal static readonly string HTTP = "http://";
+        internal static readonly string HTTPS = "https://";
+
+
+        internal static class IdPrefixTemplate
+        {
+            internal static readonly string API          = "api";
+            internal static readonly string APIOPERATION = "operation";
+            internal static readonly string GROUP        = "group";
+            internal static readonly string PRODUCT      = "product";
+            internal static readonly string PROPERTY     = "property";
+            internal static readonly string REPORT       = "report";
+            internal static readonly string SUBSCRIPTION = "subscription";
+            internal static readonly string TENANT       = "tenant";
+            internal static readonly string USER         = "user";
+            internal static readonly string Logger       = "logger";
+        }
+
+
+        internal static readonly string FITABSE_TOKEN = "FitabaseToken";
+        //internal static readonly string FITABASE_API_VERSION = "Fitabase-API-Version";
+
+        
+
         internal static class ApiManagement
         {
             internal static readonly string AccessToken = "SharedAccessSignature";
+
 
             internal static class Url
             {
@@ -20,7 +45,10 @@ namespace Fitabase.Azure.ApiManagement
                 internal static readonly string VersionQuery = "api-version";
 
                 internal static readonly string FilterQuery = "$filter";
-            }
+
+				internal static readonly string SkipFilterQuery = "$skip";
+				internal static readonly string TopFilterQuery = "$top";
+			}
 
             internal static class Versions
             {
@@ -29,6 +57,7 @@ namespace Fitabase.Azure.ApiManagement
 
             internal static class Headers
             {
+                internal static readonly string Authorization = "Authorization";
                 internal static readonly string ETagMatch = "If-Match";
             }
         }

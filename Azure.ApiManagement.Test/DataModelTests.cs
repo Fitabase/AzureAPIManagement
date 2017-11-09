@@ -2,12 +2,49 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Fitabase.Azure.ApiManagement;
 using Fitabase.Azure.ApiManagement.Model;
+using Fitabase.Azure.ApiManagement.DataModel.Properties;
+using Fitabase.Azure.ApiManagement.Filters;
+using Fitabase.Azure.ApiManagement.DataModel.Filters;
+using System.Collections.Generic;
 
 namespace Azure.ApiManagement.Test
 {
     [TestClass]
     public class DataModelTests
     {
+
+        [TestMethod]
+        public void APIOperationBuilder()
+        {
+            string name = "Server API operation";
+            RequestMethod method = RequestMethod.POST;
+            string urlTemplate = "/Get/a/{a}/b/{b}";
+            string description = "an operation created in the operation";
+            ParameterContract[] parameters = null;
+            RequestContract request = null;
+            ResponseContract[] responses = null;
+
+            parameters = Parameters();
+            
+            APIOperation operation = APIOperation.Create(name, method, urlTemplate, parameters, request, responses, description);
+
+            APIOperationHelper helper = new APIOperationHelper(operation);
+        }
+        
+
+        private ParameterContract[] Parameters()
+        {
+
+            ParameterContract[] parameters =
+            {
+                ParameterContract.Create("a", ParameterType.NUMBER.ToString()),
+                ParameterContract.Create("b", ParameterType.NUMBER.ToString())
+            };
+            return parameters;
+        }
+
+
+
         [TestMethod]
         public void DeserilizeProducts()
         {
@@ -242,5 +279,80 @@ namespace Azure.ApiManagement.Test
             Assert.AreEqual("https", result.Protocols[0]);
         }
 
-    }
+
+
+		#region QueryFilter Tests
+
+
+		[TestMethod]
+		public void TestQueryFilter()
+		{
+
+			QueryFilterExpression filter = new QueryFilterExpression()
+			{
+				Filter = new FunctionFilterExpression(FunctionOption.CONTAINS, new QueryKeyValuePair("name", "value")),
+				Skip = 1,
+				Top = 1
+			};
+
+			string result = filter.GetFilterQuery();
+			//Assert.AreEqual(result, string.Format("{0}={1}&{2}={3}", "$skip", filter.Skip, "$top", filter.Top));
+		}
+
+		[TestMethod]
+		public void TestQueryFilterWithSkipFilter()
+		{
+			QueryFilterExpression filter = new QueryFilterExpression()
+			{
+				Skip = 1
+			};
+
+			string result = filter.GetFilterQuery();
+			Assert.AreEqual(result, string.Format("{0}={1}", "$skip", filter.Skip));
+		}
+
+		[TestMethod]
+		public void TestQueryFilterWithTopFilter()
+		{
+			QueryFilterExpression filter = new QueryFilterExpression()
+			{
+				Top = 1
+			};
+
+			string result = filter.GetFilterQuery();
+			Assert.AreEqual(result, string.Format("{0}={1}", "$top", filter.Top));
+		}
+
+		[TestMethod]
+		public void TestQueryFilterWithEmptyFilter()
+		{
+
+			QueryFilterExpression filter = new QueryFilterExpression();
+			string result = filter.GetFilterQuery();
+			Assert.AreEqual(result, "");
+		}
+
+
+		#endregion
+
+
+	
+
+
+
+		#region FunctionFilterOption Tests
+
+		[TestMethod]
+		public void TestFunctionFilterOption()
+		{
+			FunctionOption function = FunctionOption.START_WITH;
+
+			var str = function.ToDescriptionString();
+		}
+
+
+		#endregion
+
+
+	}
 }
