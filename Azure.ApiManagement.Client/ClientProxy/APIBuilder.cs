@@ -137,7 +137,20 @@ namespace Fitabase.Azure.ApiManagement
                     return String.Format("/{0}/{1}", version, path);
             }
 
-            
+            /// <summary>
+            /// Return a (unique) API name from swagger.
+            /// </summary>
+            /// <returns>an unique API name</returns>
+            private string GetAPIName()
+            {
+                if (_builder._swagger == null)
+                    throw new SwaggerResourceException("Swagger is required");
+
+                string name = _builder._swagger.Info.Title;
+                return name;
+            }
+       
+
             /// <summary>
             /// Return a (unique) API name from swagger. The API's name is appended
             /// with the basepath (or api's version) to provide an unique API name 
@@ -146,7 +159,7 @@ namespace Fitabase.Azure.ApiManagement
             /// Ex. bodytrace/v1 where title = bodytrace, basepath = /v1
             /// </summary>
             /// <returns>an unique API name</returns>
-            private string GetAPIName()
+            private string GetAPINameWithVersion()
             {
                 if (_builder._swagger == null)
                     throw new SwaggerResourceException("Swagger is required");
@@ -159,7 +172,7 @@ namespace Fitabase.Azure.ApiManagement
                 if (_builder._setting.API_NameThenVersion)
                     return String.Format("{0}/{1}", name, version);
                 else
-                 return String.Format("{0}/{1}", version, name);
+                    return String.Format("{0}/{1}", version, name);
             }
         }
         #endregion
