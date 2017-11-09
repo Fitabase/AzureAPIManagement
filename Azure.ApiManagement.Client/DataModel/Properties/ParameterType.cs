@@ -9,7 +9,7 @@ namespace Fitabase.Azure.ApiManagement.Model
 
     public enum ParameterType
     {
-        NUMBER, STRING, BOOLEAN, DATETIME
+        NUMBER, STRING, BOOLEAN, DATETIME, INTEGER
     }
 
     public static class TemplateParameterType
@@ -18,5 +18,7 @@ namespace Fitabase.Azure.ApiManagement.Model
         {
             return type.ToString().ToLower();
         }
+
+        
     }
 }

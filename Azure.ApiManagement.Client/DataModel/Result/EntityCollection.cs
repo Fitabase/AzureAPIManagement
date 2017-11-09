@@ -30,7 +30,7 @@ namespace Fitabase.Azure.ApiManagement.Model
         /// <summary>
         /// The absolute url to the remaining items in the collection.
         /// </summary>
-        [JsonProperty("nextLink")]
+        [JsonProperty("nextLink", NullValueHandling = NullValueHandling.Ignore)]
         public string NextLink { get; set; }
     }
 }

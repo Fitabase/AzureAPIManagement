@@ -1,154 +1,146 @@
-﻿using Newtonsoft.Json;
+﻿using Fitabase.Azure.ApiManagement.DataModel.Properties;
+using Fitabase.Azure.ApiManagement.Model.Exceptions;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Fitabase.Azure.ApiManagement.Model
 {   
+
+    public class APIOperationHelper
+    {
+        public APIOperation Operation;
+
+
+
+        public APIOperationHelper(APIOperation operation)
+        {
+            this.Operation = operation;
+        }
+
+        public string GetOriginalURL()
+        {
+            string paramURL = GetParametersURL();
+            if(String.IsNullOrEmpty(paramURL))
+            {
+                return Operation.UrlTemplate;
+            }
+            return Operation.UrlTemplate.Replace(GetParametersURL(), "");
+        }
+        
+        public string GetParametersURL()
+        {
+            return BuildParametersURL(Operation.TemplateParameters);
+        }
+
+        public static string BuildParametersURL(ICollection<ParameterContract> parameters)
+        {
+            if (parameters == null) return "";
+            StringBuilder builder = new StringBuilder();
+            foreach (var param in parameters)
+            {
+                builder.Append("/").Append(param.Name)
+                        .Append("/{").Append(param.Name).Append("}");
+            }
+            return builder.ToString();
+        }
+        public static string BuildURL(string url, ICollection<ParameterContract> parameters)
+        {
+            if (parameters == null) return url;
+
+            string parameterURL = BuildParametersURL(parameters);
+            StringBuilder builder = new StringBuilder(url);
+            if(!url.Contains(parameterURL))
+            {
+                builder.Append(parameterURL);
+            }
+            return builder.ToString();
+        }
+    }
+
     public class APIOperation : EntityBase
     {
         protected override string UriIdFormat => "/operations";
 
-        public APIOperation() { }
-        public APIOperation(string id, string name, 
-                            string method, string urlTemplate, 
-                            List<TemplateParameter> parameters,
-                            RequestContract request)
-        {
-            this.Id = id;
-            this.Name = name;
-            this.Method = method;
-            this.UrlTemplate = urlTemplate;
-            this.TemplateParameter = parameters;
-            this.Request = request;
-        }
-
-
-        // Name of the operation
-        [JsonProperty("name")]
-        public string Name { get; set; }
-
-        // A valid HTTP Operation Method
-        [JsonProperty("method")]
-        public string Method { get; set; }
-
-        // Relative URL template identifying the target resource for this operation
-        [JsonProperty("urlTemplate")]
-        public string UrlTemplate { get; set; }         
-
-        // Collection of URL template parameters
-        // E.g calc.com/sum?a=5&b=10
-        [JsonProperty("templateParameters")]
-        public List<TemplateParameter> TemplateParameter { get; set; }
-
-        // Description of the operation. May include HTML formatting tags.
-        [JsonProperty("description")]
-        public string Description { get; set; }
-
-        // An entity containing request details
-        [JsonProperty("request")]
-        public RequestContract Request { get; set; }
-    }
-
-
-
-    /// <summary>
-    /// This class containing request details
-    /// </summary>
-    public class RequestContract
-    {
-        [JsonProperty("description")]
-        public string Description { get; set; }
-
-        [JsonProperty("queryParameters")]
-        public List<QueryParameter> QueryParameters { get; set; }
-
-        [JsonProperty("headers")]
-        public List<RequestHeader> Headers { get; set; }
-    }
-
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public class RequestHeader
-    {
-        public RequestHeader(string name, ParameterType type, string defaultValue = null)
-        {
-            if (String.IsNullOrWhiteSpace(name))
-                throw new ArgumentException("RequestHeader name is required");
-            this.Name = name;
-            this.Type = TemplateParameterType.GetType(type);
-            this.DefaultValue = defaultValue;
-        }
-
-        [JsonProperty("name")]
-        public string Name { get; set; }
-        [JsonProperty("description")]
-        public string Description { get; set; }
-        [JsonProperty("type")]
-        public string Type { get; set; }
-        [JsonProperty("defaultValue")]
-        public string DefaultValue { get; set; }
-        [JsonProperty("required")]
-        public bool Required { get; set; }
-        [JsonProperty("values")]
-        public string[] Values { get; set; }
-    }
-
-    
-    /// <summary>
-    /// TODO not so sure what query parameter does...
-    /// </summary>
-    public class QueryParameter
-    {
-        public QueryParameter(string name, ParameterType type)
-        {
-            if (String.IsNullOrWhiteSpace(name))
-                throw new ArgumentException("QueryParameter name is required");
-            this.Name = name;
-            this.Type = TemplateParameterType.GetType(type);
-        }
-
-        [JsonProperty("name")]
-        public string Name { get; set; }
-        [JsonProperty("description")]
-        public string Description { get; set; }
-        [JsonProperty("type")]
-        public string Type { get; set; }
-        [JsonProperty("defaultValue")]
-        public string DefaultValue { get; set; }
-        [JsonProperty("values")]
-        public string[] Values { get; set; }
-    }
-
-
-    /// <summary>
-    /// This class represent a URL template parameter.
-    /// E.x calc.com/sum?a=5&b=10
-    /// </summary>
-    public class TemplateParameter
-    {
-        public TemplateParameter(string name, ParameterType type)
-        {
-            if (String.IsNullOrWhiteSpace(name))
-                throw new ArgumentException("TemplateParameter name is required");
-            this.Name = name;
-            this.Type = TemplateParameterType.GetType(type);
-        }
         
-        [JsonProperty("name")]
-        public string Name { get; set; }
-        [JsonProperty("description")]
-        public string Description { get; set; }
-        [JsonProperty("type")]
-        public string Type { get; set; }
-        [JsonProperty("defaultValue")]
-        public string DefaultValue { get; set; }
-        [JsonProperty("values")]
-        public string[] Values { get; set; }
+        public static APIOperation Create(string name, 
+                            RequestMethod method, string urlTemplate, 
+                            ParameterContract[] parameters,
+                            RequestContract request, ResponseContract[] responses, string description = null)
+        {
+            if (String.IsNullOrWhiteSpace(name))
+                throw new InvalidEntityException("Operation's is required");
+            if (name.Length > 100)
+                throw new InvalidEntityException("Length of operation's name must be < 100");
+            if (String.IsNullOrWhiteSpace(urlTemplate))
+                throw new InvalidEntityException("Operation's urlTemplate is required");
+            
+            
+            APIOperation operation = new APIOperation();
+            operation.Id = EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.APIOPERATION);
+            operation.Name = name;
+            operation.Method = method.ToString();
+            operation.TemplateParameters = parameters;
+            operation.Request = request;
+            operation.Responses = responses;
+            operation.Description = description;
+            
+            operation.UrlTemplate = APIOperationHelper.BuildURL(urlTemplate, parameters);
+            
+            return operation;
+        }
 
+
+        public static APIOperation Create(string name,
+                            string method, string urlTemplate,
+                            ParameterContract[] parameters,
+                            RequestContract request, ResponseContract[] responses, string description = null)
+        {
+            RequestMethod requestMethod;
+            if (method == "GET") requestMethod = RequestMethod.GET;
+            else if (method == "POST") requestMethod = RequestMethod.POST;
+            else if (method == "PUT") requestMethod = RequestMethod.PUT;
+            else if (method == "DELETE") requestMethod = RequestMethod.DELETE;
+            else if (method == "PATCH") requestMethod = RequestMethod.PATCH;
+            else throw new InvalidEntityException("Invalid operation's method");
+
+            return Create(name, requestMethod, urlTemplate, parameters, request, responses, description);
+        }
+
+
+        [JsonProperty("name", NullValueHandling = NullValueHandling.Ignore)]
+        public string Name { get; set; }
+        
+        [JsonProperty("method", NullValueHandling = NullValueHandling.Ignore)]
+        public string Method { get; set; }          // A Valid HTTP Operation Method.
+
+        [JsonProperty("urlTemplate", NullValueHandling = NullValueHandling.Ignore)]
+        public string UrlTemplate { get; set; }     // Relative URL template identifying the target resource for this operation
+        
+        [JsonProperty("templateParameters", NullValueHandling = NullValueHandling.Ignore)]
+        public ParameterContract[] TemplateParameters { get; set; }  // Collection of URL template parameters. E.g calc.com/sum?a=5&b=10
+        
+        [JsonProperty("description", NullValueHandling = NullValueHandling.Ignore)]
+        public string Description { get; set; }         // Description of the operation. May include HTML formatting tags.
+        
+        [JsonProperty("request", NullValueHandling = NullValueHandling.Ignore)]
+        public RequestContract Request { get; set; }    // An entity containing request details
+
+        [JsonProperty("responses", NullValueHandling = NullValueHandling.Ignore)]
+        public ResponseContract[] Responses { get; set; }
+
+        public string GetOriginalPath()
+        {
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < TemplateParameters.Length; i++)
+            {
+                string param = TemplateParameters[i].Name;
+                builder.Append("/").Append(param)
+                        .Append("/{").Append(param).Append("}");
+            }
+            string str = UrlTemplate.Replace(builder.ToString(), "");
+            return str;
+        }
     }
 }

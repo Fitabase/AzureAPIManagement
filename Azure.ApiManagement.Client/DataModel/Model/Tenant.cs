@@ -9,6 +9,14 @@ namespace Fitabase.Azure.ApiManagement.Model
 {
     public class Tenant : EntityBase
     {
+        public static Tenant Create()
+        {
+            Tenant tenant = new Tenant();
+            tenant.Id = EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.TENANT);
+
+            return tenant;
+        }
+
         protected override string UriIdFormat { get { return "/tenants/"; } }
 
         [JsonProperty("primaryKey")]

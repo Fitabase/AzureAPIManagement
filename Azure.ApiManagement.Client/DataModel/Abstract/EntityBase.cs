@@ -10,7 +10,6 @@ namespace Fitabase.Azure.ApiManagement.Model
     public abstract class EntityBase
     {
         protected abstract string UriIdFormat { get; }
-
         private string _id;
         [JsonIgnore]
         public string Id
@@ -41,5 +40,19 @@ namespace Fitabase.Azure.ApiManagement.Model
         /// </summary>
         [JsonProperty("id", NullValueHandling = NullValueHandling.Ignore)]
         public string Uri { get; set; }
+
+        public string GetPlainId()
+        {
+            if (!String.IsNullOrWhiteSpace(Uri))
+            {
+                if(Uri.Contains("/"))
+                {
+                    string[] splits = Uri.Split('/');
+                    return splits[splits.Length - 1];
+                }
+            }
+            return String.Empty;
+        }
+
     }
 }
