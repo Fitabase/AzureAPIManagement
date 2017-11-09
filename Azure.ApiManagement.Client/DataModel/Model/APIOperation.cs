@@ -85,8 +85,9 @@ namespace Fitabase.Azure.ApiManagement.Model
             operation.Request = request;
             operation.Responses = responses;
             operation.Description = description;
-            
-            operation.UrlTemplate = APIOperationHelper.BuildURL(urlTemplate, parameters);
+
+            operation.UrlTemplate = urlTemplate;
+            //operation.UrlTemplate = APIOperationHelper.BuildURL(urlTemplate, parameters);
             
             return operation;
         }

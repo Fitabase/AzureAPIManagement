@@ -8,6 +8,6 @@ namespace Fitabase.Azure.ApiManagement.DataModel.Properties
 {
     public enum RequestMethod
     {
-        GET, DELETE, PATCH, PUT, POST, UNKNOWN
+        GET, DELETE, PATCH, PUT, POST, HEAD, UNKNOWN
     }
 }

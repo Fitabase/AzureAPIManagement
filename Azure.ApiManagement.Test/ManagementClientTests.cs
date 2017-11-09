@@ -3,18 +3,11 @@ using Fitabase.Azure.ApiManagement;
 using Fitabase.Azure.ApiManagement.Model;
 using System;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using System.IO;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System.Collections;
 using System.Collections.Generic;
 using Fitabase.Azure.ApiManagement.DataModel.Properties;
-using Fitabase.Azure.ApiManagement.Model.Exceptions;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
+using Fitabase.Azure.ApiManagement.Filters;
+using Fitabase.Azure.ApiManagement.DataModel.Filters;
+using Newtonsoft.Json;
 
 namespace Azure.ApiManagement.Test
 {
@@ -22,16 +15,18 @@ namespace Azure.ApiManagement.Test
     public class ManagementClientTests
     {
         protected ManagementClient Client { get; set; }
-
-        public static string API_DOC = @"C:\Users\inter\Desktop\FitabaseAPI\Azure\api.json";
-        public static string API_OPERATION_DOC = @"C:\Users\inter\Desktop\FitabaseAPI\Azure\apioperation.json";
-
+		private QueryFilterExpression filter;
 
 
         [TestInitialize]
         public void SetUp()
         {
             Client = new ManagementClient(@"C:\Repositories\AzureAPIManagement\Azure.ApiManagement.Test\APIMKeys.json");
+
+			filter = new QueryFilterExpression()
+			{
+				Skip = 1,
+			};
         }
 
  
@@ -63,8 +58,14 @@ namespace Azure.ApiManagement.Test
             EntityCollection<User> userCollection = Client.GetUsersAsync().Result;
             Assert.IsNotNull(userCollection);
             Assert.AreEqual(userCollection.Count, userCollection.Values.Count);
-        }
 
+			// Test with filter
+			userCollection = Client.GetUsersAsync(filter).Result;
+			Assert.IsNotNull(userCollection);
+			Assert.IsTrue(userCollection.Count > userCollection.Values.Count);
+		}
+
+	
         [TestMethod]
         public void GetUser()
         {
@@ -80,17 +81,32 @@ namespace Azure.ApiManagement.Test
             string userId = "66da331f7a1c49d98ac8a4ad136c7c64";
             EntityCollection<Subscription> collection = Client.GetUserSubscriptionAsync(userId).Result;
             Assert.IsNotNull(collection);
-        }
+			Assert.AreEqual(collection.Count, collection.Values.Count);
 
-        [TestMethod]
-        public void GetUserGroup()
-        {
-            string userId = "user_bef163ba98af433c917914dd4c208115";
-            EntityCollection<Group> collection = Client.GetUserGroupsAsync(userId).Result;
-            Assert.IsNotNull(collection);
-        }
+			// Test With filter
+			collection = Client.GetUserSubscriptionAsync(userId, filter).Result;
+			Assert.IsNotNull(collection);
+			Assert.IsTrue(collection.Count > collection.Values.Count);
+		}
 
-        [TestMethod]
+
+
+
+		[TestMethod]
+		public void GetUserGroup()
+		{
+			string userId = "1";
+			EntityCollection<Group> collection = Client.GetUserGroupsAsync(userId).Result;
+			Assert.IsNotNull(collection);
+			Assert.AreEqual(collection.Count, collection.Values.Count);
+
+			// With Filter
+			collection = Client.GetUserGroupsAsync(userId, filter).Result;
+			Assert.IsNotNull(collection);
+			Assert.IsTrue(collection.Count > collection.Values.Count);
+		}
+
+		[TestMethod]
         public void DeleteUser()
         {
             int count_v1 = Client.GetUsersAsync().Result.Count;
@@ -148,46 +164,114 @@ namespace Azure.ApiManagement.Test
         /*********************************************************/
 
         #region API TestCases
-
-
+            
 
         [TestMethod]
         public void CreateApi()
         {
             int count_v1 = Client.GetAPIsAsync().Result.Count;
-            string name = "abcd";
+            string name = "Test FitabaseAPI staging";
             string description = "An example to create apis from service";
-            string serviceUrl = "abc.com";
-            string path = "/v4";
+            string serviceUrl = "fitabase-staging.net";
+            string path = "/v1";
             string[] protocols = new string[] { "http", "https" };
 
             API newAPI = API.Create(name, serviceUrl, path, protocols, description);
             API api = Client.CreateAPIAsync(newAPI).Result;
-            int count_v2 = Client.GetAPIsAsync().Result.Count;
             Assert.IsNotNull(api.Id);
+            int count_v2 = Client.GetAPIsAsync().Result.Count;
             Assert.AreEqual(count_v1 + 1, count_v2);
         }
 
 
-        [TestMethod]
-        public void GetAPI()
-        {
-            string apiId = "api_b8aad5c90425479c9e50c2513bfbc804";
-            API api = Client.GetAPIAsync(apiId).Result;
-            Assert.IsNotNull(api);
-            Assert.AreEqual(api.Id, apiId);
-        }
+  //      [TestMethod]
+  //      public void GetAPI()
+  //      {
+  //          //string apiId = "api_7d1d97fd4cce41c09b5d0c703be89d15;rev=2";
+		//	string apiId = "api_7d1d97fd4cce41c09b5d0c703be89d15";
+		//	string revision = "2";
+		//	API api = Client.GetAPIAsync(apiId, revision).Result;
+		//	Assert.IsNotNull(api);
+		//	Assert.AreEqual(api.ApiRevision, revision);
+		//	Assert.AreEqual(api.Id, apiId);
+		//	string json = JsonConvert.SerializeObject(api);
+
+		//}
+		
+
+		[TestMethod]
+		public void UpdateAPIName()
+		{
+			string apiId = "api_7d1d97fd4cce41c09b5d0c703be89d15";
+			string revision = "1";
+			API api = Client.GetAPIAsync(apiId, revision).Result;
+			//api.ApiRevision = "2";
+			//api.IsCurrent = false;
+
+			api.Name = "other name";
+			api.IsCurrent = false;
+			api.ApiRevision = "2";
+
+			var task = Client.UpdateAPIAsync(api);
+			api = Client.GetAPIAsync(apiId).Result;
+			string json = JsonConvert.SerializeObject(api);
+		}
 
 
         [TestMethod]
         public void ApiCollection()
         {
-            EntityCollection<API> apis = Client.GetAPIsAsync().Result;
-            Assert.IsNotNull(apis);
-            Assert.IsTrue(apis.Count > 0);
-        }
+            EntityCollection<API> collection = Client.GetAPIsAsync().Result;
+            Assert.IsNotNull(collection);
+            Assert.IsTrue(collection.Count > 0);
+			string json = JsonConvert.SerializeObject(collection);
 
-        [TestMethod]
+		}
+
+
+		[TestMethod]
+		public void TestApiCollection_FilterByApiName()
+		{
+			QueryFilterExpression filter = new QueryFilterExpression()
+			{
+				Filter = new OperationFilterExpression(OperationOption.GT, new QueryKeyValuePair(QueryableConstants.Api.Id, "api_08e0084f4fe243aeb6ae04452b3fa4c3"))
+			};
+
+			EntityCollection<API> collection = Client.GetAPIsAsync(filter).Result;
+			Assert.IsNotNull(collection);
+		}
+
+
+		[TestMethod]
+		public void TestApiCollection_FilterByApiPath()
+		{
+			QueryFilterExpression filter = new QueryFilterExpression()
+			{
+				Filter = new FunctionFilterExpression(FunctionOption.CONTAINS, new QueryKeyValuePair(QueryableConstants.Api.Name, "(Staging)"))
+			};
+
+			EntityCollection<API> collection = Client.GetAPIsAsync(filter).Result;
+			Assert.IsNotNull(collection);
+
+			string json = JsonConvert.SerializeObject(collection);
+		}
+
+
+
+		[TestMethod]
+		public void TestApiCollection_FilterByApiServiceUrl()
+		{
+			QueryFilterExpression filter = new QueryFilterExpression()
+			{
+				Filter = new FunctionFilterExpression(FunctionOption.CONTAINS, new QueryKeyValuePair("path", "v1")),
+				Skip = 1
+			};
+
+			EntityCollection<API> collection = Client.GetAPIsAsync(filter).Result;
+			Assert.IsNotNull(collection);
+		}
+
+		[TestMethod]
         public void DeleteAPI()
         {
             int count_v1 = Client.GetAPIsAsync().Result.Count;
@@ -233,12 +317,12 @@ namespace Azure.ApiManagement.Test
         public void APIOperationLifeCycle()
         {
             long c1, c2;
-            string apiId = "api_b8aad5c90425479c9e50c2513bfbc804";
+            string apiId = "api_96c8b0b79c9342f7a42f56795c92fd1d";
 
-            string name = "Operation_v2";
-            RequestMethod method = RequestMethod.GET;
-            string urlTemplate = "/get";
-            string description = "an operation created in the operation";
+            string name = "Operation_3";
+            RequestMethod method = RequestMethod.DELETE;
+            string urlTemplate = "/pet/{petId}";
+            string description = "post it";
 
             APIOperation operation = APIOperation.Create(name, method, urlTemplate, Parameters(), Request(), Responses(), description);
 
@@ -252,6 +336,7 @@ namespace Azure.ApiManagement.Test
 
             #endregion
 
+            /*
             #region RETRIEVE
 
             APIOperation other = Client.GetAPIOperationAsync(apiId, entity.Id).Result;
@@ -336,6 +421,7 @@ namespace Azure.ApiManagement.Test
             c2 = Client.GetOperationsByAPIAsync(apiId).Result.Count;
             Assert.AreEqual(c1 - 1, c2);
             #endregion
+            */
         }
 
 
@@ -369,8 +455,7 @@ namespace Azure.ApiManagement.Test
 
             ParameterContract[] parameters =
             {
-                ParameterContract.Create("a", ParameterType.NUMBER.ToString()),
-                ParameterContract.Create("b", ParameterType.NUMBER.ToString())
+                ParameterContract.Create("petId", ParameterType.NUMBER.ToString())
             };
             return parameters;
         }
@@ -379,8 +464,8 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void UpdateAPIOperation()
         {
-            string apiId = "597687442f02d30494230f8c";
-            string operationId = "597687442f02d31290052fed";
+            string apiId = "598e06832f02d3110cf5100b";
+            string operationId = "598e06832f02d30700f1c8f1";
             APIOperation entity_v1 = Client.GetAPIOperationAsync(apiId, operationId).Result;
 
             APIOperation operation = new APIOperation()
@@ -404,18 +489,17 @@ namespace Azure.ApiManagement.Test
         public void UpdateOperationParameter()
         {
             string apiId = "api_b8aad5c90425479c9e50c2513bfbc804";
-            string operationId = "operation_ab7e97314cb840eca6cead919d7c003b";
+            string operationId = "operation_be5ecb981a0d43678ae492502c925047";
 
             APIOperation entity = Client.GetAPIOperationAsync(apiId, operationId).Result;
             APIOperationHelper helper = new APIOperationHelper(entity);
 
-
-
-
+            
             List<ParameterContract> parameters = new List<ParameterContract>();
             parameters.Add(ParameterContract.Create("account", "uuid"));
+            parameters.Add(ParameterContract.Create("subscription", "uuid"));
 
-            entity.UrlTemplate = APIOperationHelper.BuildURL(helper.GetOriginalURL(), parameters);
+            entity.UrlTemplate = APIOperationHelper.BuildURL("/get", parameters);
             entity.TemplateParameters = parameters.ToArray();
 
             var task = Client.UpdateAPIOperationAsync(apiId, operationId, entity);
@@ -450,30 +534,38 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void GetAPIOperation()
         {
-            try
-            {
-                string apiId = "api_2ee0f0a800334301b857367980c332c4";
-                string operationId = "operation_9a4eea768ecc48a5be9fcb8f33781189";
-                APIOperation operation = Client.GetAPIOperationAsync(apiId, operationId).Result;
-                Assert.IsNotNull(operation);
-            }
-            catch (HttpResponseException ex)
-            {
-                System.Diagnostics.Debug.WriteLine(ex.Message);
-                System.Diagnostics.Debug.WriteLine(ex.StatusCode);
-            }
+            string apiId = "admin-swagger";
+            string operationId = "59c9a6155882b5cb2db3ba41";
+            APIOperation operation = Client.GetAPIOperationAsync(apiId, operationId).Result;
+            Assert.IsNotNull(operation);
         }
 
-        [TestMethod]
-        public void GetOperationsByAPI()
-        {
-            string apiId = "597687442f02d30494230f8c";
-            EntityCollection<APIOperation> collection = Client.GetOperationsByAPIAsync(apiId).Result;
-            Assert.IsNotNull(collection);
-        }
+		[TestMethod]
+		public void GetOperationsByAPI()
+		{
+			string apiId = "59a9a0682f02d308c8fef6b5";
+			EntityCollection<APIOperation> collection = Client.GetOperationsByAPIAsync(apiId).Result;
+			Assert.IsNotNull(collection);
+			Assert.AreEqual(collection.Count, collection.Values.Count);
+			
+		}
 
 
-        [TestMethod]
+
+		[TestMethod]
+		public void TestApiOperationCollectionWithFilter()
+		{
+			QueryFilterExpression filter = new QueryFilterExpression()
+			{
+				Filter = new OperationFilterExpression(OperationOption.EQ, new QueryKeyValuePair(QueryableConstants.Operation.Method, "post")),
+				Skip = 1
+			};
+
+			string apiId = "59a9a0682f02d308c8fef6b5";
+			EntityCollection<APIOperation> collection = Client.GetOperationsByAPIAsync(apiId, filter).Result;
+		}
+
+		[TestMethod]
 
         public void DelteAPIOperation()
         {
@@ -593,9 +685,15 @@ namespace Azure.ApiManagement.Test
         [TestMethod]
         public void ProductCollection()
         {
-            EntityCollection<Product> products = Client.GetProductsAsync().Result;
-            Assert.IsNotNull(products);
-        }
+            EntityCollection<Product> collection = Client.GetProductsAsync().Result;
+            Assert.IsNotNull(collection);
+			Assert.AreEqual(collection.Count, collection.Values.Count);
+
+			// With filter
+			collection = Client.GetProductsAsync(filter).Result;
+			Assert.IsTrue(collection.Count > collection.Values.Count);
+
+		}
 
 
         [TestMethod]
@@ -604,7 +702,12 @@ namespace Azure.ApiManagement.Test
             string productId = "5956a9b92f02d30b88dfad7d";
             EntityCollection<Subscription> collection = Client.GetProductSubscriptionsAsync(productId).Result;
             Assert.IsNotNull(collection);
-        }
+			Assert.AreEqual(collection.Count, collection.Values.Count);
+
+			// With filter
+			collection = Client.GetProductSubscriptionsAsync(productId, filter).Result;
+			Assert.IsTrue(collection.Count > collection.Values.Count);
+		}
 
 
         [TestMethod]
@@ -613,7 +716,12 @@ namespace Azure.ApiManagement.Test
             string productId = "5956a9b92f02d30b88dfad7d";
             EntityCollection<API> collection = Client.GetProductAPIsAsync(productId).Result;
             Assert.IsNotNull(collection);
-        }
+			Assert.AreEqual(collection.Count, collection.Values.Count);
+
+			// With filter
+			collection = Client.GetProductAPIsAsync(productId, filter).Result;
+			Assert.IsTrue(collection.Count > collection.Values.Count);
+		}
         [TestMethod]
         public void AddProductApi()
         {
@@ -647,7 +755,12 @@ namespace Azure.ApiManagement.Test
             string productId = "5956a9b92f02d30b88dfad7d";
             EntityCollection<Group> collection = Client.GetProductGroupsAsync(productId).Result;
             Assert.IsNotNull(collection);
-        }
+			Assert.AreEqual(collection.Count, collection.Values.Count);
+
+			// With Filter
+			collection = Client.GetProductGroupsAsync(productId, filter).Result;
+			Assert.IsTrue(collection.Count > collection.Values.Count);
+		}
         [TestMethod]
         public void AddProductGroup()
         {
@@ -671,11 +784,43 @@ namespace Azure.ApiManagement.Test
             Assert.AreEqual(count_v1 - 1, count_v2);
         }
 
+        [TestMethod]
+        public void GetProductPolicy()
+        {
+            string productId = "5870184f9898000087060001";
+            var o = Client.GetProductPolicyAsync(productId);
+        }
+        
+        [TestMethod]
+        public void CheckProductPolicy()
+        {
+            string productId = "5956a9b92f02d30b88dfad7d";
+            var a = Client.CheckProductPolicyAsync(productId);
+        }
+
+        [TestMethod]
+        public void SetProductPolicy()
+        {
+            string productId = "5956a9b92f02d30b88dfad7d";
+            string policy = "";
+            var b = Client.SetProductPolicyAsync(productId, policy);
+        }
+
+        [TestMethod]
+        public void DeleteProductPolicy()
+        {
+            string productId = "5956a9b92f02d30b88dfad7d";
+            var b = Client.DeleteProductPolicyAsync(productId);
+        }
+
 
         #endregion Product TestCases
 
 
 
+
+
+        
 
 
 
@@ -736,7 +881,12 @@ namespace Azure.ApiManagement.Test
         {
             EntityCollection<Subscription> collection = Client.GetSubscriptionsAsync().Result;
             Assert.IsNotNull(collection);
-        }
+			Assert.AreEqual(collection.Count, collection.Values.Count);
+
+			// With Filter
+			collection = Client.GetSubscriptionsAsync(filter).Result;
+			Assert.IsTrue(collection.Count > collection.Values.Count);
+		}
 
         [TestMethod]
         public void GetSubscription()
@@ -820,7 +970,12 @@ namespace Azure.ApiManagement.Test
         {
             EntityCollection<Group> collection = Client.GetGroupsAsync().Result;
             Assert.IsNotNull(collection);
-        }
+			Assert.AreEqual(collection.Count, collection.Values.Count);
+
+			// With filter
+			collection = Client.GetGroupsAsync(filter).Result;
+			Assert.IsTrue(collection.Count > collection.Values.Count);
+		}
 
         [TestMethod]
         public void GetGroupUsers()
@@ -828,7 +983,12 @@ namespace Azure.ApiManagement.Test
             string groupId = "5870184f9898000087020002";
             EntityCollection<User> collection = Client.GetUsersInGroupAsync(groupId).Result;
             Assert.IsNotNull(collection);
-        }
+			Assert.AreEqual(collection.Count, collection.Values.Count);
+
+			// With filter
+			collection = Client.GetUsersInGroupAsync(groupId, filter).Result;
+			Assert.IsTrue(collection.Count > collection.Values.Count);
+		}
 
 
         [TestMethod]
@@ -862,31 +1022,7 @@ namespace Azure.ApiManagement.Test
 
 
 
-
-        /*********************************************************/
-        /**********************  LOGGERs  ************************/
-        /*********************************************************/
-
-        #region Logger TestCases
-
-        [TestMethod]
-        public void CreateLogger()
-        {
-            string loggerType = "azureEventHub";
-            string name = "ServerLogger_v1";
-            string description = "This logger is created in server";
-            object credentials = null;
-            Logger logger = Logger.Create(loggerType, name, description, credentials);
-            Logger entity = Client.CreateLoggerAsync(logger).Result;
-        }
-
-        [TestMethod]
-        public void GetLoggers()
-        {
-            EntityCollection<Logger> loggers = Client.GetLoggersAsync().Result;
-        }
-
-        #endregion
+        
 
     }
 }
