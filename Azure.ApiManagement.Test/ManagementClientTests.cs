@@ -631,60 +631,7 @@ namespace Azure.ApiManagement.Test
             int count_v2 = Client.GetProductsAsync().Result.Count;
             Assert.AreEqual(count_v1 + 1, count_v2);
         }
-
-
-        [TestMethod]
-        public void GetProductGroups()
-        {
-            var task = Client.GetProductsAsync();
-            task.Wait();
-
-            var productId = task.Result[0].Id;
-
-            var pTask = Client.GetProductGroupsAsync(productId);
-            pTask.Wait();
-
-            Assert.IsNotNull(pTask.Result);
-        }
-
-        [TestMethod]
-        public async Task GetRemoveAndAddBackProductGroup()
-        {
-            //get some existing products
-            var task = Client.GetProductsAsync(null, true);
-            task.Wait();
-
-            //let's try this with the first in the list
-            var productId = task.Result[0].Id;
-            List<Group> originalGroups = task.Result[0].Groups;
-
-            List<Group> groups = await Client.GetProductGroupsAsync(productId);
-
-            Assert.AreEqual(originalGroups.Count, groups.Count);
-
-            //delete the first group
-            bool bSucceededDelete = await Client.RemoveProductGroupAsync(productId, originalGroups[0].Id);
-
-            Assert.AreEqual(true, bSucceededDelete);
-
-            //now go back and check the group is gone
-            groups = await Client.GetProductGroupsAsync(productId);
-
-            //check that group is gone
-            Assert.AreEqual(2, groups.Count);
-            Assert.AreEqual(0, groups.Where(t => t.Id == originalGroups[0].Id).Count());
-
-            bool bSucceededReAdd = await Client.AddProductGroupAsync(productId, originalGroups[0].Id);
-
-            Assert.AreEqual(true, bSucceededReAdd);
-
-            //now go back and check the group is gone
-            groups = await Client.GetProductGroupsAsync(productId);
-
-            //check that group is gone
-            Assert.AreEqual(3, groups.Count);
-
-        }
+        
 
         [TestMethod]
         public void GetProduct()

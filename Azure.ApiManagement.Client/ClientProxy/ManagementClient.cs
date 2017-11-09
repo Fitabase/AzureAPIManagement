@@ -614,79 +614,7 @@ namespace Fitabase.Azure.ApiManagement
 
         #endregion
 
-        #region Product Groups
-
-        /// <summary>
-        /// https://docs.microsoft.com/en-us/rest/api/apimanagement/productgroups#ProductGroups_ListByProduct
-        /// </summary>
-        /// <param name="productId"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        public Task<List<Group>> GetProductGroupsAsync(string productId,
-             CancellationToken cancellationToken = default(CancellationToken))
-        {
-            if (String.IsNullOrEmpty(productId))
-                throw new ArgumentException("productId is required");
-
-            var uri = String.Format("/products/{0}/groups", productId);
-
-            var request = base.BuildRequest(uri, "GET");
-
-            return base.ExecuteRequestAsync<EntityCollection<Group>>(request, HttpStatusCode.OK, cancellationToken)
-                       .ContinueWith<List<Group>>(t =>
-                       {
-                           return t.Result.Values;
-                       });
-        }
-
-        /// <summary>
-        /// https://docs.microsoft.com/en-us/rest/api/apimanagement/productgroups#ProductGroups_Add
-        /// </summary>
-        /// <param name="productId"></param>
-        /// <param name="groupId"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        public Task<bool> AddProductGroupAsync(string productId, string groupId, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            if (String.IsNullOrEmpty(groupId))
-                throw new ArgumentNullException("groupId must not be null");
-            if (String.IsNullOrEmpty(productId))
-                throw new ArgumentException("Valid Product Id is required");
-
-            var uri = String.Format("/products/{0}/groups/{1}", productId, groupId);
-            var request = base.BuildRequest(uri, "PUT");
-
-            return base.ExecuteRequestAsync(request, HttpStatusCode.Created, cancellationToken);
-        }
-
-        /// <summary>
-        /// https://docs.microsoft.com/en-us/rest/api/apimanagement/productgroups#ProductGroups_Remove
-        /// </summary>
-        /// <param name="productId"></param>
-        /// <param name="groupId"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        public Task<bool> RemoveProductGroupAsync(string productId, string groupId, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            if (String.IsNullOrEmpty(groupId))
-                throw new ArgumentNullException("groupId must not be null");
-            if (String.IsNullOrEmpty(productId))
-                throw new ArgumentException("Valid Product Id is required");
-
-            var uri = String.Format("/products/{0}/groups/{1}", productId, groupId);
-            var request = base.BuildRequest(uri, "DELETE");
-
-            return base.ExecuteRequestAsync(request, HttpStatusCode.NoContent, cancellationToken);
-        }
-
-        #endregion
-
-        #region Product APIs
-
-
-
-
-
+        
         /*********************************************************/
         /**********************  PRODUCT  ************************/
         /*********************************************************/
@@ -829,6 +757,10 @@ namespace Fitabase.Azure.ApiManagement
 				endpoint = string.Format("{0}?{1}", endpoint, filter.GetFilterQuery());
 			return await DoRequestAsync<EntityCollection<Subscription>>(endpoint, RequestMethod.GET, cancellationToken);
         }
+
+        #endregion
+
+        #region Product Group
 
         /// <summary>
         /// Adds the association between the specified developer group with the specified product.
