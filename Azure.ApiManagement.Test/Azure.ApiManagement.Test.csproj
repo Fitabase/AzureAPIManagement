@@ -67,9 +67,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="APIMKeys.BLANK.json" />
-    <None Include="APIMKeys.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    <None Include="APIMKeys.json" />
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>

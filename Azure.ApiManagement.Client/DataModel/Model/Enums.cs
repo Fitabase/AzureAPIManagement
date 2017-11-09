@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Fitabase.Azure.ApiManagement.Model
 {
+
     public enum ProductState
     {
         /// <summary>

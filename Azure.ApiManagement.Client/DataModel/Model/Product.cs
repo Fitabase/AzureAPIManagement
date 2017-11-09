@@ -12,6 +12,16 @@ namespace Fitabase.Azure.ApiManagement.Model
     {
         protected override string UriIdFormat { get { return "/products/"; } }
 
+        public Product() { }
+
+        public Product(string id, string name, string description)
+        {
+            this.Id = id;
+            this.Name = name;
+            this.Description = description;
+        }
+
+
         /// <summary>
         /// Name of the entity. Must not be empty. Maximum length is 100 characters.
         /// </summary>
@@ -70,7 +80,9 @@ namespace Fitabase.Azure.ApiManagement.Model
         /// </summary>
         [JsonProperty("groups")]
         public List<Group> Groups {get; set;}
+
     }
+    
 
    
 }

@@ -4,6 +4,9 @@ using Newtonsoft.Json.Converters;
 
 namespace Fitabase.Azure.ApiManagement.Model
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class Subscription : EntityBase
     {
         protected override string UriIdFormat { get { return "/subscriptions/"; } }

@@ -7,9 +7,28 @@ using System.Threading.Tasks;
 
 namespace Fitabase.Azure.ApiManagement.Model
 {
+    /// <summary>
+    /// This class represents an api of Azure API Management.
+    /// </summary>
     public class API : EntityBase
     {
         protected override string UriIdFormat {  get { return "/apis/"; } }
+
+        public API() { }
+        public API(string name, string description, 
+                   string serviceUrl, string path, 
+                   List<String> protocols, 
+                   AuthenticationSettings authentication, 
+                   SubscriptionKeyParameterNames customNames)
+        {
+            this.Name = name;
+            this.Description = description;
+            this.ServiceUrl = serviceUrl;
+            this.Path = path;
+            this.Protocols = protocols;
+            this.Authentication = authentication;
+            this.CustomNames = customNames;
+        }
 
         /// <summary>
         /// Name of the entity. Must not be empty. Maximum length is 100 characters.
