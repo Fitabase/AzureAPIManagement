@@ -612,6 +612,39 @@ namespace Fitabase.Azure.ApiManagement
         }
 
 
+        /// <summary>
+        /// List of policy configuration at the API Operation level.
+        /// </summary>
+        public async Task<EntityCollection<Policy>> GetOperationPolicyByOperationAsync(string apiId, string operationId, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if (String.IsNullOrEmpty(apiId))
+                throw new InvalidEntityException("apiId is required");
+
+            string endpoint = String.Format("{0}/apis/{1}/operations/{2}/policies", _api_endpoint, apiId, operationId);
+
+            return await DoRequestAsync<EntityCollection<Policy>>(endpoint, RequestMethod.GET, cancellationToken);
+        }
+
+        /// <summary>
+        /// List of policy configuration at the API Operation level.
+        /// </summary>
+        public async Task<EntityCollection<Policy>> SetOperationPolicyByOperationAsync(string apiId, string operationId, string policyContent, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if (String.IsNullOrEmpty(apiId))
+                throw new InvalidEntityException("apiId is required");
+
+            string endpoint = String.Format("{0}/apis/{1}/operations/{2}/policies/policy", _api_endpoint, apiId, operationId);
+            Policy policy = new Policy()
+            {
+                PolicyContent = policyContent
+            };
+
+            return await DoRequestAsync<EntityCollection<Policy>>(endpoint, RequestMethod.PUT, JsonConvert.SerializeObject(policy), cancellationToken);
+        }
+
+
+
+
         #endregion
 
 

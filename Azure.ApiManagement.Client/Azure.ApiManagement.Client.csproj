@@ -64,6 +64,7 @@
     <Compile Include="DataModel\Filters\OperationOption.cs" />
     <Compile Include="DataModel\Model\APIRevision.cs" />
     <Compile Include="DataModel\Model\Logger.cs" />
+    <Compile Include="DataModel\Model\Policy.cs" />
     <Compile Include="DataModel\Model\UserIdentity.cs" />
     <Compile Include="DataModel\ResponseContract.cs" />
     <Compile Include="DataModel\Properties\Documents.cs" />

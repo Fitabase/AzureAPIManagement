@@ -116,6 +116,9 @@ namespace Fitabase.Azure.ApiManagement.Model
         [JsonProperty("method", NullValueHandling = NullValueHandling.Ignore)]
         public string Method { get; set; }          // A Valid HTTP Operation Method.
 
+        [JsonProperty("policies", NullValueHandling = NullValueHandling.Ignore)]
+        public string Policies { get; set; }          // A Valid HTTP Operation Method.
+
         [JsonProperty("urlTemplate", NullValueHandling = NullValueHandling.Ignore)]
         public string UrlTemplate { get; set; }     // Relative URL template identifying the target resource for this operation
         
