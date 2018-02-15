@@ -67,7 +67,7 @@ namespace Fitabase.Azure.ApiManagement.Model
         public static APIOperation Create(string name, 
                             RequestMethod method, string urlTemplate, 
                             ParameterContract[] parameters,
-                            RequestContract request, ResponseContract[] responses, string description = null, string policies = null)
+                            RequestContract request, ResponseContract[] responses, string description = null)
         {
             if (String.IsNullOrWhiteSpace(name))
                 throw new InvalidEntityException("Operation's is required");
@@ -85,7 +85,6 @@ namespace Fitabase.Azure.ApiManagement.Model
             operation.Request = request;
             operation.Responses = responses;
             operation.Description = description;
-            operation.Policies = policies;
 
             operation.UrlTemplate = urlTemplate;
             //operation.UrlTemplate = APIOperationHelper.BuildURL(urlTemplate, parameters);
