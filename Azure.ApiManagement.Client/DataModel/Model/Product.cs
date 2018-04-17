@@ -17,7 +17,8 @@ namespace Fitabase.Azure.ApiManagement.Model
                         bool subscriptionRequired = true,
                         bool? approvalRequired = true,
                         int? subscriptionsLimit = 0,
-                        string terms = null)
+                        string terms = null,
+                        string productId = null)
         {
             if (String.IsNullOrWhiteSpace(name))
                 throw new InvalidEntityException("Product's name is required");
@@ -32,7 +33,7 @@ namespace Fitabase.Azure.ApiManagement.Model
             }
 
             Product product = new Product();
-            product.Id = EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.PRODUCT);
+            product.Id = productId ?? EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.PRODUCT);
             product.Name = name;
             product.Description = description;
             product.Terms = terms;
