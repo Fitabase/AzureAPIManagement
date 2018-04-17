@@ -55,6 +55,11 @@ namespace Fitabase.Azure.ApiManagement
         {
             Init(filePath);
             TimeoutSeconds = 25;
+
+            if(string.IsNullOrEmpty(_apiVersion))
+            {
+                _apiVersion = Constants.ApiManagement.Versions.Feb2014;
+            }
         }
 
         /// <summary>
