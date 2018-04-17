@@ -71,10 +71,10 @@ namespace Fitabase.Azure.ApiManagement
                 {
                     apiKeysContent = sr.ReadToEnd();
                     var json = JObject.Parse(apiKeysContent);
-                    _api_endpoint = json["apiEndpoint"].ToString();
-                    _serviceId = json["serviceId"].ToString();
-                    _accessToken = json["accessKey"].ToString();
-                    _apiVersion = json["apiVersion"].ToString();
+                    _api_endpoint = json["host"]?.ToString();
+                    _serviceId = json["serviceId"]?.ToString();
+                    _accessToken = json["accessKey"]?.ToString();
+                    _apiVersion = json["apiVersion"]?.ToString();
                 }
             }
             catch (Exception e)
