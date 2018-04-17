@@ -25,7 +25,9 @@ namespace Fitabase.Azure.ApiManagement.Model
         public static Subscription Create(string userId, string productId, string name,
                                            SubscriptionDateSettings dateSettings = null,
                                            SubscriptionState state = SubscriptionState.submitted,
-                                           string primaryKey = null, string secondaryKey = null)
+                                           string primaryKey = null, 
+                                           string secondaryKey = null,
+                                           string subscriptionId = null)
         {
             if (String.IsNullOrWhiteSpace(userId) 
                 && userId.StartsWith(Constants.IdPrefixTemplate.USER))
@@ -37,7 +39,7 @@ namespace Fitabase.Azure.ApiManagement.Model
                 throw new InvalidEntityException("subscription's name is required");
 
             Subscription subscription = new Subscription();
-            subscription.Id = EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.SUBSCRIPTION);
+            subscription.Id = subscriptionId ?? EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.SUBSCRIPTION);
             subscription.UserId = userId;
             subscription.ProductId = productId;
             subscription.Name = name;
