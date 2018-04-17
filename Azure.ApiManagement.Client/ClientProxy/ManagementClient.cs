@@ -647,11 +647,7 @@ namespace Fitabase.Azure.ApiManagement
 
         #endregion
 
-
-
-
-
-
+        
         /*********************************************************/
         /**********************  PRODUCT  ************************/
         /*********************************************************/
@@ -794,6 +790,10 @@ namespace Fitabase.Azure.ApiManagement
 				endpoint = string.Format("{0}?{1}", endpoint, filter.GetFilterQuery());
 			return await DoRequestAsync<EntityCollection<Subscription>>(endpoint, RequestMethod.GET, cancellationToken);
         }
+
+        #endregion
+
+        #region Product Group
 
         /// <summary>
         /// Adds the association between the specified developer group with the specified product.

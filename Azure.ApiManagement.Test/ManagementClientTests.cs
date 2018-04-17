@@ -3,6 +3,9 @@ using Fitabase.Azure.ApiManagement;
 using Fitabase.Azure.ApiManagement.Model;
 using System;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 using System.Collections.Generic;
 using Fitabase.Azure.ApiManagement.DataModel.Properties;
 using Fitabase.Azure.ApiManagement.Filters;
@@ -628,6 +631,7 @@ namespace Azure.ApiManagement.Test
             int count_v2 = Client.GetProductsAsync().Result.Count;
             Assert.AreEqual(count_v1 + 1, count_v2);
         }
+        
 
         [TestMethod]
         public void GetProduct()
