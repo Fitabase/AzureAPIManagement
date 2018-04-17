@@ -23,7 +23,9 @@ namespace Fitabase.Azure.ApiManagement.Model
         
         public static User Create(string firstName, string lastName,
                     string email, string password,
-                    UserState state = UserState.active, string note = "")
+                    UserState state = UserState.active, 
+                    string note = "",
+                    string userId = null)
         {
 
             if (String.IsNullOrEmpty(firstName) && firstName.Length > 100)
@@ -36,7 +38,7 @@ namespace Fitabase.Azure.ApiManagement.Model
                 throw new InvalidEntityException("Invalid password: " + password);
 
             User user = new User();
-            user.Id = EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.USER);
+            user.Id = userId ?? EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.USER);
             user.FirstName = firstName;
             user.LastName = lastName;
             user.Email = email;
