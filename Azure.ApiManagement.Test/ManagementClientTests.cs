@@ -30,7 +30,7 @@ namespace Azure.ApiManagement.Test
         [TestInitialize]
         public void SetUp()
         {
-            Client = new ManagementClient(@"C:\Repositories\AzureAPIManagement\Azure.ApiManagement.Test\APIMKeys.json");
+            Client = new ManagementClient(@"APIMKeys.json");
 
 			filter = new QueryFilterExpression()
 			{
