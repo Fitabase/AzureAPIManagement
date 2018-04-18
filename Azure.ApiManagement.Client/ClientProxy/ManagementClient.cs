@@ -37,7 +37,7 @@ namespace Fitabase.Azure.ApiManagement
 
 
         public ManagementClient(string host, string serviceId, string accessToken)
-            : this(host, serviceId, accessToken, Constants.ApiManagement.Versions.Feb2014)
+            : this(host, serviceId, accessToken, Constants.ApiManagement.Versions.Jan2018)
         {
 
         }
@@ -58,7 +58,7 @@ namespace Fitabase.Azure.ApiManagement
 
             if(string.IsNullOrEmpty(_apiVersion))
             {
-                _apiVersion = Constants.ApiManagement.Versions.Feb2014;
+                _apiVersion = Constants.ApiManagement.Versions.Jan2018;
             }
         }
 
