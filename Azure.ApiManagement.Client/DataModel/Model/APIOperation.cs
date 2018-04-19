@@ -67,7 +67,10 @@ namespace Fitabase.Azure.ApiManagement.Model
         public static APIOperation Create(string name, 
                             RequestMethod method, string urlTemplate, 
                             ParameterContract[] parameters,
-                            RequestContract request, ResponseContract[] responses, string description = null)
+                            RequestContract request, 
+                            ResponseContract[] responses, 
+                            string description = null,
+                            string operationId = null)
         {
             if (String.IsNullOrWhiteSpace(name))
                 throw new InvalidEntityException("Operation's is required");
@@ -78,7 +81,7 @@ namespace Fitabase.Azure.ApiManagement.Model
             
             
             APIOperation operation = new APIOperation();
-            operation.Id = EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.APIOPERATION);
+            operation.Id = operationId ?? EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.APIOPERATION);
             operation.Name = name;
             operation.Method = method.ToString();
             operation.TemplateParameters = parameters;

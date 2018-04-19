@@ -1,5 +1,5 @@
 ﻿{
-  "host": "foobarhost", //the first part of the subdomian / url to your APIM instance
-  "serviceId" : "ABCD12345678900011122233",
-  "accessKey": "abcdefghijklmnopqrstubwxyznowiknowmyabcnexttimewontyousingwithmeYa+W$eDidItThatsW00tA=="
+    "host": "https://foobarhost.management.azure-api.net", //the first part of the subdomian / url to your APIM instance
+    "serviceId": "ABCD12345678900011122233",
+    "accessKey": "abcdefghijklmnopqrstubwxyznowiknowmyabcnexttimewontyousingwithmeYa+W$eDidItThatsW00tA=="
 }

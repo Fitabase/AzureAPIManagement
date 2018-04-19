@@ -37,7 +37,7 @@ namespace Fitabase.Azure.ApiManagement
 
 
         public ManagementClient(string host, string serviceId, string accessToken)
-            : this(host, serviceId, accessToken, Constants.ApiManagement.Versions.Feb2014)
+            : this(host, serviceId, accessToken, Constants.ApiManagement.Versions.Jan2018)
         {
 
         }
@@ -55,6 +55,11 @@ namespace Fitabase.Azure.ApiManagement
         {
             Init(filePath);
             TimeoutSeconds = 25;
+
+            if(string.IsNullOrEmpty(_apiVersion))
+            {
+                _apiVersion = Constants.ApiManagement.Versions.Jan2018;
+            }
         }
 
         /// <summary>
@@ -71,10 +76,10 @@ namespace Fitabase.Azure.ApiManagement
                 {
                     apiKeysContent = sr.ReadToEnd();
                     var json = JObject.Parse(apiKeysContent);
-                    _api_endpoint = json["apiEndpoint"].ToString();
-                    _serviceId = json["serviceId"].ToString();
-                    _accessToken = json["accessKey"].ToString();
-                    _apiVersion = json["apiVersion"].ToString();
+                    _api_endpoint = json["host"]?.ToString();
+                    _serviceId = json["serviceId"]?.ToString();
+                    _accessToken = json["accessKey"]?.ToString();
+                    _apiVersion = json["apiVersion"]?.ToString();
                 }
             }
             catch (Exception e)

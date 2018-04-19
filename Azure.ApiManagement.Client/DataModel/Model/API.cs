@@ -17,7 +17,8 @@ namespace Fitabase.Azure.ApiManagement.Model
                    string serviceUrl, string path, 
                    string[] protocols, string description = "",
                    AuthenticationSettingsConstract authentication = null, 
-                   SubscriptionKeyParameterNames customNames = null) 
+                   SubscriptionKeyParameterNames customNames = null,
+                   string apiId = null) 
         {
             if (String.IsNullOrWhiteSpace(name))
                 throw new InvalidEntityException("API's name is required");
@@ -29,7 +30,7 @@ namespace Fitabase.Azure.ApiManagement.Model
                 throw new InvalidEntityException("API's protocol is missing");
 
             API api = new API();
-            api.Id = EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.API);
+            api.Id = apiId ?? EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.API);
             api.Name        = name;
             api.Description = description;
             api.ServiceUrl  = api.GetServiceUrlFormat(serviceUrl);

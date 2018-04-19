@@ -11,8 +11,11 @@ namespace Fitabase.Azure.ApiManagement.Model
     }
     public class Group : EntityBase
     {
-        public static Group Create(string name, string description = "", 
-                                    GroupType type = GroupType.custom, string externalId = null)
+        public static Group Create(string name, 
+                                    string description = "", 
+                                    GroupType type = GroupType.custom, 
+                                    string externalId = null,
+                                    string groupId = null)
         {
             if (String.IsNullOrEmpty(name))
                 throw new InvalidEntityException("group's name is required");
@@ -20,7 +23,7 @@ namespace Fitabase.Azure.ApiManagement.Model
                 throw new InvalidEntityException("group's type can't be set to system");
 
             Group group = new Group();
-            group.Id = EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.GROUP);
+            group.Id = groupId ?? EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.GROUP);
             group.Name = name;
             group.Description = description;
             group.Type = type;
