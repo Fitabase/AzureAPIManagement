@@ -32,7 +32,7 @@ namespace Azure.ApiManagement.Test
             };
             UrlPath = urls[0];
 
-            _Client = new ManagementClient(@"APIMKeys.json");
+            _Client = new ManagementClient(@"C:\Repositories\AzureAPIManagement\Azure.ApiManagement.Test\APIMKeys.json");
 
         }
 
