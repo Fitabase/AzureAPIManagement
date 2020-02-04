@@ -22,7 +22,7 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="$buildOutputPath$\Azure.ApiManagement.Client.dll" target="netstandard2.0" exclude="" />
-    <file src="$buildOutputPath$\Azure.ApiManagement.Client.pdb" target="netstandard2.0" exclude="" />
+    <file src="$buildOutputPath$\Azure.ApiManagement.Client.dll" target="lib\netstandard2.1" exclude="" />
+    <file src="$buildOutputPath$\Azure.ApiManagement.Client.pdb" target="lib\netstandard2.1" exclude="" />
   </files>
 </package>
