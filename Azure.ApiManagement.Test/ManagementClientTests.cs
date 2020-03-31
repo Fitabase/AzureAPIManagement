@@ -829,7 +829,7 @@ namespace Azure.ApiManagement.Test
             {
                 Id = subscriptionId,
                 Name = "newServerName",
-                ExpirationDate = DateTime.Now
+                ExpirationDate = DateTime.UtcNow
             };
             var task = Client.UpdateSubscriptionAsync(subscription);
             task.Wait();

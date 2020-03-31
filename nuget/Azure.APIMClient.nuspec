@@ -14,15 +14,15 @@
     <releaseNotes>
             Manage your Azure API Management instance programatically
     </releaseNotes>
-    <copyright>Copyright 2016</copyright>
+    <copyright>Copyright 2019</copyright>
     <tags>Azure APIM</tags>
     <dependencies>
-	  <dependency id="Newtonsoft.Json" version="8.0.2" />
-      <dependency id="Microsoft.AspNet.WebApi.Client" version="5.2.3"/>
+	  <dependency id="Newtonsoft.Json" version="12.0.3" />
+    <dependency id="Microsoft.AspNet.WebApi.Client" version="5.2.7"/>
     </dependencies>
   </metadata>
   <files>
-    <file src="$buildOutputPath$\SmallStepsLabs.Azure.ApiManagement.Client.dll" target="lib\net452" exclude="" />
-    <file src="$buildOutputPath$\SmallStepsLabs.Azure.ApiManagement.Client.pdb" target="lib\net452" exclude="" />
+    <file src="$buildOutputPath$\Azure.ApiManagement.Client.dll" target="lib\netstandard2.1" exclude="" />
+    <file src="$buildOutputPath$\Azure.ApiManagement.Client.pdb" target="lib\netstandard2.1" exclude="" />
   </files>
 </package>
