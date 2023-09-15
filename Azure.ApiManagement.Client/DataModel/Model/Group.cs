@@ -24,7 +24,7 @@ namespace Fitabase.Azure.ApiManagement.Model
 
             Group group = new Group();
             group.Id = groupId ?? EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.GROUP);
-            group.Name = name;
+            group.DisplayName = name;
             group.Description = description;
             group.Type = type;
             group.ExternalId = externalId;
@@ -36,8 +36,8 @@ namespace Fitabase.Azure.ApiManagement.Model
         /// <summary>
         /// Name of the entity. Must not be empty. Maximum length is 100 characters.
         /// </summary>
-        [JsonProperty("name")]
-        public string Name { get; set; }
+        [JsonProperty("displayName")]
+        public string DisplayName { get; set; }
 
         /// <summary>
         /// Description of the entity. Must not be empty. May include HTML formatting tags. Maximum length is 1000 characters.

@@ -55,7 +55,7 @@ namespace Azure.ApiManagement.Test
             string email = String.Format("{0}{1}@test.com", firstName, DateTimeOffset.Now.ToUnixTimeMilliseconds());
             string password = "P@ssWo3d";
             User newUser = User.Create(firstName, lastName, email, password, userId:_userId);
-            User entity = Client.CreateUserAsync(newUser).Result;
+            User entity = Client.CreateOrUpdateUserAsync(newUser.Id, firstName, lastName, email, password, "active", "").Result;
             Assert.IsNotNull(entity);
             Assert.IsNotNull(entity.Id);
             int count_v2 = Client.GetUsersAsync().Result.Count;
@@ -66,14 +66,14 @@ namespace Azure.ApiManagement.Test
         [TestCategory("Read")]
         public void GetUserCollection()
         {
-            EntityCollection<User> userCollection = Client.GetUsersAsync().Result;
+            List<User> userCollection = Client.GetUsersAsync().Result;
             Assert.IsNotNull(userCollection);
-            Assert.AreEqual(userCollection.Count, userCollection.Values.Count);
+            Assert.AreEqual(userCollection.Count, userCollection.Count);
 
 			// Test with filter
 			userCollection = Client.GetUsersAsync(filter).Result;
 			Assert.IsNotNull(userCollection);
-			Assert.IsTrue(userCollection.Count > userCollection.Values.Count);
+			Assert.IsTrue(userCollection.Count > userCollection.Count);
 		}
 
 	
@@ -565,7 +565,7 @@ namespace Azure.ApiManagement.Test
         {
             int count_v1 = Client.GetProductsAsync().Result.Count;
             Product product = Product.Create("new Server product", "This product is created from the server", ProductState.published, productId:_productId);
-            Product entity = Client.CreateProductAsync(product).Result;
+            Product entity = Client.CreateOrUpdateProductAsync(product.Id, product.DisplayName, product.State.ToString()).Result;
             Assert.IsNotNull(entity);
             Assert.IsNotNull(entity.Id);
             int count_v2 = Client.GetProductsAsync().Result.Count;
@@ -607,12 +607,12 @@ namespace Azure.ApiManagement.Test
             Product product = new Product()
             {
                 Id = productId,
-                Name = "AbcProduct"
+                DisplayName = "AbcProduct"
             };
             var task = Client.UpdateProductAsync(product);
             task.Wait();
             Product entity = Client.GetProductAsync(productId).Result;
-            Assert.AreEqual(product.Name, entity.Name);
+            Assert.AreEqual(product.DisplayName, entity.DisplayName);
         }
 
 
@@ -633,13 +633,13 @@ namespace Azure.ApiManagement.Test
         [TestCategory("Read")]
         public void ProductCollection()
         {
-            EntityCollection<Product> collection = Client.GetProductsAsync().Result;
+            List<Product> collection = Client.GetProductsAsync().Result;
             Assert.IsNotNull(collection);
-			Assert.AreEqual(collection.Count, collection.Values.Count);
+			Assert.AreEqual(collection.Count, collection.Count);
 
 			// With filter
 			collection = Client.GetProductsAsync(filter).Result;
-			Assert.IsTrue(collection.Count > collection.Values.Count);
+			Assert.IsTrue(collection.Count > collection.Count);
 
 		}
 
@@ -664,13 +664,13 @@ namespace Azure.ApiManagement.Test
         public void GetProductAPIs()
         {
             string productId = _productId;
-            EntityCollection<API> collection = Client.GetProductAPIsAsync(productId).Result;
+            List<API> collection = Client.GetProductAPIsAsync(productId).Result;
             Assert.IsNotNull(collection);
-			Assert.AreEqual(collection.Count, collection.Values.Count);
+			Assert.AreEqual(collection.Count, collection.Count);
 
 			// With filter
 			collection = Client.GetProductAPIsAsync(productId, filter).Result;
-			Assert.IsTrue(collection.Count > collection.Values.Count);
+			Assert.IsTrue(collection.Count > collection.Count);
 		}
         [TestMethod]
         [TestCategory("Init")]
@@ -679,7 +679,7 @@ namespace Azure.ApiManagement.Test
             string productId = _productId;
             string apiId = _apiId;
             int count_v1 = Client.GetProductAPIsAsync(productId).Result.Count;
-            var task = Client.AddProductAPIAsync(productId, apiId);
+            var task = Client.CreateOrUpdateProductAPIAsync(productId, apiId);
             task.Wait();
             int count_v2 = Client.GetProductAPIsAsync(productId).Result.Count;
 
@@ -706,13 +706,13 @@ namespace Azure.ApiManagement.Test
         public void GetProductGroups()
         {
             string productId = _productId;
-            EntityCollection<Group> collection = Client.GetProductGroupsAsync(productId).Result;
+            List<Group> collection = Client.GetProductGroupsAsync(productId).Result;
             Assert.IsNotNull(collection);
-			Assert.AreEqual(collection.Count, collection.Values.Count);
+			Assert.AreEqual(collection.Count, collection.Count);
 
 			// With Filter
 			collection = Client.GetProductGroupsAsync(productId, filter).Result;
-			Assert.IsTrue(collection.Count > collection.Values.Count);
+			Assert.IsTrue(collection.Count > collection.Count);
 		}
         [TestMethod]
         [TestCategory("Init")]
@@ -800,7 +800,7 @@ namespace Azure.ApiManagement.Test
             DateTime now = DateTime.Now;
             SubscriptionDateSettings dateSettings = new SubscriptionDateSettings(now.AddDays(1), now.AddMonths(2));
             Subscription subscription = Subscription.Create(userId, productId, name, dateSettings, SubscriptionState.active, subscriptionId:_subscriptionId);
-            Subscription entity = Client.CreateSubscriptionAsync(subscription).Result;
+            Subscription entity = Client.CreateOrUpdateSubscriptionAsync(subscription.DisplayName, subscription.Scope, subscription.OwnerId, subscription.Id, subscription.ProductId, subscription.State.ToString()).Result;
             Assert.IsNotNull(entity);
             Assert.IsNotNull(entity.Id);
             int c2 = Client.GetSubscriptionsAsync().Result.Count;
@@ -828,14 +828,14 @@ namespace Azure.ApiManagement.Test
             Subscription subscription = new Subscription()
             {
                 Id = subscriptionId,
-                Name = "newServerName",
+                DisplayName = "newServerName",
                 ExpirationDate = DateTime.UtcNow
             };
             var task = Client.UpdateSubscriptionAsync(subscription);
             task.Wait();
             Subscription entity = Client.GetSubscriptionAsync(subscriptionId).Result;
 
-            Assert.AreEqual(subscription.Name, entity.Name);
+            Assert.AreEqual(subscription.DisplayName, entity.DisplayName);
         }
 
         [TestMethod]

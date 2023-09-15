@@ -34,7 +34,7 @@ namespace Fitabase.Azure.ApiManagement.Model
 
             Product product = new Product();
             product.Id = productId ?? EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.PRODUCT);
-            product.Name = name;
+            product.DisplayName = name;
             product.Description = description;
             product.Terms = terms;
             product.State = state;
@@ -47,7 +47,7 @@ namespace Fitabase.Azure.ApiManagement.Model
 
         
         [JsonProperty("name", NullValueHandling = NullValueHandling.Ignore)]
-        public string Name { get; set; }
+        public string DisplayName { get; set; }
 
         [JsonProperty("description", NullValueHandling = NullValueHandling.Ignore)]
         public string Description { get; set; }

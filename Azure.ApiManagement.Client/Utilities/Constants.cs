@@ -54,6 +54,7 @@ namespace Fitabase.Azure.ApiManagement
             {
                 internal static readonly string Feb2014 = "2014-02-14-preview";
                 internal static readonly string Jan2018 = "2018-01-01";
+                internal static readonly string Aug2022 = "2022-08-01";
             }
 
             internal static class Headers

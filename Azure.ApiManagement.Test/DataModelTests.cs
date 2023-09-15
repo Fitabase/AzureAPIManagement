@@ -86,7 +86,7 @@ namespace Azure.ApiManagement.Test
 
             Assert.AreEqual("53e10f187e888000b4060001", result.Values[0].Id);
             Assert.AreEqual("53e10f187e888000b4060002", result.Values[1].Id);
-            Assert.AreEqual("Starter", result.Values[0].Name);
+            Assert.AreEqual("Starter", result.Values[0].DisplayName);
             Assert.AreEqual(null, result.Values[0].Groups);
 
         }
@@ -166,7 +166,7 @@ namespace Azure.ApiManagement.Test
             Assert.AreEqual("544d9a6d0fe876031c020001", result.Values[0].Groups[0].Id);
             Assert.AreEqual("544d9a6d0fe876031c020003", result.Values[0].Groups[2].Id);
 
-            Assert.AreEqual("Administrators", result.Values[0].Groups[0].Name);
+            Assert.AreEqual("Administrators", result.Values[0].Groups[0].DisplayName);
             Assert.AreEqual(true, result.Values[0].Groups[0].BuiltIn);
         }
 
