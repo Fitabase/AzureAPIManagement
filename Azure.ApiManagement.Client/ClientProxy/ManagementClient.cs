@@ -18,7 +18,6 @@ using Azure.ResourceManager.ApiManagement.Models;
 using Azure.ResourceManager.ApiManagement;
 using System.Linq;
 using Azure.ApiManagement.Client.DataModel;
-using Azure.ApiManagement.Client.MappingProfiles;
 using Microsoft.Extensions.Azure;
 
 namespace Fitabase.Azure.ApiManagement

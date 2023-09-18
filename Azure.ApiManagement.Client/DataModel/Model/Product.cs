@@ -46,7 +46,7 @@ namespace Fitabase.Azure.ApiManagement.Model
         }
 
         
-        [JsonProperty("name", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty("displayName", NullValueHandling = NullValueHandling.Ignore)]
         public string DisplayName { get; set; }
 
         [JsonProperty("description", NullValueHandling = NullValueHandling.Ignore)]
