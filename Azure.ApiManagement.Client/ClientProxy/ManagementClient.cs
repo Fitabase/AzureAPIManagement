@@ -781,7 +781,7 @@ namespace Fitabase.Azure.ApiManagement
         /// <summary>
         /// Create a product
         /// </summary>
-        public async Task<Product> CreateOrUpdateProductAsync(string productId, string displayName, string productState, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<Product> CreateOrUpdateProductAsync(string productId, string displayName, string productState, CancellationToken cancellationToken = default(CancellationToken), bool subscriptionRequired = true)
         {
             if (String.IsNullOrEmpty(displayName))
                 throw new InvalidEntityException("product display name is required");
@@ -791,7 +791,8 @@ namespace Fitabase.Azure.ApiManagement
             Product productContent = new Product()
             {
                 DisplayName = displayName,
-                State = GetProductState(productState)
+                State = GetProductState(productState),
+                SubscriptionRequired = subscriptionRequired
             };
 
             RequestBody<Product> requestBody = new RequestBody<Product>();
