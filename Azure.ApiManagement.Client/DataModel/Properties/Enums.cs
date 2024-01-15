@@ -13,4 +13,11 @@ namespace Fitabase.Azure.ApiManagement.Model
         published       // Published products are discoverable by developers on the developer portal.
     }
 
+    public enum UserState
+    {
+        active,
+        blocked,
+        deleted,
+        pending
+    }
 }

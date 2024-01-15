@@ -13,7 +13,7 @@ namespace Fitabase.Azure.ApiManagement.Model
     /// </summary>
     /// <typeparam name="T"></typeparam>
     [JsonObject(MemberSerialization.OptIn)]
-    public class EntityCollection<T> where T : EntityBase
+    public class EntityCollection<T>  
     {
         /// <summary>
         /// The total number of elements in the collection.

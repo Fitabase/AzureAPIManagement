@@ -7,16 +7,6 @@ using Fitabase.Azure.ApiManagement.Model.Exceptions;
 
 namespace Fitabase.Azure.ApiManagement.Model
 {
-    public enum UserState
-    {
-        active,
-        blocked
-    }
-
-   
-
-
-
     public class User : EntityBase
     {
         protected override string UriIdFormat { get { return "/users/"; } }

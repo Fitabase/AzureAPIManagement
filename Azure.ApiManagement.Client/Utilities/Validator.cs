@@ -8,7 +8,7 @@ namespace Fitabase.Azure.ApiManagement
     {
         internal static void ValidateProduct(Product product)
         {
-            if (String.IsNullOrEmpty(product.Name) && product.Name.Length > 100)
+            if (String.IsNullOrEmpty(product.DisplayName) && product.DisplayName.Length > 100)
                 throw new InvalidEntityException("Product configuration is not valid. 'Name' is required and must not exceed 100 characters.");
 
             if (String.IsNullOrEmpty(product.Description) && product.Description.Length > 1000)

@@ -40,9 +40,9 @@ namespace Fitabase.Azure.ApiManagement.Model
 
             Subscription subscription = new Subscription();
             subscription.Id = subscriptionId ?? EntityIdGenerator.GenerateIdSignature(Constants.IdPrefixTemplate.SUBSCRIPTION);
-            subscription.UserId = userId;
+            subscription.OwnerId = userId;
             subscription.ProductId = productId;
-            subscription.Name = name;
+            subscription.DisplayName = name;
             subscription.PrimaryKey = primaryKey;
             subscription.SecondaryKey = secondaryKey;
             subscription.State = state;
@@ -56,8 +56,8 @@ namespace Fitabase.Azure.ApiManagement.Model
 
 
         private string userId;
-        [JsonProperty("userId", NullValueHandling = NullValueHandling.Ignore)]
-        public string UserId                    // User (user id path) for whom subscription is being created in form /users/{uid}
+        [JsonProperty("ownerId", NullValueHandling = NullValueHandling.Ignore)]
+        public string OwnerId                    // User (user id path) for whom subscription is being created in form /users/{uid}
         {
             get
             {
@@ -90,9 +90,12 @@ namespace Fitabase.Azure.ApiManagement.Model
                 this.productId = value;
             }      
         }
-        [JsonProperty("name", NullValueHandling = NullValueHandling.Ignore)]
-        public string Name { get; set; }            // Subscription name.
-        
+        [JsonProperty("displayName", NullValueHandling = NullValueHandling.Ignore)]
+        public string DisplayName { get; set; }            // Subscription name.
+
+        [JsonProperty("scope", NullValueHandling = NullValueHandling.Ignore)]
+        public string Scope { get; set; }        // Required. Scope like /products/{productId} or /apis or /apis/{apiId}.
+
         [JsonProperty("state", NullValueHandling = NullValueHandling.Ignore)]
         [JsonConverter(typeof(StringEnumConverter))]
         public SubscriptionState? State { get; set; }    // The state of the subscription. 
@@ -109,7 +112,7 @@ namespace Fitabase.Azure.ApiManagement.Model
         [JsonProperty("endDate", NullValueHandling = NullValueHandling.Ignore)]
         public DateTime? EndDate { get; set; }           // Date when subscription was cancelled or expired.
 
-        [JsonProperty("notifiactionDate", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty("notificationDate", NullValueHandling = NullValueHandling.Ignore)]
         public DateTime? NotificationDate { get; set; }  // Upcoming subscription expiration notification date.
 
         [JsonProperty("stateComment", NullValueHandling = NullValueHandling.Ignore)]
