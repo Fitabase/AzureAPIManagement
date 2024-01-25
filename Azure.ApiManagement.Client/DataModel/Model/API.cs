@@ -114,8 +114,6 @@ namespace Fitabase.Azure.ApiManagement.Model
         [JsonProperty("isOnline", NullValueHandling = NullValueHandling.Ignore)]
         public bool? IsOnline { get; set; }          // Indicates if API revision is accessible via the gateway.
 
-        [JsonProperty("properties", NullValueHandling = NullValueHandling.Ignore)]
-        public ApiProperties Properties { get; set; }
     }
 
     
