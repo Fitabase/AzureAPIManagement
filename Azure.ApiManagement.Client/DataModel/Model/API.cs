@@ -62,7 +62,10 @@ namespace Fitabase.Azure.ApiManagement.Model
 
         
         [JsonProperty("name", NullValueHandling = NullValueHandling.Ignore)]
-        public string Name { get; set; }                
+        public string Name { get; set; }
+
+        [JsonProperty("displayName", NullValueHandling = NullValueHandling.Ignore)]
+        public string DisplayName { get; set; }
 
         [JsonProperty("apiRevision", NullValueHandling = NullValueHandling.Ignore)]
         public string ApiRevision { get; set; }         // Describes the Revision of the Api. If no value is provided, default revision 1 is created
