@@ -42,7 +42,7 @@ namespace Azure.ApiManagement.Test
         {
             string urlPath = @"https://fitabasedev.azure-api.net/swagger/DailyActivity";
 			List<KeyValuePair<string, string>> headerList = new List<KeyValuePair<string, string>>();
-			headerList.Add(new KeyValuePair<string, string>("Ocp-Apim-Subscription-Key", "362453116f0948dea2461856d29b310f"));
+			headerList.Add(new KeyValuePair<string, string>("Ocp-Apim-Subscription-Key", "528182b6dd3e4ff697b6c69a13ef663f"));
 			
 			AbstractSwaggerReader swaggerReader = new AuthorizedSwaggerUrlReader(urlPath, headerList);
             APIBuilder builder = APIBuilder.GetBuilder(swaggerReader);
